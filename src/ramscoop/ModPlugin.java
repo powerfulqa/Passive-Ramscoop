@@ -20,6 +20,17 @@ public class ModPlugin extends BaseModPlugin {
     public void onApplicationLoad() {
         // This ensures the mod settings are loaded when the game starts
         loadSettings();
+        
+        // Register a custom class replacement to handle serialization issues
+        try {
+            // This helps handle the case where the mod is disabled/removed
+            Global.getSettings().getScriptClassLoader().addClassReplacement(
+                "ramscoop.Ramscoop", 
+                "java.util.ArrayList"
+            );
+        } catch (Exception e) {
+            Global.getLogger(ModPlugin.class).error("Failed to register class replacement", e);
+        }
     }
 
     @Override

@@ -162,4 +162,12 @@ public class Ramscoop implements EveryFrameScript, Serializable {
     public ArrayList<?> getScripts() {
         return compatibilityList;
     }
+    
+    // Special method to allow this class to be converted to ArrayList when needed
+    // This helps with backwards compatibility when mod is disabled
+    public Object writeReplace() {
+        // Return an empty ArrayList instead of this object when saving
+        // This will make old saves compatible with future game versions without the mod
+        return new ArrayList<>();
+    }
 }
