@@ -5,8 +5,10 @@ release/
 
 # Build scripts
 *.bat
-build.xml
 find_java.ps1
+
+# Keep these files for reference but don't commit changes to them
+# build.xml
 
 # IDE files
 .idea/

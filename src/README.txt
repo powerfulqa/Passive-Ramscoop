@@ -1,20 +1,28 @@
 # Source Code Structure
 
-This directory contains placeholder source files for the Ramscoop mod. To complete the source code:
+This directory contains the source code for the Passive-Ramscoop mod. The code is organized as follows:
 
-1. Extract the actual source code from the JAR file using a decompiler tool like:
-   - JD-GUI (http://java-decompiler.github.io/)
-   - CFR (https://www.benf.org/other/cfr/)
-   - Procyon (https://bitbucket.org/mstrobel/procyon)
+## Package Structure
 
-2. Replace the placeholder files in this directory with the extracted source code
+- `ramscoop/` - Main package containing all mod classes
+  - `ModPlugin.java` - Entry point for the mod, handles initialization and configuration
+  - `Ramscoop.java` - Core implementation of the resource generation system
 
-3. Compile the code using the build script (build.bat) or Ant (build.xml)
+## Development Workflow
 
-The main classes of the mod are:
-- ModPlugin.java: Entry point for the mod, handles initialization
-- Ramscoop.java: Main implementation of the resource generation system
+1. Make changes to the source files in this directory
+2. Compile using build.bat or build.xml in the root directory
+3. The compiled JAR will be placed in the jars/ directory
+4. Launch Starsector to test your changes
 
-For Starsector mod development resources, visit:
+## Implementation Details
+
+- The mod uses Starsector's EveryFrameScript system to run code each frame
+- Resource generation happens when the player fleet is in a nebula
+- Settings are loaded from data/config/settings.json
+
+## Resources for Starsector Modding
+
 - Official Modding Forum: https://fractalsoftworks.com/forum/index.php?board=1.0
 - Modding Documentation: https://starsector.fandom.com/wiki/Modding
+- Javadocs: https://fractalsoftworks.com/starfarer.api/
