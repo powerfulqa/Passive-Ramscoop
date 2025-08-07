@@ -1,0 +1,52 @@
+name: Release Package
+
+on:
+  push:
+    tags:
+      - 'v*' # Trigger on any tag starting with 'v'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Create Release Package
+        run: |
+          # Create release directory
+          mkdir -p release
+          
+          # Copy only the required files for users
+          cp -r jars release/
+          cp mod_info.json release/
+          cp settings.json release/
+          cp README.md release/
+          cp LICENSE release/
+          
+          # Determine version from tag
+          VERSION=${GITHUB_REF#refs/tags/}
+          
+          # Create the zip file
+          cd release
+          zip -r "../Ramscoop-${VERSION}.zip" ./*
+          cd ..
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Ramscoop ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          files: Ramscoop-${{ github.ref_name }}.zip
+          body: |
+            # Ramscoop ${{ github.ref_name }}
+            
+            See the [changelog](https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/changelog.md) for details.
+            
+            ## Installation
+            
+            Extract the zip file into your Starsector/mods directory.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

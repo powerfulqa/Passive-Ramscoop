@@ -39,6 +39,16 @@ Passive-Ramscoop/
    - Build scripts are excluded from git but should be kept locally
    - Build artifacts (in `build/` directory) are excluded from git
 
+4. **Creating Releases**:
+   - Update version numbers in `mod_info.json` and `Ramscoop.version`
+   - Update the `changelog.md` with your changes
+   - Commit changes: `git add . && git commit -m "Prepare release vX.Y"`
+   - Create and push a version tag: `git tag vX.Y && git push origin vX.Y`
+   - GitHub Actions will automatically:
+     - Create a release package with only user-required files
+     - Attach it to a new GitHub release
+     - Publish with notes from your changelog
+
 ## Resource Generation Logic
 
 The mod works as follows:
