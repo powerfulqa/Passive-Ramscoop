@@ -2,124 +2,130 @@ package ramscoop;
 
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.campaign.CampaignFleetAPI;
+import com.fs.starfarer.api.campaign.FleetDataAPI;
+import com.fs.starfarer.api.combat.MutableStat;
+import com.fs.starfarer.api.fleet.MutableFleetStatsAPI;
+import java.util.HashMap;
+import java.util.Map;
 
-/**
- * Main class implementing the Ramscoop functionality.
- * Handles the passive generation of fuel and supplies while in nebulas.
- */
 public class Ramscoop implements EveryFrameScript {
     
-    // Configuration settings
-    private boolean enableFuel = true;
-    private boolean enableSupplies = true;
-    private float fuelPerDay = 0.1f;
-    private float percentSupplyLimit = 0.35f;
-    private int hardSupplyLimit = 0;
-    
-    // Internal tracking variables
-    private float daysPassed = 0f;
-    private boolean inNebula = false;
-    private boolean isDone = false;
-    
-    public Ramscoop() {
-        // Initialize ramscoop system
-        loadSettings();
-    }
-    
     /**
-     * Load settings from configuration
+     * Checks if a stat mod is from a nebula effect.
+     * @param mod The stat mod to check
+     * @return true if it's a nebula stat mod
      */
-    private void loadSettings() {
-        try {
-            // This would normally load from settings.json
-            // We're using defaults for now
-        } catch (Exception e) {
-            // Log error
-        }
-    }
-    
-    /**
-     * Check if in nebula
-     */
-    private boolean isInNebula() {
-        try {
-            return Global.getSector().getPlayerFleet().getContainingLocation().isNebula();
-        } catch (Exception e) {
-            return false;
-        }
-    }
-    
-    /**
-     * Generate resources
-     */
-    private void generateResources() {
-        try {
-            // Get player fleet
-            Object playerFleet = Global.getSector().getPlayerFleet();
-            
-            // This would normally:
-            // 1. Generate fuel based on settings
-            // 2. Generate supplies based on settings
-            // 3. Add them to player cargo
-        } catch (Exception e) {
-            // Log error
-        }
-    }
-    
-    // EveryFrameScript implementation
-    @Override
-    public boolean isDone() {
-        return isDone;
-    }
-
-    @Override
-    public boolean runWhilePaused() {
-        return false;
+    public boolean isNebula(MutableStat.StatMod mod) {
+        return mod != null && mod.source != null && mod.source.contains("nebula_stat_mod");
     }
 
     @Override
     public void advance(float amount) {
         try {
-            // Check if game is paused
-            if (Global.getSector().isPaused()) return;
+            // Get the player fleet
+            CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
+            if (fleet == null) {
+                return;
+            }
             
-            // Check nebula status
-            boolean currentlyInNebula = isInNebula();
+            // Get fleet data
+            FleetDataAPI fleetData = fleet.getFleetData();
+            MutableStat.StatMod nebulaMod = null;
+            MutableFleetStatsAPI stats = fleetData.getFleet().getStats();
             
-            // Only process when in a nebula
-            if (currentlyInNebula) {
-                // Convert time to days (10 seconds = 1 day)
-                daysPassed += amount / 10f;
-                
-                // Generate resources once per day
-                if (daysPassed >= 1.0f) {
-                    generateResources();
-                    daysPassed = 0f;
-                    
-                    // Notify player when entering nebula
-                    if (!inNebula) {
-                        Global.getSector().getCampaignUI().addMessage(
-                            "Your fleet's ramscoops are now collecting resources from the nebula."
-                        );
-                    }
-                }
-            } else if (inNebula) {
-                // Notify player when leaving nebula
-                Global.getSector().getCampaignUI().addMessage(
-                    "Your fleet has left the nebula. Ramscoop collection has stopped."
-                );
-                
-                // Generate partial day resources
-                if (daysPassed > 0) {
-                    generateResources();
-                    daysPassed = 0f;
+            // In 0.98aRC8, make sure to properly use generics for better type safety
+            @SuppressWarnings("unchecked")
+            Map<String, MutableStat.StatMod> mods = stats.getFleetwideMaxBurnMod().getMultBonuses();
+            
+            // Get current resources
+            float fuel = fleet.getCargo().getFuel();
+            float supplies = fleet.getCargo().getSupplies();
+            float minimumcrew = fleetData.getMinCrew();
+            float currentcrew = fleet.getCargo().getCrew();
+            float extracrew = 0.0f;
+            double suppliesperdayd = 0.0;
+            float suppliesperday = 0.0f;
+            float minspace = 0.0f;
+            
+            // Calculate fuel generation rate (updated for 0.98aRC8)
+            double fuelperdayd = Math.floor(fleet.getCargo().getMaxFuel() * ModPlugin.fuel_per_day);
+            float fuelperday = (float)fuelperdayd;
+            
+            // Calculate max supplies
+            double maxsuppliesd = Math.floor(fleet.getCargo().getMaxCapacity() * ModPlugin.percent_supply_limit);
+            float maxpercentsupplies = (float)maxsuppliesd;
+            float maxsupplies = 0.0f;
+            
+            // Check if we're in a nebula by looking for the nebula stat mod
+            for (Map.Entry<String, MutableStat.StatMod> entry : mods.entrySet()) {
+                MutableStat.StatMod statMod = entry.getValue();
+                if (isNebula(statMod)) {
+                    nebulaMod = statMod;
+                    break;
                 }
             }
             
-            // Update state
-            inNebula = currentlyInNebula;
+            // Set max supplies based on configured limits
+            maxsupplies = ModPlugin.hard_supply_limit == 0.0f ? 
+                maxpercentsupplies : 
+                Math.min(maxpercentsupplies, ModPlugin.hard_supply_limit);
+            
+            // Only process if we're in a nebula
+            if (nebulaMod != null) {
+                // Handle supply generation if enabled
+                if (ModPlugin.enable_supplies) {
+                    if ("extra".equals(ModPlugin.crew_usage)) {
+                        if (currentcrew > minimumcrew) {
+                            extracrew = currentcrew - minimumcrew;
+                            suppliesperday = extracrew * ModPlugin.supplies_per_crew;
+                        }
+                    } else if ("all".equals(ModPlugin.crew_usage)) {
+                        suppliesperday = currentcrew * ModPlugin.supplies_per_crew;
+                    } else if ("nocrew".equals(ModPlugin.crew_usage)) {
+                        if ("percent".equals(ModPlugin.no_crew_gen)) {
+                            suppliesperdayd = Math.floor(fleet.getCargo().getMaxCapacity() * ModPlugin.no_crew_rate);
+                            suppliesperday = (float)suppliesperdayd;
+                        } else if ("flat".equals(ModPlugin.no_crew_gen)) {
+                            suppliesperday = ModPlugin.no_crew_rate;
+                        }
+                    }
+                    
+                    // Calculate available space
+                    minspace = supplies < maxsupplies ? 
+                        Math.min(maxsupplies - supplies, fleet.getCargo().getSpaceLeft()) : 
+                        fleet.getCargo().getSpaceLeft();
+                    
+                    // Add supplies based on time passed and available space
+                    if (fleet.getCargo().getSpaceLeft() > 0.0f && suppliesperday > 0.0f && supplies < maxsupplies) {
+                        float days = Global.getSector().getClock().convertToDays(amount);
+                        if (suppliesperday * days < minspace) {
+                            fleet.getCargo().addSupplies(suppliesperday * days);
+                        } else {
+                            fleet.getCargo().addSupplies(minspace);
+                        }
+                    }
+                }
+                
+                // Handle fuel generation if enabled and not at max capacity
+                if (ModPlugin.enable_fuel && fuel < fleet.getCargo().getMaxFuel()) {
+                    float days = Global.getSector().getClock().convertToDays(amount);
+                    fleet.getCargo().addFuel(fuelperday * days);
+                }
+            }
         } catch (Exception e) {
-            // Log error
+            // Log the exception for debugging
+            Global.getLogger(Ramscoop.class).error("Error in Ramscoop.advance", e);
         }
+    }
+
+    @Override
+    public boolean isDone() {
+        return false;  // Script never terminates on its own
+    }
+
+    @Override
+    public boolean runWhilePaused() {
+        return false;  // Don't run when game is paused
     }
 }

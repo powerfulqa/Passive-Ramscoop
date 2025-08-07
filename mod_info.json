@@ -6,7 +6,5 @@
 	"description":"Adds an automatic process to your fleet to scoop up 'stuff' from nebulas to create fuel and supplies. Original by Meridias561, updated for 0.98aRC8 by PowerfulQA.",
 	"gameVersion":"0.98a-RC8",
 	"jars":["jars/Ramscoop.jar"],
-	"modPlugin":"ramscoop.ModPlugin",
-	"modSettings":"data/config/settings.json",
-	"license":"CC BY-NC 4.0 with additional restrictions - see LICENSE file"
+	"modPlugin":"ramscoop.ModPlugin"
 }

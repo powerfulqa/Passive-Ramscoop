@@ -16,7 +16,7 @@ This mod adds an automatic process to your fleet to scoop up 'stuff' from nebula
 
 ## Configuration
 
-You can customize the mod's behavior by editing the `data/config/settings.json` file:
+You can customize the mod's behavior by editing the `settings.json` file in the root directory of the mod:
 
 - `enable_fuel`: Set to `true` to enable fuel generation, `false` to disable
 - `enable_supplies`: Set to `true` to enable supplies generation, `false` to disable
@@ -27,7 +27,7 @@ You can customize the mod's behavior by editing the `data/config/settings.json` 
   - `extra`: Use only excess crew over the fleet minimum
   - `all`: Use all crew for supply generation
   - `nocrew`: Don't use crew for calculation
-- `supply_per_crew`: Amount of supplies each crew member generates per day
+- `supplies_per_crew`: Amount of supplies each crew member generates per day
 - `no_crew_gen`: For 'nocrew' mode, choose between 'percent' or 'flat' generation rate
 - `no_crew_rate`: Value for the percent or flat rate generation
 
@@ -38,9 +38,12 @@ You can customize the mod's behavior by editing the `data/config/settings.json` 
 ## Changes in Version 0.3
 
 - Updated to be compatible with Starsector 0.98a-RC8
-- Fixed several bugs including nebula detection issues
+- Fixed nebula detection using fleet stat modifiers for more reliable detection
 - Improved stability and error handling
-- Fixed settings loading issues
+- Fixed settings loading issues with proper mod ID reference
+- Simplified mod structure with settings file in root directory
+- Added detailed documentation for developers
+- Added simple_build.bat as a lightweight build alternative
 
 ## Credits
 

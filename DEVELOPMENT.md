@@ -6,18 +6,17 @@ This document provides information for developers who want to work on the Passiv
 
 ```
 Passive-Ramscoop/
-├── data/               # Game data files
-│   └── config/
-│       └── settings.json
 ├── jars/               # Compiled mod JAR files
 │   └── Ramscoop.jar
 ├── src/                # Source code
 │   └── ramscoop/
 │       ├── ModPlugin.java
 │       └── Ramscoop.java
-├── build.bat           # Windows build script (not tracked in git)
+├── build.bat           # Windows build script
+├── simple_build.bat    # Simplified build script
 ├── build.xml           # Ant build script 
 ├── mod_info.json       # Mod metadata
+├── settings.json       # Mod configuration
 ├── README.md           # User documentation
 └── DEVELOPMENT.md      # Developer documentation (this file)
 ```
@@ -46,8 +45,11 @@ The mod works as follows:
 
 1. `ModPlugin` initializes the mod and registers the `Ramscoop` instance
 2. `Ramscoop` implements the `EveryFrameScript` interface to run every frame
-3. When the player fleet is in a nebula, resources are gradually accumulated
-4. Settings in `data/config/settings.json` control generation rates and limits
+3. When the player fleet is in a nebula, resources are gradually accumulated:
+   - Nebula detection is done by checking for "nebula_stat_mod" in fleet stats
+   - This is more reliable than using direct location checks
+4. Settings in `settings.json` (in the mod's root directory) control generation rates and limits
+5. The mod uses the game's settings loading mechanism with the mod ID: `Global.getSettings().loadJSON("settings.json", "m561_ramscoop")`
 
 ## Contributing
 
