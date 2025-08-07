@@ -62,6 +62,15 @@ Please make sure to test your changes thoroughly before submitting.
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. 
-The MIT License is a permissive license that allows anyone to freely use, modify, distribute, and sell the software, 
-provided that the original copyright notice and the license text are included in all copies or substantial portions of the software.
+This project is licensed under the Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0) - see the [LICENSE](LICENSE) file for details.
+
+This license allows:
+- Freely using and modifying the mod for personal use
+- Sharing the mod with others for non-commercial purposes
+- Creating and sharing derivative works (as long as they're also non-commercial)
+
+This license prohibits:
+- Using the mod for commercial purposes
+- Selling the mod or any derivative works based on it
+
+Any modifications or distributions must give appropriate credit to the original authors.

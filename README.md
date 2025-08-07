@@ -47,6 +47,18 @@ You can customize the mod's behavior by editing the `data/config/settings.json` 
 Original mod by Meridias561 (for Starsector 0.95a)
 Updated for Starsector 0.98a-RC8 by PowerfulQA
 
+To contact the original author for permissions:
+- Meridias561's Nexus Mods profile: https://next.nexusmods.com/profile/Meridias561
+
 ## License
 
-This mod is open source and released under the MIT License. See the LICENSE file for details.
+This mod is released under the Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0) with additional restrictions from the original author. These include:
+
+1. You must give appropriate credit to the original creators
+2. You may not use it for commercial purposes (no selling of this mod or derivatives)
+3. **You must obtain explicit permission from the original author (Meridias561) before modifying any files**
+4. **You must obtain explicit permission before using any assets from this mod in other projects**
+5. You must credit the original author when uploading or sharing this mod
+
+Contact information for permission requests can be found in the Credits section above.
+See the LICENSE file for complete details.
