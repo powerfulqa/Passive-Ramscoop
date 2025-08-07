@@ -3,12 +3,16 @@ build/
 bin/
 release/
 
-# Build scripts
+# Ignore all batch files by default
 *.bat
-find_java.ps1
 
-# Keep these files for reference but don't commit changes to them
-# build.xml
+# But track these specific build scripts that are essential for development
+!build.bat
+!simple_build.bat
+
+# Other build-related files
+find_java.ps1
+# build.xml is tracked by default
 
 # IDE files
 .idea/

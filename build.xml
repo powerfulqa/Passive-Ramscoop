@@ -1,0 +1,91 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Ramscoop" default="build">
+    <!-- Define properties -->
+    <property name="src.dir" value="src"/>
+    <property name="build.dir" value="build"/>
+    <property name="classes.dir" value="${build.dir}/classes"/>
+    <property name="jar.dir" value="jars"/>
+    <property name="mod.id" value="m561_ramscoop"/>
+    <property name="mod.name" value="Ramscoop"/>
+    <property name="mod.version" value="0.3"/>
+    <property name="main.class" value="ramscoop.ModPlugin"/>
+    
+    <!-- Define the Starsector directory based on OS -->
+    <condition property="starsector.dir" value="C:/Program Files (x86)/Fractal Softworks/Starsector">
+        <os family="windows"/>
+    </condition>
+    <condition property="starsector.dir" value="${user.home}/Library/Application Support/Fractal Softworks/Starsector">
+        <os family="mac"/>
+    </condition>
+    <condition property="starsector.dir" value="${user.home}/.local/share/fractalsoftworks/starsector">
+        <os family="unix"/>
+    </condition>
+    
+    <!-- The Starsector core classpath -->
+    <path id="compile.classpath">
+        <fileset dir="${starsector.dir}/starsector-core">
+            <include name="*.jar"/>
+        </fileset>
+    </path>
+
+    <!-- Clean task to remove build directories -->
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+        <mkdir dir="${build.dir}"/>
+        <mkdir dir="${classes.dir}"/>
+        <mkdir dir="${jar.dir}"/>
+    </target>
+
+    <!-- Compile task to compile all java files -->
+    <target name="compile" depends="clean">
+        <javac srcdir="${src.dir}" destdir="${classes.dir}" source="1.8" target="1.8" debug="true" 
+               includeantruntime="false" encoding="UTF-8" deprecation="true" nowarn="off">
+            <classpath refid="compile.classpath"/>
+            <compilerarg value="-Xlint:unchecked"/>
+        </javac>
+    </target>
+
+    <!-- Build task to create the jar file -->
+    <target name="build" depends="compile">
+        <jar destfile="${build.dir}/${mod.name}.jar">
+            <fileset dir="${classes.dir}"/>
+        </jar>
+        <copy file="${build.dir}/${mod.name}.jar" todir="${jar.dir}"/>
+        <echo message="${mod.name} built successfully!"/>
+    </target>
+    
+    <!-- Package task to create a distribution zip file -->
+    <target name="package" depends="build">
+        <property name="release.dir" value="${build.dir}/release"/>
+        <property name="release.path" value="${release.dir}/${mod.name}-${mod.version}"/>
+        
+        <delete dir="${release.dir}"/>
+        <mkdir dir="${release.dir}"/>
+        <mkdir dir="${release.path}"/>
+        
+        <!-- Copy all required mod files to release directory -->
+        <copy file="mod_info.json" todir="${release.path}"/>
+        <copy file="README.md" todir="${release.path}"/>
+        
+        <mkdir dir="${release.path}/jars"/>
+        <copy file="${jar.dir}/${mod.name}.jar" todir="${release.path}/jars"/>
+        
+        <copy todir="${release.path}/data">
+            <fileset dir="data"/>
+        </copy>
+        
+        <!-- Copy graphics if they exist -->
+        <if>
+            <available file="graphics" type="dir"/>
+            <then>
+                <copy todir="${release.path}/graphics">
+                    <fileset dir="graphics"/>
+                </copy>
+            </then>
+        </if>
+        
+        <!-- Create the zip file -->
+        <zip destfile="${build.dir}/${mod.name}-${mod.version}.zip" basedir="${release.dir}"/>
+        <echo message="Release package created at ${build.dir}/${mod.name}-${mod.version}.zip"/>
+    </target>
+</project>
