@@ -1,11 +1,16 @@
 {
     "masterVersionFile":"https://raw.githubusercontent.com/powerfulqa/Passive-Ramscoop/main/Ramscoop.version",
     "modName":"Passive Ramscoop",
+    "modId":"passive_ramscoop",
     "modVersion":
     {
         "major":0,
         "minor":3,
         "patch":0
     },
-    "starsectorVersion":"0.98a-RC8"
+    "starsectorVersion":"0.98a-RC8",
+    "directDownloadURL":"https://github.com/powerfulqa/Passive-Ramscoop/releases/latest",
+    "changelogURL":"https://github.com/powerfulqa/Passive-Ramscoop/releases",
+    "modThreadId":"",
+    "modNexusId":""
 }
