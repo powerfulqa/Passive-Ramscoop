@@ -35,13 +35,15 @@ You can customize the mod's behavior by editing the `settings.json` file in the 
 
 - Starsector 0.98a-RC8
 
-## Safe Mod Removal
+## Mod Type
 
-This mod is designed to be safely removable without breaking saves:
+This is a **utility mod** which means it can be safely added to or removed from existing saves at any time without causing any issues. You can:
 
-1. **Recommended Method**: Disable the mod in the launcher and load your save. Play for a few minutes and save the game. This allows the mod to cleanly remove itself.
+- Add the mod to an existing save
+- Remove the mod from an existing save
+- Enable/disable the mod whenever you want
 
-2. **Direct Removal**: You can also directly remove the mod files. The mod is designed to handle its absence gracefully, although you may see a one-time warning message when loading a save that previously used the mod.
+No special steps are needed when adding or removing the mod - it's designed to handle these changes gracefully.
 
 ## Changes in Version 0.3
 

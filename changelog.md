@@ -2,6 +2,7 @@
 
 ## Version 0.3 (2025-08-07)
 - Updated for Starsector 0.98a-RC8 compatibility
+- Marked as a utility mod that can be safely added/removed from saves
 - Fixed nebula detection issues
 - Improved error handling
 - Added proper type safety with generics

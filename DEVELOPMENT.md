@@ -68,7 +68,7 @@ The mod works as follows:
 
 ## Serialization Design
 
-To ensure save game compatibility when the mod is removed:
+This mod is marked as a utility mod in `mod_info.json` using `"utility": true`, which means it can be safely added or removed from existing saves at any time. However, we still implement proper serialization to ensure maximum compatibility:
 
 1. `Ramscoop` implements `Serializable` with a proper `serialVersionUID`
 2. Transient fields are marked with the `transient` keyword to prevent serialization issues
@@ -76,7 +76,7 @@ To ensure save game compatibility when the mod is removed:
 4. `RamscoopSaveProxy` provides compatibility for saved games when the mod is uninstalled
 5. `ModPlugin` handles proper cleanup in `beforeGameSave()` and restoration in `onGameSave()`
 
-This approach prevents ClassNotFoundException errors that would normally occur when loading a save after removing the mod.
+While these serialization safeguards aren't strictly necessary for utility mods, they provide an extra layer of safety and ensure the mod behaves predictably when enabled or disabled.
 
 ## Contributing
 
