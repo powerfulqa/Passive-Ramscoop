@@ -34,11 +34,13 @@ public class ModPlugin extends BaseModPlugin {
         try {
             log.info("Ramscoop mod - initializing resource generation system");
             
-            // Add the Ramscoop system to the game
-            if (!Global.getSector().getListenerManager().hasListener(Ramscoop.class)) {
-                Global.getSector().getListenerManager().addListener(new Ramscoop());
-                log.info("Ramscoop passive resource generation system initialized");
-            }
+            // Create a single instance of Ramscoop
+            Ramscoop ramscoop = new Ramscoop();
+            
+            // Add the Ramscoop as an EveryFrameScript
+            Global.getSector().addScript(ramscoop);
+            
+            log.info("Ramscoop passive resource generation system initialized");
         } catch (Exception e) {
             log.error("Failed to initialize Ramscoop system", e);
         }
