@@ -1,0 +1,20 @@
+# Build output directories
+build/
+bin/
+release/
+
+# Build scripts
+build.bat
+build.xml
+find_java.ps1
+prepare_release.bat
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+
+# Temporary files
+exclude.txt
+*.bak
+*.log

@@ -1,0 +1,24 @@
+{
+	"_comments1": "To turn on/off the fuel and supplies generating",
+	"enable_fuel": true,
+	"enable_supplies": true,
+
+	"_comments2": "Fuel generating - Percent of max fuel to generate per day, as decimal (.1 is 10%, 1 is 100%)",
+	"fuel_per_day": 0.1,
+	
+	"_comments3": "Supply generating limits - Generate up to this percent of max cargo, as decimal",
+	"percent_supply_limit": 0.35,
+	"_comments4": "Hard limit on generating supplies, in case you have huge cargo cap. Actual limit will be either percent or hard limit, whichever is smaller so you don't fill smaller cargos with all supplies. 0 = no hard limit",
+	"hard_supply_limit": 0,
+
+	"_comments5": "Crew usage for supply gen: extra = calculate using crew over your fleet minimum, put those slackers to good use; all = use all crew for supply gen, just because you fly a ship doesn't mean you can slack off; nocrew = don't use crew to calculate supply gen",
+	"crew_usage": "extra",
+
+	"_comments6": "For 'extra' or 'all' crew setting, each crew generates this amount per day, decimal or int. Will generate up to set limits",
+	"supplies_per_crew": 0.1,
+	
+	"_comments7": "For 'none' crew setting, pick either 'percent' for a percentage of max cargo per day or 'flat' for a flat value of supplies per day. Will generate up to set limits",
+	"no_crew_gen": "percent",
+	"_comments8": "Put the value you want for the percent or flat rate here, decimal or int",
+	"no_crew_rate": 0.1
+}
