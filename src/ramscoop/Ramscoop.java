@@ -6,13 +6,21 @@ import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.FleetDataAPI;
 import com.fs.starfarer.api.combat.MutableStat;
 import com.fs.starfarer.api.fleet.MutableFleetStatsAPI;
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
-public class Ramscoop implements EveryFrameScript {
+public class Ramscoop implements EveryFrameScript, Serializable {
+    
+    // Add serialVersionUID to ensure compatibility across versions
+    private static final long serialVersionUID = 1L;
     
     // Make fields transient to prevent serialization issues
     private transient float daysAccumulator = 0f;
+    
+    // Create a placeholder ArrayList field to handle deserialization
+    private ArrayList<?> compatibilityList = new ArrayList<>();
     
     /**
      * Checks if a stat mod is from a nebula effect.
@@ -137,6 +145,21 @@ public class Ramscoop implements EveryFrameScript {
     private Object readResolve() {
         // Re-initialize transient fields
         daysAccumulator = 0f;
+        
+        // Make sure we have a compatibilityList initialized to prevent null pointer exceptions
+        if (compatibilityList == null) {
+            compatibilityList = new ArrayList<>();
+        }
+        
         return this;
+    }
+    
+    // Special methods to handle the ArrayList conversion error
+    public void setScripts(ArrayList<?> list) {
+        compatibilityList = list != null ? list : new ArrayList<>();
+    }
+    
+    public ArrayList<?> getScripts() {
+        return compatibilityList;
     }
 }
