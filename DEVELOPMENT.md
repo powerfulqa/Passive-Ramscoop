@@ -11,12 +11,15 @@ Passive-Ramscoop/
 ├── src/                # Source code
 │   └── ramscoop/
 │       ├── ModPlugin.java
-│       └── Ramscoop.java
+│       ├── Ramscoop.java
+│       └── RamscoopSaveProxy.java
 ├── build.bat           # Windows build script
-├── simple_build.bat    # Simplified build script
-├── build.xml           # Ant build script 
+├── build.xml           # Ant build script (cross-platform)
+├── find_java.ps1       # PowerShell script to locate Java installations
 ├── mod_info.json       # Mod metadata
-├── settings.json       # Mod configuration
+├── data/               # Mod data files
+│   └── config/         
+│       └── settings.json # Mod configuration
 ├── README.md           # User documentation
 └── DEVELOPMENT.md      # Developer documentation (this file)
 ```
@@ -30,9 +33,11 @@ Passive-Ramscoop/
 
 2. **Build Process**:
    - Edit the Java source files in the `src` directory
-   - Run `build.bat` or use Ant with `build.xml` to compile
+   - Run `build.bat` to compile (Windows) or use Ant with `build.xml` (cross-platform)
+   - For release packaging, run `build.bat release` or `ant package` 
    - The built JAR is placed in the `jars` directory
    - Launch Starsector to test your changes
+   - If you need help finding Java, use the `find_java.ps1` script
 
 3. **Source Control**:
    - The repository contains both source code and compiled assets
@@ -58,8 +63,20 @@ The mod works as follows:
 3. When the player fleet is in a nebula, resources are gradually accumulated:
    - Nebula detection is done by checking for "nebula_stat_mod" in fleet stats
    - This is more reliable than using direct location checks
-4. Settings in `settings.json` (in the mod's root directory) control generation rates and limits
+4. Settings in `settings.json` (in the data/config directory) control generation rates and limits
 5. The mod uses the game's settings loading mechanism with the mod ID: `Global.getSettings().loadJSON("settings.json", "m561_ramscoop")`
+
+## Serialization Design
+
+To ensure save game compatibility when the mod is removed:
+
+1. `Ramscoop` implements `Serializable` with a proper `serialVersionUID`
+2. Transient fields are marked with the `transient` keyword to prevent serialization issues
+3. The `writeReplace()` method returns an empty ArrayList when saving, ensuring no mod-specific classes are stored
+4. `RamscoopSaveProxy` provides compatibility for saved games when the mod is uninstalled
+5. `ModPlugin` handles proper cleanup in `beforeGameSave()` and restoration in `onGameSave()`
+
+This approach prevents ClassNotFoundException errors that would normally occur when loading a save after removing the mod.
 
 ## Contributing
 

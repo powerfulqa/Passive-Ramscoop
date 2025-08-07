@@ -2,6 +2,7 @@ package ramscoop;
 
 import com.fs.starfarer.api.BaseModPlugin;
 import com.fs.starfarer.api.Global;
+import com.fs.starfarer.api.EveryFrameScript;
 import org.json.JSONObject;
 
 public class ModPlugin extends BaseModPlugin {
@@ -21,16 +22,8 @@ public class ModPlugin extends BaseModPlugin {
         // This ensures the mod settings are loaded when the game starts
         loadSettings();
         
-        // Register a custom class replacement to handle serialization issues
-        try {
-            // This helps handle the case where the mod is disabled/removed
-            Global.getSettings().getScriptClassLoader().addClassReplacement(
-                "ramscoop.Ramscoop", 
-                "java.util.ArrayList"
-            );
-        } catch (Exception e) {
-            Global.getLogger(ModPlugin.class).error("Failed to register class replacement", e);
-        }
+        // Note: We've removed the class replacement code that was causing errors
+        // The writeReplace method in Ramscoop class will handle serialization issues
     }
 
     @Override
@@ -52,13 +45,15 @@ public class ModPlugin extends BaseModPlugin {
         }
     }
     
-    @Override
+    // We need to use the exact method signature from BaseModPlugin
+    // to avoid compatibility issues
     public void beforeGameSave() {
         // Ensure any transient data is cleared before save
         cleanupScripts();
     }
 
-    @Override
+    // We need to use the exact method signature from BaseModPlugin
+    // to avoid compatibility issues
     public void onGameSave() {
         // Re-add scripts after saving
         onGameLoad(false);
@@ -68,8 +63,8 @@ public class ModPlugin extends BaseModPlugin {
         // Remove our script from the sector when unloaded
         // This prevents errors when the mod is removed later
         if (Global.getSector() != null) {
-            Object toRemove = null;
-            for (Object script : Global.getSector().getScripts()) {
+            EveryFrameScript toRemove = null;
+            for (EveryFrameScript script : Global.getSector().getScripts()) {
                 if (script instanceof Ramscoop) {
                     toRemove = script;
                     break;

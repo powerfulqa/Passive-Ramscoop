@@ -8,10 +8,9 @@ release/
 
 # But track these specific build scripts that are essential for development
 !build.bat
-!simple_build.bat
 
 # Other build-related files
-find_java.ps1
+!find_java.ps1
 # build.xml is tracked by default
 
 # IDE files
