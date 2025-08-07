@@ -2,7 +2,7 @@
     "id": "passive_ramscoop",
     "name": "Passive Ramscoop",
     "author": "powerfulqa",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "description": "Adds passive ramscoop functionality to ships",
     "gameVersion": "0.98a-RC8",
     "utility": true,
