@@ -59,3 +59,9 @@ If you want to contribute to this project:
 4. Submit a pull request
 
 Please make sure to test your changes thoroughly before submitting.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. 
+The MIT License is a permissive license that allows anyone to freely use, modify, distribute, and sell the software, 
+provided that the original copyright notice and the license text are included in all copies or substantial portions of the software.

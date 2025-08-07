@@ -46,3 +46,7 @@ You can customize the mod's behavior by editing the `data/config/settings.json` 
 
 Original mod by Meridias561 (for Starsector 0.95a)
 Updated for Starsector 0.98a-RC8 by PowerfulQA
+
+## License
+
+This mod is open source and released under the MIT License. See the LICENSE file for details.

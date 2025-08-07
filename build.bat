@@ -73,6 +73,7 @@ if "%1"=="release" (
     REM Copy mod files to release directory
     copy mod_info.json %RELEASE_DIR%\
     copy README.md %RELEASE_DIR%\
+    copy LICENSE %RELEASE_DIR%\
     copy jars\%MOD_NAME%.jar %RELEASE_DIR%\jars\
     
     REM Copy data directory if it exists
