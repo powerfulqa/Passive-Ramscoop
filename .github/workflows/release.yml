@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write # Required for creating releases
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
@@ -51,7 +53,7 @@ jobs:
 
       - name: Create GitHub Release
         id: create_release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           name: Ramscoop ${{ github.ref_name }}
           draft: false
@@ -65,5 +67,4 @@ jobs:
             ## Installation
             
             Extract the zip file into your Starsector/mods directory.
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        # Token is automatically used from the GITHUB_TOKEN provided by Actions
