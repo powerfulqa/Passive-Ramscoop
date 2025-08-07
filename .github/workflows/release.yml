@@ -12,6 +12,22 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Validate release files
+        run: |
+          # Check that essential mod files exist
+          for file in "mod_info.json" "settings.json" "README.md" "LICENSE"; do
+            if [ ! -f "$file" ]; then
+              echo "Error: $file is missing"
+              exit 1
+            fi
+          done
+          
+          # Verify JAR exists
+          if [ ! -f "jars/Ramscoop.jar" ]; then
+            echo "Error: Ramscoop.jar is missing"
+            exit 1
+          fi
+
       - name: Create Release Package
         run: |
           # Create release directory
@@ -23,6 +39,7 @@ jobs:
           cp settings.json release/
           cp README.md release/
           cp LICENSE release/
+          cp changelog.md release/ 2>/dev/null || :
           
           # Determine version from tag
           VERSION=${GITHUB_REF#refs/tags/}
