@@ -11,6 +11,9 @@ import java.util.Map;
 
 public class Ramscoop implements EveryFrameScript {
     
+    // Make fields transient to prevent serialization issues
+    private transient float daysAccumulator = 0f;
+    
     /**
      * Checks if a stat mod is from a nebula effect.
      * @param mod The stat mod to check
@@ -127,5 +130,13 @@ public class Ramscoop implements EveryFrameScript {
     @Override
     public boolean runWhilePaused() {
         return false;  // Don't run when game is paused
+    }
+    
+    // Make the class more resilient to serialization/deserialization
+    // This helps with save compatibility when the mod is removed
+    private Object readResolve() {
+        // Re-initialize transient fields
+        daysAccumulator = 0f;
+        return this;
     }
 }

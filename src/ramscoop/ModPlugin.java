@@ -17,6 +17,12 @@ public class ModPlugin extends BaseModPlugin {
     public static float no_crew_rate = 0.1f;
 
     @Override
+    public void onApplicationLoad() {
+        // This ensures the mod settings are loaded when the game starts
+        loadSettings();
+    }
+
+    @Override
     public void onGameLoad(boolean newGame) {
         loadSettings();
         
@@ -32,6 +38,37 @@ public class ModPlugin extends BaseModPlugin {
         if (!found) {
             Global.getSector().addScript(new Ramscoop());
             Global.getLogger(ModPlugin.class).info("Ramscoop initialized");
+        }
+    }
+    
+    @Override
+    public void beforeGameSave() {
+        // Ensure any transient data is cleared before save
+        cleanupScripts();
+    }
+
+    @Override
+    public void onGameSave() {
+        // Re-add scripts after saving
+        onGameLoad(false);
+    }
+
+    private void cleanupScripts() {
+        // Remove our script from the sector when unloaded
+        // This prevents errors when the mod is removed later
+        if (Global.getSector() != null) {
+            Object toRemove = null;
+            for (Object script : Global.getSector().getScripts()) {
+                if (script instanceof Ramscoop) {
+                    toRemove = script;
+                    break;
+                }
+            }
+            
+            if (toRemove != null) {
+                Global.getSector().removeScript(toRemove);
+                Global.getLogger(ModPlugin.class).info("Ramscoop script removed for clean save");
+            }
         }
     }
     

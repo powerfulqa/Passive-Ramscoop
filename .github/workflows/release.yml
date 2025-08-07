@@ -42,6 +42,7 @@ jobs:
           cp README.md release/
           cp LICENSE release/
           cp changelog.md release/ 2>/dev/null || :
+          cp Ramscoop.version release/ 2>/dev/null || :
           
           # Determine version from tag
           VERSION=${GITHUB_REF#refs/tags/}
