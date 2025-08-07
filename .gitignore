@@ -4,10 +4,9 @@ bin/
 release/
 
 # Build scripts
-build.bat
+*.bat
 build.xml
 find_java.ps1
-prepare_release.bat
 
 # IDE files
 .idea/
