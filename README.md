@@ -1,40 +1,43 @@
-# Ramscoop Mod v0.3 for Starsector 0.98a-RC8
+# Ramscoop Mod for Starsector
 
-This mod adds an automatic process to your fleet to scoop up 'stuff' from nebulas to create fuel and supplies.
+## Overview
+Ramscoop is a small utility mod that adds an automatic process to your fleet to gather resources from nebulas, generating fuel and supplies over time.
 
 ## Features
-
 - Automatically generate fuel and supplies while in nebulas
-- Configurable generation rates
-- Options to use crew for supply generation
-- Customizable limits to prevent excessive resource accumulation
+- Configurable generation rates and limits
+- Multiple crew usage options for supply generation
 
 ## Installation
-
-1. Copy the `Ramscoop-0.3` folder to your Starsector mods directory
-2. Start Starsector and enable the mod in the launcher
+1. Extract the mod files to your Starsector `mods` directory (the folder should be named `Passive-Ramscoop`)
+2. Enable the mod in the Starsector launcher
 
 ## Configuration
+All settings can be adjusted in the `settings.json` file. Note that this mod uses a non-standard JSON format where some string values are unquoted:
 
-You can customize the mod's behavior by editing the `settings.json` file in the root directory of the mod:
-
-- `enable_fuel`: Set to `true` to enable fuel generation, `false` to disable
-- `enable_supplies`: Set to `true` to enable supplies generation, `false` to disable
-- `fuel_per_day`: Percentage of max fuel to generate per day (e.g., 0.1 = 10%)
-- `percent_supply_limit`: Maximum percentage of cargo space that can be filled with generated supplies
-- `hard_supply_limit`: Hard limit on the amount of supplies that can be generated (0 = no limit)
-- `crew_usage`: Method for calculating supply generation based on crew:
-  - `extra`: Use only excess crew over the fleet minimum
-  - `all`: Use all crew for supply generation
-  - `nocrew`: Don't use crew for calculation
-- `supplies_per_crew`: Amount of supplies each crew member generates per day
-- `no_crew_gen`: For 'nocrew' mode, choose between 'percent' or 'flat' generation rate
-- `no_crew_rate`: Value for the percent or flat rate generation
+- `enable_fuel`: Set to true/false to enable/disable fuel generation
+- `enable_supplies`: Set to true/false to enable/disable supplies generation
+- `fuel_per_day`: Percentage of max fuel to generate per day (decimal format, .1 = 10%)
+- `percent_supply_limit`: Maximum percentage of cargo capacity to fill with supplies (.35 = 35%)
+- `hard_supply_limit`: Hard limit on supply generation (0 = no limit)
+- `crew_usage`: How crew affects supply generation (extra, all, or nocrew - note: unquoted values)
+- `supply_per_crew`: Amount of supplies each crew generates per day (.1 = 0.1 supplies per crew)
+- `no_crew_gen`: For "nocrew" option, generation method (percent or flat - note: unquoted values)
+- `no_crew_rate`: Rate value for the selected "no_crew_gen" option (.1 = 10% or 0.1 flat rate)
 
 ## Compatibility
-
 - Starsector 0.98a-RC8
+- No known mod conflicts
+- Current version: 0.3.0
 
+<<<<<<< HEAD
+## Development
+This mod includes build scripts for development:
+- `build.ps1` - PowerShell build script
+- `build.bat` - Windows batch build script
+
+See [CHANGELOG.md](CHANGELOG.md) for version history and [MIGRATION_REPORT.md](MIGRATION_REPORT.md) for technical migration details.
+=======
 ## Mod Type
 
 This is a **utility mod** which means it can be safely added to or removed from existing saves at any time without causing any issues. You can:
@@ -54,24 +57,13 @@ No special steps are needed when adding or removing the mod - it's designed to h
 - Simplified mod structure with settings file in root directory
 - Added detailed documentation for developers
 - Added simple_build.bat as a lightweight build alternative
+>>>>>>> origin/main
 
 ## Credits
-
-Original mod by Meridias561 (for Starsector 0.95a)
-Updated for Starsector 0.98a-RC8 by PowerfulQA
-
-To contact the original author for permissions:
-- Meridias561's Nexus Mods profile: https://next.nexusmods.com/profile/Meridias561
+- Original mod by Meridias561 (https://next.nexusmods.com/profile/Meridias561)
+- Updated version by powerfulqa
 
 ## License
+Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0) with additional restrictions.
 
-This mod is released under the Creative Commons Attribution-NonCommercial 4.0 International License (CC BY-NC 4.0) with additional restrictions from the original author. These include:
-
-1. You must give appropriate credit to the original creators
-2. You may not use it for commercial purposes (no selling of this mod or derivatives)
-3. **You must obtain explicit permission from the original author (Meridias561) before modifying any files**
-4. **You must obtain explicit permission before using any assets from this mod in other projects**
-5. You must credit the original author when uploading or sharing this mod
-
-Contact information for permission requests can be found in the Credits section above.
-See the LICENSE file for complete details.
+See [LICENSE.txt](LICENSE.txt) for full details.

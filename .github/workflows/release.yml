@@ -17,7 +17,7 @@ jobs:
       - name: Validate release files
         run: |
           # Check that essential mod files exist
-          for file in "mod_info.json" "settings.json" "README.md" "LICENSE"; do
+          for file in "mod_info.json" "settings.json" "README.md" "LICENSE.txt"; do
             if [ ! -f "$file" ]; then
               echo "Error: $file is missing"
               exit 1
@@ -40,9 +40,9 @@ jobs:
           cp mod_info.json release/
           cp settings.json release/
           cp README.md release/
-          cp LICENSE release/
-          cp changelog.md release/ 2>/dev/null || :
-          cp Ramscoop.version release/ 2>/dev/null || :
+          cp LICENSE.txt release/
+          cp changelog.txt release/ 2>/dev/null || :
+          cp version.json release/ 2>/dev/null || :
           
           # Determine version from tag
           VERSION=${GITHUB_REF#refs/tags/}
@@ -63,7 +63,7 @@ jobs:
           body: |
             # Ramscoop ${{ github.ref_name }}
             
-            See the [changelog](https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/changelog.md) for details.
+            See the [changelog](https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/CHANGELOG.md) for details.
             
             ## Installation
             

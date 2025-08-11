@@ -22,3 +22,8 @@ release/
 exclude.txt
 *.bak
 *.log
+
+# Project files
+/.cache/
+/.idea/
+/.vscode/

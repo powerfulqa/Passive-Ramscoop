@@ -1,11 +1,10 @@
 {
-    "id": "passive_ramscoop",
-    "name": "Passive Ramscoop",
-    "author": "powerfulqa",
-    "version": "0.3.1",
-    "description": "Adds passive ramscoop functionality to ships",
-    "gameVersion": "0.98a-RC8",
-    "utility": true,
-    "jars": ["jars/Ramscoop.jar"],
-	"modPlugin":"ramscoop.ModPlugin"
+	"id":"m561_ramscoop",
+	"name":"Ramscoop",
+	"author":"Meridias561, updated by powerfulqa",
+	"version":"0.3.0",
+	"description":"Adds an automatic process to your fleet to scoop up 'stuff' from nebulas to create fuel and supplies.",
+	"gameVersion":"0.98a-RC8",
+	"jars":["jars/Ramscoop.jar"],
+	"modPlugin":"ramscoop.ModPlugin",
 }

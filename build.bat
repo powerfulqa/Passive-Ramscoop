@@ -1,92 +1,61 @@
 @echo off
 setlocal enabledelayedexpansion
 
-REM Set paths
-set JAVA_HOME=C:\Program Files\Java\jdk-23
-set PATH=%JAVA_HOME%\bin;%PATH%
-set STARSECTOR_PATH=C:\Program Files (x86)\Fractal Softworks\Starsector
+:: Configuration
+set SS_DIR=C:\Program Files (x86)\Fractal Softworks\Starsector
+set MOD_NAME=Passive-Ramscoop
+set MOD_ID=m561_ramscoop
+set SRC_DIR=%cd%\src
+set OUT_DIR=%cd%\jars
 
-REM Set mod information
-set MOD_NAME=Ramscoop
-set MOD_VERSION=0.3
-set MOD_PACKAGE=ramscoop
+:: Create directories if they don't exist
+if not exist "%OUT_DIR%" mkdir "%OUT_DIR%"
 
-echo Using Java at: %JAVA_HOME%
+:: Set up classpath with all necessary libraries from Starsector
+set CLASSPATH="%SS_DIR%\starsector-core\starfarer.api.jar"
+set CLASSPATH=%CLASSPATH%;"%SS_DIR%\starsector-core\starfarer_obf.jar"
+set CLASSPATH=%CLASSPATH%;"%SS_DIR%\starsector-core\janino.jar"
+set CLASSPATH=%CLASSPATH%;"%SS_DIR%\starsector-core\commons-compiler.jar"
+set CLASSPATH=%CLASSPATH%;"%SS_DIR%\starsector-core\commons-compiler-jdk.jar"
+set CLASSPATH=%CLASSPATH%;"%SS_DIR%\starsector-core\fs.common_obf.jar"
+set CLASSPATH=%CLASSPATH%;"%SS_DIR%\starsector-core\fs.sound_obf.jar"
+set CLASSPATH=%CLASSPATH%;"%SS_DIR%\starsector-core\lwjgl.jar"
+set CLASSPATH=%CLASSPATH%;"%SS_DIR%\starsector-core\lwjgl_util.jar"
+set CLASSPATH=%CLASSPATH%;"%SS_DIR%\starsector-core\json.jar"
+set CLASSPATH=%CLASSPATH%;"%SS_DIR%\starsector-core\log4j-1.2.9.jar"
 
-REM Create directories
-if not exist build mkdir build
-if not exist build\classes mkdir build\classes
-if not exist jars mkdir jars
-
-REM Check if Java is available
-javac -version
-if %ERRORLEVEL% neq 0 (
-    echo ERROR: Java compiler not found!
-    echo Please install Java JDK or update the JAVA_HOME variable in this script.
-    exit /b 1
-)
-
-REM Build classpath with all Starsector core jars
-echo Building classpath...
-set CP=.
-for %%f in ("%STARSECTOR_PATH%\starsector-core\*.jar") do (
-    set CP=!CP!;%%f
-)
-
-REM Compile Java files
+:: Compile Java files
 echo Compiling Java files...
-if exist src\%MOD_PACKAGE%\*.java (
-    javac --release 8 -Xlint:deprecation -Xlint:unchecked -cp "!CP!" -d build\classes src\%MOD_PACKAGE%\*.java
-    if %ERRORLEVEL% neq 0 (
-        echo Compilation failed!
-        echo Note: This is expected if you haven't yet extracted the Starsector API
-        echo or if the source files are just placeholders.
-        exit /b 1
-    )
-) else (
-    echo No Java source files found in src\%MOD_PACKAGE%\
+javac --release 8 -cp %CLASSPATH% -d "%SRC_DIR%" "%SRC_DIR%\ramscoop\*.java"
+if %ERRORLEVEL% NEQ 0 (
+    echo Compilation failed!
+    exit /b %ERRORLEVEL%
 )
 
-REM Create JAR file
+:: Create JAR file
 echo Creating JAR file...
-cd build\classes
-if exist %MOD_PACKAGE%\*.class (
-    jar cf "..\%MOD_NAME%.jar" %MOD_PACKAGE%\*.class
-    cd ..\..
-    copy /y "build\%MOD_NAME%.jar" "jars\%MOD_NAME%.jar"
-    echo JAR file created and copied to jars directory.
+cd "%SRC_DIR%"
+
+:: Find Java installation to use its jar command
+set JAVA_HOME=""
+for /f "tokens=*" %%i in ('where java') do (
+    set JAVA_PATH=%%i
+    set JAVA_BIN=%%~dpi
+)
+
+:: Use jar from Java installation or fall back to jar command if in PATH
+if exist "%JAVA_BIN%jar.exe" (
+    echo Using jar from: %JAVA_BIN%jar.exe
+    "%JAVA_BIN%jar.exe" cf "%OUT_DIR%\Ramscoop.jar" ramscoop\*.class
 ) else (
-    cd ..\..
-    echo No class files found to create JAR.
+    echo Attempting to use system jar command...
+    jar cf "%OUT_DIR%\Ramscoop.jar" ramscoop\*.class
 )
 
-REM Create release zip if specified
-if "%1"=="release" (
-    echo Creating release package...
-    set RELEASE_DIR=release\%MOD_NAME%-%MOD_VERSION%
-    if exist release rmdir /s /q release
-    mkdir release
-    mkdir %RELEASE_DIR%
-    mkdir %RELEASE_DIR%\jars
-    mkdir %RELEASE_DIR%\data
-    
-    REM Copy mod files to release directory
-    copy mod_info.json %RELEASE_DIR%\
-    copy README.md %RELEASE_DIR%\
-    copy LICENSE %RELEASE_DIR%\
-    copy jars\%MOD_NAME%.jar %RELEASE_DIR%\jars\
-    
-    REM Copy data directory if it exists
-    if exist data xcopy /E /I data %RELEASE_DIR%\data
-    
-    REM Copy graphics directory if it exists
-    if exist graphics xcopy /E /I graphics %RELEASE_DIR%\graphics
-    
-    REM Create zip file
-    powershell Compress-Archive -Path release\%MOD_NAME%-%MOD_VERSION% -DestinationPath release\%MOD_NAME%-%MOD_VERSION%.zip -Force
-    
-    echo Release package created at release\%MOD_NAME%-%MOD_VERSION%.zip
+if %ERRORLEVEL% NEQ 0 (
+    echo JAR creation failed!
+    exit /b %ERRORLEVEL%
 )
 
-echo Build process completed successfully!
-endlocal
+echo Build completed successfully!
+echo JAR file created at: %OUT_DIR%\Ramscoop.jar
