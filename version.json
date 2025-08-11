@@ -1,5 +1,5 @@
 {
-    "masterVersionFile": "https://github.com/powerfulqa/Passive-Ramscoop/raw/main/Passive-Ramscoop/version.json",
+    "masterVersionFile": "https://github.com/powerfulqa/Passive-Ramscoop/raw/main/version.json",
     "modVersion": {
         "major": 0,
         "minor": 3,
@@ -7,8 +7,14 @@
     },
     "modName": "Ramscoop",
     "modThreadId": null,
+    "modNexusId": null,
     
-    "directDownloadURL": "https://github.com/powerfulqa/Passive-Ramscoop/archive/refs/heads/main.zip",
+    "directDownloadURL": "https://github.com/powerfulqa/Passive-Ramscoop/releases/latest",
     
-    "changelogURL": "https://github.com/powerfulqa/Passive-Ramscoop/raw/main/Passive-Ramscoop/changelog.txt"
+    "changelogURL": "https://github.com/powerfulqa/Passive-Ramscoop/raw/main/CHANGELOG.md",
+    
+    "starsectorVersion": "0.98a-RC8",
+    "author": "Meridias561, updated by powerfulqa",
+    "description": "Adds an automatic process to your fleet to scoop up 'stuff' from nebulas to create fuel and supplies.",
+    "repository": "https://github.com/powerfulqa/Passive-Ramscoop"
 }
