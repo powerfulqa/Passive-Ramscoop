@@ -4,6 +4,7 @@
 
 ### ✅ Core Features Added
 - **LunaLib Settings Integration**: Full in-game configuration support
+- **LunaLib Version Checker Integration**: Automatic update notifications support
 - **Soft Dependency Implementation**: Works with or without LunaLib
 - **Backward Compatibility**: Existing settings.json configurations remain functional
 - **Enhanced Settings Management**: Smart detection and loading system
@@ -17,6 +18,7 @@
 
 #### New Files:
 - `data/config/LunaSettings.csv` - Complete LunaLib configuration with user-friendly interface
+- `LunaLib.version` - Version checker file for automatic update notifications
 
 #### Enhanced Files:
 - `src/ramscoop/ModPlugin.java` - Added reflection-based LunaLib integration
@@ -27,7 +29,7 @@
 - `changelog.md` - Documented all new features
 - `MIGRATION_REPORT.md` - Added technical implementation details
 
-### ✅ LunaLib Settings Menu Features
+### ✅ LunaLib Integration Features
 - **9 configurable settings** organized in logical sections:
   - Enable/disable fuel and supply generation
   - Fuel generation rate control
@@ -37,6 +39,8 @@
 - **Real-time configuration** - changes apply immediately
 - **Range validation** - prevents invalid values
 - **Crash-safe formatting** - avoids problematic characters like %
+- **Version checking integration** - appears properly in LunaLib Version Checker
+- **Automatic update notifications** - users notified when new versions available
 
 ### ✅ Technical Implementation Highlights
 - **Reflection-based loading**: No hard JAR dependency on LunaLib
@@ -106,6 +110,7 @@ The feature branch `feature/lunalib-support` is ready for:
 ✅ **Issues Resolved**:
 - CSV format specifier crash fixed
 - Settings interface now stable and functional
+- Version checker "Unsupported" status resolved
 - Full backward compatibility maintained
 
 The LunaLib integration is now complete, tested, and ready for use!
