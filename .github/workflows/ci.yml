@@ -30,7 +30,6 @@ jobs:
       run: |
         # Check that essential mod files exist
         for file in "mod_info.json" "settings.json" "README.md" "LICENSE.txt"; do
-        for file in "mod_info.json" "settings.json" "README.md" "LICENSE.txt"; do
           if [ ! -f "$file" ]; then
             echo "Error: $file is missing"
             exit 1
