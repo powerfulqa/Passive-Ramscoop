@@ -1,7 +1,7 @@
 {
 	"id":"m561_ramscoop",
 	"name":"Ramscoop",
-	"author":"Meridias561",
+	"author":"Meridias561, updated by powerfulqa",
 	"version":"0.3.0",
 	"description":"Adds an automatic process to your fleet to scoop up 'stuff' from nebulas to create fuel and supplies.",
 	"gameVersion":"0.98a-RC8",
