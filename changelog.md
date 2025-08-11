@@ -1,0 +1,13 @@
+# Ramscoop Changelog
+
+## Version 0.3.0 (2025-08-11)
+- Updated for Starsector 0.98a-RC8 compatibility
+- Fixed settings.json format to use valid JSON with comments
+- Added simple error logging to help diagnose issues (no log4j dependency)
+- Added null checks to prevent NullPointerExceptions
+- Updated the loadJSON call to include modId parameter as required by newer API
+- Restructured code for better readability and maintainability
+- Added both batch (.bat) and PowerShell (.ps1) build scripts for easier compilation
+
+## Version 0.2c
+- Original version by Meridias561 for Starsector 0.95a

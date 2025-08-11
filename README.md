@@ -30,12 +30,34 @@ All settings can be adjusted in the `settings.json` file. Note that this mod use
 - No known mod conflicts
 - Current version: 0.3.0
 
+<<<<<<< HEAD
 ## Development
 This mod includes build scripts for development:
 - `build.ps1` - PowerShell build script
 - `build.bat` - Windows batch build script
 
 See [CHANGELOG.md](CHANGELOG.md) for version history and [MIGRATION_REPORT.md](MIGRATION_REPORT.md) for technical migration details.
+=======
+## Mod Type
+
+This is a **utility mod** which means it can be safely added to or removed from existing saves at any time without causing any issues. You can:
+
+- Add the mod to an existing save
+- Remove the mod from an existing save
+- Enable/disable the mod whenever you want
+
+No special steps are needed when adding or removing the mod - it's designed to handle these changes gracefully.
+
+## Changes in Version 0.3
+
+- Updated to be compatible with Starsector 0.98a-RC8
+- Fixed nebula detection using fleet stat modifiers for more reliable detection
+- Improved stability and error handling
+- Fixed settings loading issues with proper mod ID reference
+- Simplified mod structure with settings file in root directory
+- Added detailed documentation for developers
+- Added simple_build.bat as a lightweight build alternative
+>>>>>>> origin/main
 
 ## Credits
 - Original mod by Meridias561 (https://next.nexusmods.com/profile/Meridias561)
