@@ -56,24 +56,24 @@ jobs:
 
       - name: Create Release Package
         run: |
-          # Create release directory
-          mkdir -p release
+          # Create release directory with mod folder structure
+          mkdir -p release/Ramscoop
           
-          # Copy only the required files for users
-          cp -r jars release/
-          cp mod_info.json release/
-          cp settings.json release/
-          cp README.md release/
-          cp LICENSE.txt release/
-          cp changelog.txt release/ 2>/dev/null || :
-          cp version.json release/ 2>/dev/null || :
+          # Copy only the required files for users into the Ramscoop folder
+          cp -r jars release/Ramscoop/
+          cp mod_info.json release/Ramscoop/
+          cp settings.json release/Ramscoop/
+          cp README.md release/Ramscoop/
+          cp LICENSE.txt release/Ramscoop/
+          cp changelog.txt release/Ramscoop/ 2>/dev/null || :
+          cp version.json release/Ramscoop/ 2>/dev/null || :
           
           # Determine version from tag
           VERSION=${GITHUB_REF#refs/tags/}
           
-          # Create the zip file
+          # Create the zip file with the Ramscoop folder inside
           cd release
-          zip -r "../Ramscoop-${VERSION}.zip" ./*
+          zip -r "../Ramscoop-${VERSION}.zip" Ramscoop/
           cd ..
 
       - name: Create GitHub Release
