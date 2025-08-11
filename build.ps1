@@ -4,8 +4,8 @@
 $SS_DIR = "C:\Program Files (x86)\Fractal Softworks\Starsector"
 $MOD_NAME = "Passive-Ramscoop"
 $MOD_ID = "m561_ramscoop"
-$SRC_DIR = "$PWD\Passive-Ramscoop\src"
-$OUT_DIR = "$PWD\Passive-Ramscoop\jars"
+$SRC_DIR = "$PWD\src"
+$OUT_DIR = "$PWD\jars"
 
 # Create directories if they don't exist
 if (-not (Test-Path -Path "$OUT_DIR")) {

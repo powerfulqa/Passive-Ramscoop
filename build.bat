@@ -6,7 +6,7 @@ set SS_DIR=C:\Program Files (x86)\Fractal Softworks\Starsector
 set MOD_NAME=Passive-Ramscoop
 set MOD_ID=m561_ramscoop
 set SRC_DIR=%cd%\src
-set OUT_DIR=%cd%\Passive-Ramscoop\jars
+set OUT_DIR=%cd%\jars
 
 :: Create directories if they don't exist
 if not exist "%OUT_DIR%" mkdir "%OUT_DIR%"
