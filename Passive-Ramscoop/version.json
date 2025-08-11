@@ -1,0 +1,14 @@
+{
+    "masterVersionFile": "https://github.com/powerfulqa/Passive-Ramscoop/raw/main/Passive-Ramscoop/version.json",
+    "modVersion": {
+        "major": 0,
+        "minor": 3,
+        "patch": 0
+    },
+    "modName": "Ramscoop",
+    "modThreadId": null,
+    
+    "directDownloadURL": "https://github.com/powerfulqa/Passive-Ramscoop/archive/refs/heads/main.zip",
+    
+    "changelogURL": "https://github.com/powerfulqa/Passive-Ramscoop/raw/main/Passive-Ramscoop/changelog.txt"
+}

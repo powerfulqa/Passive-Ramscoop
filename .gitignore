@@ -1,0 +1,29 @@
+# Build output directories
+build/
+bin/
+release/
+
+# Ignore all batch files by default
+*.bat
+
+# But track these specific build scripts that are essential for development
+!build.bat
+
+# Other build-related files
+!find_java.ps1
+# build.xml is tracked by default
+
+# IDE files
+.idea/
+.vscode/
+*.iml
+
+# Temporary files
+exclude.txt
+*.bak
+*.log
+
+# Project files
+/.cache/
+/.idea/
+/.vscode/
