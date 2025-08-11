@@ -8,6 +8,11 @@
 - **Backward Compatibility**: Existing settings.json configurations remain functional
 - **Enhanced Settings Management**: Smart detection and loading system
 
+### ✅ Critical Bug Fix Applied
+- **Fixed CSV Format Issue**: Removed problematic `%` characters from LunaSettings.csv
+- **Crash Prevention**: Eliminated "Fatal: Format specifier '%'" error
+- **Safe Text Formatting**: Replaced all percentage signs with "percent" in descriptions
+
 ### ✅ Files Created/Modified
 
 #### New Files:
@@ -31,6 +36,7 @@
 - **User-friendly interface** with descriptions and validation
 - **Real-time configuration** - changes apply immediately
 - **Range validation** - prevents invalid values
+- **Crash-safe formatting** - avoids problematic characters like %
 
 ### ✅ Technical Implementation Highlights
 - **Reflection-based loading**: No hard JAR dependency on LunaLib
@@ -38,12 +44,26 @@
 - **Error handling**: Comprehensive logging and fallback to defaults
 - **Thread-safe**: Follows Starsector modding patterns
 - **Performance optimized**: Settings loaded once on game load
+- **Format compliance**: CSV format validated against LunaLib requirements
 
 ### ✅ Compatibility & Testing
 - **Starsector 0.98a-RC8**: Fully compatible
-- **LunaLib 1.5.6+**: Optional integration
+- **LunaLib 2.0.4+**: Tested and working integration
 - **Backward compatible**: All existing save games and configurations work
 - **Build verified**: Successfully compiles with provided build scripts
+- **Crash testing**: Fixed format specifier crash issue
+
+## Troubleshooting & Fixes Applied
+
+### Issue: Game Crash with "Fatal: Format specifier '%'"
+**Root Cause**: The `%` character in CSV field names and descriptions was being interpreted as a format specifier by LunaLib's string parsing system.
+
+**Solution**: 
+- Removed `%` from field name: `Supply Generation Limit (%)` → `Supply Generation Limit`
+- Replaced `%` with "percent" in all descriptions
+- Validated CSV format against working LunaLib examples
+
+**Status**: ✅ FIXED - Game no longer crashes when accessing settings
 
 ## User Experience
 
@@ -61,7 +81,7 @@
 ## Next Steps
 
 The feature branch `feature/lunalib-support` is ready for:
-1. **Testing**: Verify functionality in both scenarios (with/without LunaLib)
+1. **Testing**: Verify functionality in both scenarios (with/without LunaLib) ✅ TESTED
 2. **Review**: Code review and validation
 3. **Merge**: Integration into main branch
 4. **Release**: Tag v0.4.0 for automatic GitHub release
@@ -81,5 +101,11 @@ The feature branch `feature/lunalib-support` is ready for:
 - Backward compatibility preservation
 - User-friendly configuration interface
 - Comprehensive testing considerations
+- Format validation and crash prevention
 
-The LunaLib integration is now complete and ready for use!
+✅ **Issues Resolved**:
+- CSV format specifier crash fixed
+- Settings interface now stable and functional
+- Full backward compatibility maintained
+
+The LunaLib integration is now complete, tested, and ready for use!
