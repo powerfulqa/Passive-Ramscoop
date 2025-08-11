@@ -29,12 +29,18 @@ jobs:
     - name: Validate mod structure
       run: |
         # Check that essential mod files exist
-        for file in "mod_info.json" "settings.json" "README.md" "LICENSE.txt"; do
+        for file in "mod_info.json" "settings.json" "README.md" "LICENSE.txt" "LunaLib.version"; do
           if [ ! -f "$file" ]; then
             echo "Error: $file is missing"
             exit 1
           fi
         done
+        
+        # Check that LunaSettings.csv exists
+        if [ ! -f "data/config/LunaSettings.csv" ]; then
+          echo "Error: data/config/LunaSettings.csv is missing"
+          exit 1
+        fi
         
         # Check that JAR exists
         if [ ! -f "jars/Ramscoop.jar" ]; then

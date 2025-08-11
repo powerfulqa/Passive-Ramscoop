@@ -7,6 +7,7 @@ This report documents the migration and enhancement of the Ramscoop mod from Sta
 
 ### New Features Added
 - **LunaLib Settings Support:** Added comprehensive in-game settings configuration through LunaLib
+- **LunaLib Version Checker Support:** Added LunaLib.version file for automatic update notifications
 - **Soft Dependency Implementation:** LunaLib is optional - mod functions normally without it
 - **Enhanced Settings Management:** Improved settings loading with automatic fallback
 
@@ -14,6 +15,7 @@ This report documents the migration and enhancement of the Ramscoop mod from Sta
 
 #### New Files:
 - `data/config/LunaSettings.csv` - LunaLib configuration file defining all mod settings
+- `LunaLib.version` - Version checker file for LunaLib update notifications
 
 #### Modified Files:
 - `src/ramscoop/ModPlugin.java` - Added LunaLib integration with reflection-based loading

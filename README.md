@@ -9,6 +9,7 @@ Ramscoop is a utility mod for Starsector that automatically gathers resources fr
 - Configurable generation rates and limits
 - Multiple crew usage options for supply generation
 - **NEW in v0.4.0:** LunaLib Settings integration for in-game configuration
+- **NEW in v0.4.0:** LunaLib Version Checker support for automatic updates
 
 ## Installation
 1. Extract the mod files to your Starsector `mods` directory. The folder should be named `Passive-Ramscoop`.
@@ -42,6 +43,7 @@ If you don't have LunaLib, all settings can be adjusted in the `settings.json` f
 ## Compatibility
 - Starsector 0.98a-RC8
 - LunaLib 1.5.6+ (optional)
+- LunaLib Version Checker supported
 - No known mod conflicts
 - Current version: 0.4.0
 
