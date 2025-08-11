@@ -41,6 +41,23 @@ jobs:
           echo "Warning: Ramscoop.jar is missing, but will be skipped as we can't build it in CI"
         fi
         
+    - name: Generate and validate changelog.txt
+      run: |
+        # Test the changelog generation process
+        sed 's/^## Version /Version /g' CHANGELOG.md | \
+        sed 's/^# .*//g' | \
+        sed 's/^- /- /g' | \
+        sed '/^$/N;/^\n$/d' > test-changelog.txt
+        
+        echo "Generated test changelog.txt:"
+        cat test-changelog.txt
+        
+        # Verify it has content
+        if [ ! -s "test-changelog.txt" ]; then
+          echo "Error: Generated changelog is empty"
+          exit 1
+        fi
+        
     - name: Package validation
       run: |
         # Create a mock release package to ensure the packaging process works
@@ -48,7 +65,13 @@ jobs:
         mkdir -p release/jars
         touch release/jars/Ramscoop.jar
         
-        for file in "mod_info.json" "settings.json" "README.md" "LICENSE.txt"; do
+        # Generate changelog.txt for testing
+        sed 's/^## Version /Version /g' CHANGELOG.md | \
+        sed 's/^# .*//g' | \
+        sed 's/^- /- /g' | \
+        sed '/^$/N;/^\n$/d' > changelog.txt
+        
+        for file in "mod_info.json" "settings.json" "README.md" "LICENSE.txt" "changelog.txt"; do
           cp "$file" release/
         done
         

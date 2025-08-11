@@ -47,10 +47,11 @@ Passive-Ramscoop/
 
 4. **Creating Releases:**
    - Update version numbers in `mod_info.json` and `version.json`
-   - Update the `CHANGELOG.md` and `changelog.txt` with your changes
+   - Update the `CHANGELOG.md` with your changes (the `changelog.txt` will be automatically generated)
    - Commit changes: `git add . && git commit -m "Prepare release vX.Y"`
    - Create and push a version tag: `git tag vX.Y && git push origin vX.Y`
    - GitHub Actions will automatically:
+     - Generate `changelog.txt` from `CHANGELOG.md`
      - Create a release package with only user-required files
      - Attach it to a new GitHub release
      - Publish with notes from your changelog

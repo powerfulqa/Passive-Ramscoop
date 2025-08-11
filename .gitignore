@@ -3,6 +3,9 @@ build/
 bin/
 release/
 
+# Auto-generated files (created by GitHub Actions)
+changelog.txt
+
 # Ignore all batch files by default
 *.bat
 

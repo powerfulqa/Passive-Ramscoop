@@ -30,6 +30,18 @@ jobs:
             exit 1
           fi
 
+      - name: Generate changelog.txt from CHANGELOG.md
+        run: |
+          # Convert CHANGELOG.md to plain text format for end users
+          # Remove markdown formatting and keep the content user-friendly
+          sed 's/^## Version /Version /g' CHANGELOG.md | \
+          sed 's/^# .*//g' | \
+          sed 's/^- /- /g' | \
+          sed '/^$/N;/^\n$/d' > changelog.txt
+          
+          echo "Generated changelog.txt:"
+          cat changelog.txt
+
       - name: Create Release Package
         run: |
           # Create release directory
