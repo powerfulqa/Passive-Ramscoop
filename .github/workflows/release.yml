@@ -17,7 +17,7 @@ jobs:
       - name: Validate release files
         run: |
           # Check that essential mod files exist
-          for file in "mod_info.json" "settings.json" "README.md"; do
+          for file in "mod_info.json" "settings.json" "README.md" "LICENSE.txt"; do
             if [ ! -f "$file" ]; then
               echo "Error: $file is missing"
               exit 1
@@ -40,6 +40,7 @@ jobs:
           cp mod_info.json release/
           cp settings.json release/
           cp README.md release/
+          cp LICENSE.txt release/
           cp changelog.txt release/ 2>/dev/null || :
           cp version.json release/ 2>/dev/null || :
           
