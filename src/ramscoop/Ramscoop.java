@@ -34,7 +34,7 @@ public class Ramscoop implements EveryFrameScript {
          double suppliesperdayd = 0.0D;
          float suppliesperday = 0.0F;
          float minspace = 0.0F;
-         double fuelperdayd = Math.floor((double)(fleet.getCargo().getMaxFuel() * ModPlugin.supplies_per_crew));
+         double fuelperdayd = Math.floor((double)(fleet.getCargo().getMaxFuel() * ModPlugin.fuel_per_day));
          float fuelperday = (float)fuelperdayd;
          double maxsuppliesd = Math.floor((double)(fleet.getCargo().getMaxCapacity() * ModPlugin.percent_supply_limit));
          float maxpercentsupplies = (float)maxsuppliesd;

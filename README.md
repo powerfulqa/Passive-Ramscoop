@@ -8,14 +8,27 @@ Ramscoop is a utility mod for Starsector that automatically gathers resources fr
 - Automatically generates fuel and supplies while in nebulas
 - Configurable generation rates and limits
 - Multiple crew usage options for supply generation
+- **NEW in v0.4.0:** LunaLib Settings integration for in-game configuration
 
 ## Installation
 1. Extract the mod files to your Starsector `mods` directory. The folder should be named `Passive-Ramscoop`.
 2. Enable the mod in the Starsector launcher.
+3. (Optional) Install [LunaLib](https://fractalsoftworks.com/forum/index.php?topic=25658) for in-game settings management.
 
 ## Configuration
-All settings can be adjusted in the `settings.json` file. Note: this mod uses a non-standard JSON format where some string values are unquoted (e.g., `crew_usage: extra`).
 
+### LunaLib Settings (Recommended)
+If you have LunaLib installed, you can configure all mod settings through the in-game settings menu:
+- Press **F2** during campaign mode to open the settings menu
+- Or access "Mod Settings" when creating a new game
+- Look for the "Ramscoop Configuration" section
+
+The settings interface provides descriptions for each option and validates input ranges automatically.
+
+### Manual Configuration (settings.json)
+If you don't have LunaLib, all settings can be adjusted in the `settings.json` file. Note: this mod uses a non-standard JSON format where some string values are unquoted (e.g., `crew_usage: extra`).
+
+#### Settings Reference:
 - `enable_fuel`: Set to true/false to enable or disable fuel generation
 - `enable_supplies`: Set to true/false to enable or disable supplies generation
 - `fuel_per_day`: Percentage of maximum fuel to generate per day (decimal format, `.1` = 10%)
@@ -28,8 +41,9 @@ All settings can be adjusted in the `settings.json` file. Note: this mod uses a 
 
 ## Compatibility
 - Starsector 0.98a-RC8
+- LunaLib 1.5.6+ (optional)
 - No known mod conflicts
-- Current version: 0.3.0
+- Current version: 0.4.0
 
 ## Development
 This mod includes build scripts for development:
@@ -41,6 +55,7 @@ See [CHANGELOG.md](CHANGELOG.md) for version history and [MIGRATION_REPORT.md](M
 ## Credits
 - Original mod by Meridias561 ([Nexus Mods profile](https://next.nexusmods.com/profile/Meridias561))
 - Updated for Starsector 0.98a-RC8 by powerfulqa
+- LunaLib integration added in v0.4.0
 
 ## Licence
 Creative Commons Attribution-NonCommercial 4.0 International Licence (CC BY-NC 4.0) with additional restrictions.
