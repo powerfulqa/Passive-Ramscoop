@@ -11,15 +11,54 @@ import java.util.Iterator;
 import java.util.Map.Entry;
 
 public class Ramscoop implements EveryFrameScript {
+   private float settingsCheckTimer = 0f;
+   private static final float SETTINGS_CHECK_INTERVAL = 5f; // Check every 5 seconds
+   
+   public Ramscoop() {
+      System.out.println("Ramscoop: Ramscoop constructor called");
+      System.out.println("Ramscoop: Initial settings - fuel: " + ModPlugin.enable_fuel + ", supplies: " + ModPlugin.enable_supplies);
+   }
+   
    public boolean isNebula(StatMod mod) {
       return mod != null && mod.source != null && mod.source.contains("nebula_stat_mod");
    }
 
+   private void reloadSettingsIfNeeded() {
+      try {
+         // Check if LunaLib is available and reload settings
+         if (Global.getSettings().getModManager().isModEnabled("lunalib")) {
+            // Use reflection to call ModPlugin.loadSettings() - we need to make it public
+            Class<?> modPluginClass = Class.forName("ramscoop.ModPlugin");
+            Object modPluginInstance = modPluginClass.newInstance();
+            modPluginClass.getMethod("reloadSettings").invoke(modPluginInstance);
+         }
+      } catch (Exception e) {
+         // Silently ignore errors - settings reloading is not critical
+      }
+   }
+
    public void advance(float amount) {
       try {
+         // Debug: Always log that we're running (but throttle it)
+         if (settingsCheckTimer == 0f) { // Only log at start and after timer resets
+            System.out.println("Ramscoop: advance() called - fuel enabled: " + ModPlugin.enable_fuel + ", supplies enabled: " + ModPlugin.enable_supplies);
+         }
+         
+         // Periodically reload settings to pick up changes from LunaLib
+         settingsCheckTimer += amount;
+         if (settingsCheckTimer >= SETTINGS_CHECK_INTERVAL) {
+            settingsCheckTimer = 0f;
+            reloadSettingsIfNeeded();
+         }
+         
          CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
          if (fleet == null) {
             return;
+         }
+
+         // Debug: Log current settings state periodically (every 30 seconds)
+         if (settingsCheckTimer < 1f) { // Only log once per reload cycle
+            System.out.println("Ramscoop: Current settings - fuel: " + ModPlugin.enable_fuel + ", supplies: " + ModPlugin.enable_supplies);
          }
 
          FleetDataAPI fleetData = fleet.getFleetData();
@@ -92,18 +131,36 @@ public class Ramscoop implements EveryFrameScript {
                // Add supplies based on available space
                if (fleet.getCargo().getSpaceLeft() > 0.0F && suppliesperday > 0.0F && supplies < maxsupplies) {
                   days = Global.getSector().getClock().convertToDays(amount);
+                  float suppliesToAdd;
                   if (suppliesperday * days < minspace) {
-                     fleet.getCargo().addSupplies(suppliesperday * days);
+                     suppliesToAdd = suppliesperday * days;
+                     fleet.getCargo().addSupplies(suppliesToAdd);
                   } else {
-                     fleet.getCargo().addSupplies(minspace);
+                     suppliesToAdd = minspace;
+                     fleet.getCargo().addSupplies(suppliesToAdd);
                   }
+                  // Debug logging
+                  if (suppliesToAdd > 0.001f) { // Only log meaningful amounts
+                     System.out.println("Ramscoop: Added " + suppliesToAdd + " supplies (enabled: " + ModPlugin.enable_supplies + ")");
+                  }
+               } else if (!ModPlugin.enable_supplies) {
+                  // Debug: Log when supplies generation is disabled
+                  System.out.println("Ramscoop: Supplies generation disabled in settings");
                }
             }
 
             // Generate fuel if enabled and not at max capacity
             if (ModPlugin.enable_fuel && fuel < fleet.getCargo().getMaxFuel()) {
                days = Global.getSector().getClock().convertToDays(amount);
-               fleet.getCargo().addFuel(fuelperday * days);
+               float fuelToAdd = fuelperday * days;
+               fleet.getCargo().addFuel(fuelToAdd);
+               // Debug logging
+               if (fuelToAdd > 0.001f) { // Only log meaningful amounts
+                  System.out.println("Ramscoop: Added " + fuelToAdd + " fuel (enabled: " + ModPlugin.enable_fuel + ")");
+               }
+            } else if (!ModPlugin.enable_fuel) {
+               // Debug: Log when fuel generation is disabled
+               System.out.println("Ramscoop: Fuel generation disabled in settings");
             }
          }
       } catch (Exception e) {

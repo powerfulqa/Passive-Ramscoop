@@ -1,6 +1,6 @@
 {
 	#To turn on/off the fuel and supplies generating
-	"enable_fuel":true,
+	"enable_fuel":false,
 	"enable_supplies":true,
 
 	########

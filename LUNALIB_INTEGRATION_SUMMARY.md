@@ -24,7 +24,7 @@
 - `src/ramscoop/ModPlugin.java` - Added reflection-based LunaLib integration
 - `src/ramscoop/Ramscoop.java` - Updated fuel generation calculation
 - `mod_info.json` - Updated to version 0.4.0 with enhanced description
-- `version.json` - Updated version metadata
+- `Ramscoop.version` - Version Checker integration file
 - `README.md` - Added comprehensive LunaLib documentation
 - `changelog.md` - Documented all new features
 - `MIGRATION_REPORT.md` - Added technical implementation details

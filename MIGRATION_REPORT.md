@@ -20,7 +20,7 @@ This report documents the migration and enhancement of the Ramscoop mod from Sta
 #### Modified Files:
 - `src/ramscoop/ModPlugin.java` - Added LunaLib integration with reflection-based loading
 - `mod_info.json` - Updated version to 0.4.0, enhanced description
-- `version.json` - Updated version information
+- `Ramscoop.version` - Version Checker integration file
 - `README.md` - Added LunaLib documentation and usage instructions
 - `changelog.md` - Documented new features
 

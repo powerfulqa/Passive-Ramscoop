@@ -23,7 +23,7 @@ Passive-Ramscoop/
 ├── MIGRATION_REPORT.md # Technical migration details
 ├── LICENSE.txt         # Licence information
 ├── LunaLib.version     # Optional LunaLib version file
-├── version.json        # Mod version file
+├── Ramscoop.version    # Version file for Version Checker mod
 ├── changelog.txt       # Changelog for releases
 └── SUMMARY.md          # Project summary
 ```
@@ -46,7 +46,7 @@ Passive-Ramscoop/
    - Build scripts and artefacts should be excluded from git where appropriate
 
 4. **Creating Releases:**
-   - Update version numbers in `mod_info.json` and `version.json`
+   - Update version numbers in `mod_info.json` and `Ramscoop.version`
    - Update the `CHANGELOG.md` with your changes (the `changelog.txt` will be automatically generated)
    - Commit changes: `git add . && git commit -m "Prepare release vX.Y"`
    - Create and push a version tag: `git tag vX.Y && git push origin vX.Y`
