@@ -79,6 +79,20 @@ $CLASSPATH = @(
     "$SS_DIR\starsector-core\log4j-1.2.9.jar"
 )
 
+# Add LunaLib to classpath for direct API access (discover jar dynamically)
+$lunaLibJarDir = Join-Path $SS_DIR 'mods\03_LunaLib-2.0.4\jars'
+if (Test-Path $lunaLibJarDir) {
+    $lunaJars = Get-ChildItem -Path $lunaLibJarDir -Filter *.jar -File -ErrorAction SilentlyContinue
+    foreach ($j in $lunaJars) { $CLASSPATH += $j.FullName }
+    if ($lunaJars.Count -gt 0) {
+        Write-Host ("Including LunaLib jars: " + ($lunaJars | ForEach-Object { $_.Name } | Sort-Object | Join-String ", ")) -ForegroundColor Cyan
+    } else {
+        Write-Host "WARNING: No LunaLib jars found in $lunaLibJarDir" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "WARNING: LunaLib not found at $lunaLibJarDir; build will proceed without LunaLib API on classpath" -ForegroundColor Yellow
+}
+
 # Build the classpath string
 $CLASSPATH_STR = $CLASSPATH -join ";"
 
@@ -92,14 +106,31 @@ if ($LASTEXITCODE -ne 0) {
 
 # Create JAR file
 Write-Host "Creating JAR file..." -ForegroundColor Cyan
-Push-Location $SRC_DIR
+
+# Create a temporary directory with the correct package structure
+$tempDir = "$OUT_DIR\temp_jar"
+if (Test-Path $tempDir) {
+    Remove-Item -Recurse -Force $tempDir
+}
+New-Item -ItemType Directory -Path $tempDir -Force
+New-Item -ItemType Directory -Path "$tempDir\ramscoop" -Force
+
+# Copy compiled classes to the correct package structure
+Copy-Item "$SRC_DIR\ramscoop\*.class" "$tempDir\ramscoop\"
+
+# Create JAR from the temporary directory
+Push-Location $tempDir
 & $jar cf "$OUT_DIR\Ramscoop.jar" ramscoop\*.class
 if ($LASTEXITCODE -ne 0) {
     Write-Host "JAR creation failed!" -ForegroundColor Red
     Pop-Location
+    Remove-Item -Recurse -Force $tempDir
     exit $LASTEXITCODE
 }
 Pop-Location
+
+# Clean up temporary directory
+Remove-Item -Recurse -Force $tempDir
 
 Write-Host "Build completed successfully!" -ForegroundColor Green
 Write-Host "JAR file created at: $OUT_DIR\Ramscoop.jar" -ForegroundColor Green
