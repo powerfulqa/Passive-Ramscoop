@@ -3,6 +3,20 @@
 ## Overview
 This report documents the migration and enhancement of the Ramscoop mod from Starsector 0.95a to Starsector 0.98a-RC8, and the addition of LunaLib support in version 0.4.0.
 
+## Version 0.4.1 - LunaLib Settings Reliability
+
+### Changes
+- Replaced reflection-based LunaLib access with direct API usage (`LunaSettings.*`) and compiled against LunaLib.
+- Plugin (`ModPlugin`) is now the single source of truth; `Ramscoop` reads settings from plugin every frame.
+- Added absolute guard so supplies never generate when disabled.
+- Reduced logging noise; kept snapshot on load and meaningful traces.
+- Build script now discovers and includes LunaLib JAR on classpath.
+
+### Why
+Reflection calls to LunaLib were blocked by the script environment, causing fallback to `settings.json` and ignored LunaLib values. Direct API resolves this.
+
+---
+
 ## Version 0.4.0 - LunaLib Integration
 
 ### New Features Added
@@ -18,7 +32,7 @@ This report documents the migration and enhancement of the Ramscoop mod from Sta
 - `LunaLib.version` - Version checker file for LunaLib update notifications
 
 #### Modified Files:
-- `src/ramscoop/ModPlugin.java` - Added LunaLib integration with reflection-based loading
+- `src/ramscoop/ModPlugin.java` - Added LunaLib integration (now direct API in 0.4.1)
 - `mod_info.json` - Updated version to 0.4.0, enhanced description
 - `Ramscoop.version` - Version Checker integration file
 - `README.md` - Added LunaLib documentation and usage instructions
@@ -27,8 +41,8 @@ This report documents the migration and enhancement of the Ramscoop mod from Sta
 ### Technical Implementation Details
 
 #### LunaLib Integration Approach
-- Uses Java reflection to avoid hard dependency on LunaLib JAR
-- Implements graceful fallback to settings.json if LunaLib is not available
+- 0.4.0 used reflection; 0.4.1 uses direct API and compiles against LunaLib
+- Graceful fallback to settings.json if LunaLib is not available/ready
 - Maintains full backward compatibility with existing configurations
 
 #### Settings Mapping

@@ -1,4 +1,4 @@
-# LunaLib Integration Summary for Ramscoop v0.4.0
+# LunaLib Integration Summary (updated for v0.4.1)
 
 ## Implementation Completed
 
@@ -43,8 +43,8 @@
 - **Automatic update notifications** - users notified when new versions available
 
 ### ✅ Technical Implementation Highlights
-- **Reflection-based loading**: No hard JAR dependency on LunaLib
-- **Graceful fallback**: Automatic settings.json loading when LunaLib unavailable
+- **Direct API loading**: Compiles against LunaLib; avoids reflection restrictions
+- **Graceful fallback**: Baseline settings.json loading when LunaLib unavailable/not ready
 - **Error handling**: Comprehensive logging and fallback to defaults
 - **Thread-safe**: Follows Starsector modding patterns
 - **Performance optimized**: Settings loaded once on game load
@@ -82,13 +82,9 @@
 2. Restart game to apply changes
 3. Full functionality maintained
 
-## Next Steps
-
-The feature branch `feature/lunalib-support` is ready for:
-1. **Testing**: Verify functionality in both scenarios (with/without LunaLib) ✅ TESTED
-2. **Review**: Code review and validation
-3. **Merge**: Integration into main branch
-4. **Release**: Tag v0.4.0 for automatic GitHub release
+## Notes for maintainers
+- Keep the build script’s LunaLib path up-to-date when the LunaLib folder name changes.
+- Keep logging minimal per StarSector.prompt.md; snapshot on load is sufficient for verification.
 
 ## Implementation Quality
 

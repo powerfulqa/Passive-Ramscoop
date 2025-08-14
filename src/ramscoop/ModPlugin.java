@@ -3,35 +3,15 @@ package ramscoop;
 import com.fs.starfarer.api.BaseModPlugin;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
+import org.apache.log4j.Logger;
 import org.json.JSONObject;
+import lunalib.lunaSettings.LunaSettings;
 
 public class ModPlugin extends BaseModPlugin {
+    private static final Logger LOG = Global.getLogger(ModPlugin.class);
     public static final String MOD_ID = "m561_ramscoop";
     
-    static {
-        System.out.println("=== RAMSCOOP MOD LOADING ===");
-        System.out.println("Ramscoop: ModPlugin class loaded - STATIC INITIALIZER");
-        System.out.println("Ramscoop: Current time: " + System.currentTimeMillis());
-        System.out.println("Ramscoop: Version 0.4.0 with LunaLib support");
-        System.out.println("=== RAMSCOOP STATIC INIT COMPLETE ===");
-        
-        // Also write to a debug file
-        try {
-            java.io.FileWriter debugFile = new java.io.FileWriter("ramscoop_debug.txt", true);
-            debugFile.write("=== RAMSCOOP STATIC INITIALIZER RAN ===\n");
-            debugFile.write("Time: " + new java.util.Date() + "\n");
-            debugFile.write("========================================\n");
-            debugFile.close();
-        } catch (Exception e) {
-            // Ignore file write errors
-        }
-    }
-    
-    public ModPlugin() {
-        System.out.println("Ramscoop: ModPlugin constructor called");
-    }
-    
-    // Default values (fallback if neither LunaLib nor settings.json is available)
+    // Default values (fallbacks; will be overridden by LunaLib or settings.json)
     public static boolean enable_fuel = true;
     public static boolean enable_supplies = true;
     public static float fuel_per_day = 0.1f;
@@ -41,97 +21,113 @@ public class ModPlugin extends BaseModPlugin {
     public static String crew_usage = "extra";
     public static String no_crew_gen = "percent";
     public static float no_crew_rate = 0.1f;
-
-    private void loadSettings() {
-        System.out.println("Ramscoop: Starting settings load...");
+    
+    // Track if LunaLib is being used and if we've successfully loaded settings
+    private static boolean lunaLibReady = false;
+    private static boolean settingsLoaded = false;
+    
+    public ModPlugin() {
         try {
-            // Try LunaLib first (soft dependency)
+            LOG.info("[Ramscoop] ModPlugin constructed (v0.4.1)");
+        } catch (Exception e) {
+            System.out.println("Ramscoop: CRITICAL ERROR in constructor: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+    
+    // Simple readiness: treat LunaLib as ready if the mod is enabled; API calls will work when it's initialized
+    private static boolean isLunaLibReady() {
+        return Global.getSettings().getModManager().isModEnabled("lunalib");
+    }
+
+    private static void loadSettings() {
+        // Minimal logging
+        try {
+            // Check if LunaLib is ready
             boolean lunaLibEnabled = Global.getSettings().getModManager().isModEnabled("lunalib");
-            System.out.println("Ramscoop: LunaLib enabled: " + lunaLibEnabled);
+            LOG.info("[Ramscoop] LunaLib enabled: " + lunaLibEnabled);
             
-            if (lunaLibEnabled) {
+            if (lunaLibEnabled && isLunaLibReady()) {
                 loadLunaLibSettings();
-                System.out.println("Ramscoop: Loaded settings from LunaLib");
+                lunaLibReady = true;
+                settingsLoaded = true;
+                LOG.info("[Ramscoop] Loaded settings from LunaLib");
+            } else if (lunaLibEnabled) {
+                // LunaLib is enabled but not ready yet - use settings.json as a baseline
+                LOG.info("[Ramscoop] LunaLib not ready yet; using settings.json until it becomes ready");
+                try {
+                    loadLegacySettings();
+                    settingsLoaded = true;
+                    LOG.info("[Ramscoop] Baseline settings from settings.json applied while waiting for LunaLib");
+                } catch (Throwable t) {
+                    LOG.info("[Ramscoop] No settings.json baseline available; keeping defaults");
+                }
             } else {
                 // Fallback to settings.json
                 loadLegacySettings();
-                System.out.println("Ramscoop: Loaded settings from settings.json (LunaLib not available)");
+                settingsLoaded = true;
+                LOG.info("[Ramscoop] Loaded settings from settings.json (LunaLib not available)");
             }
         } catch (Exception exception) {
-            System.out.println("Ramscoop: Error loading settings - " + exception.getMessage());
+            LOG.error("[Ramscoop] Error loading settings", exception);
             exception.printStackTrace();
-            System.out.println("Ramscoop: Using default values");
+            LOG.info("[Ramscoop] Using default values");
+            settingsLoaded = true; // Mark as loaded so we don't keep retrying on error
         }
-        System.out.println("Ramscoop: Settings load complete");
+        LOG.info("[Ramscoop] Settings load complete");
     }
     
-    private void loadLunaLibSettings() {
+    private static void loadLunaLibSettings() {
         try {
-            // Use reflection to avoid hard dependency on LunaLib
-            Class<?> lunaSettingsClass = Class.forName("lunalib.lunaSettings.LunaSettings");
-            System.out.println("Ramscoop: Found LunaSettings class");
-            
-            // Test if our mod is recognized by LunaLib
-            try {
-                Object testValue = lunaSettingsClass.getMethod("getBoolean", String.class, String.class)
-                    .invoke(null, MOD_ID, "ramscoop_enable_fuel");
-                System.out.println("Ramscoop: LunaLib test read successful: " + testValue);
-            } catch (Exception e) {
-                System.out.println("Ramscoop: LunaLib test read failed: " + e.getMessage());
-                throw e;
-            }
-            
-            enable_fuel = (Boolean) lunaSettingsClass.getMethod("getBoolean", String.class, String.class)
-                .invoke(null, MOD_ID, "ramscoop_enable_fuel");
-            enable_supplies = (Boolean) lunaSettingsClass.getMethod("getBoolean", String.class, String.class)
-                .invoke(null, MOD_ID, "ramscoop_enable_supplies");
-            fuel_per_day = ((Double) lunaSettingsClass.getMethod("getDouble", String.class, String.class)
-                .invoke(null, MOD_ID, "ramscoop_fuel_per_day")).floatValue();
-            percent_supply_limit = ((Double) lunaSettingsClass.getMethod("getDouble", String.class, String.class)
-                .invoke(null, MOD_ID, "ramscoop_percent_supply_limit")).floatValue();
-            hard_supply_limit = ((Double) lunaSettingsClass.getMethod("getDouble", String.class, String.class)
-                .invoke(null, MOD_ID, "ramscoop_hard_supply_limit")).floatValue();
-            supplies_per_crew = ((Double) lunaSettingsClass.getMethod("getDouble", String.class, String.class)
-                .invoke(null, MOD_ID, "ramscoop_supply_per_crew")).floatValue();
-            crew_usage = (String) lunaSettingsClass.getMethod("getString", String.class, String.class)
-                .invoke(null, MOD_ID, "ramscoop_crew_usage");
-            no_crew_gen = (String) lunaSettingsClass.getMethod("getString", String.class, String.class)
-                .invoke(null, MOD_ID, "ramscoop_no_crew_gen");
-            no_crew_rate = ((Double) lunaSettingsClass.getMethod("getDouble", String.class, String.class)
-                .invoke(null, MOD_ID, "ramscoop_no_crew_rate")).floatValue();
+            // Direct API calls (LunaLib is a required dependency)
+            enable_fuel = LunaSettings.getBoolean(MOD_ID, "ramscoop_enable_fuel");
+            enable_supplies = LunaSettings.getBoolean(MOD_ID, "ramscoop_enable_supplies");
+            fuel_per_day = LunaSettings.getDouble(MOD_ID, "ramscoop_fuel_per_day").floatValue();
+            percent_supply_limit = LunaSettings.getDouble(MOD_ID, "ramscoop_percent_supply_limit").floatValue();
+            hard_supply_limit = LunaSettings.getDouble(MOD_ID, "ramscoop_hard_supply_limit").floatValue();
+            supplies_per_crew = LunaSettings.getDouble(MOD_ID, "ramscoop_supply_per_crew").floatValue();
+            crew_usage = LunaSettings.getString(MOD_ID, "ramscoop_crew_usage");
+            no_crew_gen = LunaSettings.getString(MOD_ID, "ramscoop_no_crew_gen");
+            no_crew_rate = LunaSettings.getDouble(MOD_ID, "ramscoop_no_crew_rate").floatValue();
             
             // Debug logging
             System.out.println("Ramscoop: LunaLib Settings Loaded:");
+            LOG.info("[Ramscoop] LunaLib Settings Loaded");
             System.out.println("  enable_fuel: " + enable_fuel);
             System.out.println("  enable_supplies: " + enable_supplies);
             System.out.println("  fuel_per_day: " + fuel_per_day);
             System.out.println("  supplies_per_crew: " + supplies_per_crew);
             System.out.println("  crew_usage: " + crew_usage);
+            // Single-line summary for easy grep
+            System.out.println(
+                "Ramscoop: Final settings from LunaLib -> fuel=" + enable_fuel +
+                ", supplies=" + enable_supplies +
+                ", fuel_per_day=" + fuel_per_day +
+                ", percent_supply_limit=" + percent_supply_limit +
+                ", hard_supply_limit=" + hard_supply_limit +
+                ", crew_usage=" + crew_usage +
+                ", no_crew_gen=" + no_crew_gen +
+                ", no_crew_rate=" + no_crew_rate
+            );
+            LOG.info("[Ramscoop] Final settings from LunaLib -> fuel=" + enable_fuel +
+                    ", supplies=" + enable_supplies +
+                    ", fuel_per_day=" + fuel_per_day +
+                    ", percent_supply_limit=" + percent_supply_limit +
+                    ", hard_supply_limit=" + hard_supply_limit +
+                    ", crew_usage=" + crew_usage +
+                    ", no_crew_gen=" + no_crew_gen +
+                    ", no_crew_rate=" + no_crew_rate);
             
-            // Try to register a settings change listener if available
-            try {
-                Class<?> lunaEventsClass = Class.forName("lunalib.lunaEvents.LunaEvents");
-                Object listener = new Object() {
-                    public void notifySettingsChanged(String modId) {
-                        if (MOD_ID.equals(modId)) {
-                            System.out.println("Ramscoop: Settings changed, reloading...");
-                            loadSettings();
-                        }
-                    }
-                };
-                lunaEventsClass.getMethod("addSettingsListener", Object.class).invoke(null, listener);
-                System.out.println("Ramscoop: Registered settings change listener");
-            } catch (Exception e) {
-                System.out.println("Ramscoop: Settings change listener not available, settings will only load on game start");
-            }
+            // Listener optional; our runtime script periodically calls reloadSettings()
         } catch (Exception e) {
             System.out.println("Ramscoop: Failed to load LunaLib settings: " + e.getMessage());
+            LOG.error("[Ramscoop] Failed to load LunaLib settings", e);
             e.printStackTrace();
             throw new RuntimeException("Failed to load LunaLib settings", e);
         }
     }
     
-    private void loadLegacySettings() {
+    private static void loadLegacySettings() {
         try {
             JSONObject config = Global.getSettings().loadJSON("settings.json", MOD_ID);
             enable_fuel = config.getBoolean("enable_fuel");
@@ -157,14 +153,77 @@ public class ModPlugin extends BaseModPlugin {
 
     @Override
     public void onGameLoad(boolean newGame) {
-        System.out.println("Ramscoop: ModPlugin.onGameLoad() called");
+        LOG.info("[Ramscoop] onGameLoad()");
+        // Load settings once here
         loadSettings();
+        // Log a single-line snapshot for grep
+        LOG.info("[Ramscoop] Snapshot onGameLoad -> fuel=" + enable_fuel +
+                ", supplies=" + enable_supplies +
+                ", fuel_per_day=" + fuel_per_day +
+                ", percent_supply_limit=" + percent_supply_limit +
+                ", hard_supply_limit=" + hard_supply_limit +
+                ", crew_usage=" + crew_usage +
+                ", no_crew_gen=" + no_crew_gen +
+                ", no_crew_rate=" + no_crew_rate);
+        // Start the runtime script
         Global.getSector().addTransientScript(new Ramscoop());
-        System.out.println("Ramscoop: ModPlugin initialization complete");
+        LOG.info("[Ramscoop] initialization complete");
     }
     
-    // Public method for reloading settings (called by Ramscoop periodically)
-    public void reloadSettings() {
-        loadSettings();
+    /**
+     * Public method for reloading settings - can be called by Ramscoop periodically
+     * This method will retry LunaLib loading if it wasn't ready before
+     */
+    public static void reloadSettings() {
+        // Always try to reload if LunaLib is enabled but we haven't successfully used it yet
+        if (Global.getSettings().getModManager().isModEnabled("lunalib") && !lunaLibReady) {
+            System.out.println("Ramscoop: LunaLib is enabled but not ready, attempting to load settings...");
+            LOG.info("[Ramscoop] LunaLib is enabled but not ready, attempting to load settings...");
+            loadSettings();
+        } else if (!settingsLoaded) {
+            // If no settings loaded yet, try to load them
+            System.out.println("Ramscoop: No settings loaded yet, attempting to load...");
+            LOG.info("[Ramscoop] No settings loaded yet, attempting to load...");
+            loadSettings();
+        } else {
+            System.out.println("Ramscoop: Settings already loaded, LunaLib ready: " + lunaLibReady);
+            LOG.info("[Ramscoop] Settings already loaded, LunaLib ready: " + lunaLibReady);
+        }
+    }
+    
+    /**
+     * Check if settings have been successfully loaded
+     */
+    public static boolean areSettingsLoaded() {
+        return settingsLoaded;
+    }
+    
+    /**
+     * Check if LunaLib is ready and we're using it
+     */
+    public static boolean isUsingLunaLib() {
+        return lunaLibReady;
+    }
+    
+    /**
+     * Log comprehensive settings status for debugging
+     */
+    public static void logSettingsStatus() {
+        System.out.println("=== RAMSCOOP SETTINGS STATUS ===");
+        LOG.info("[Ramscoop] === SETTINGS STATUS ===");
+        System.out.println("Settings loaded: " + settingsLoaded);
+        System.out.println("LunaLib ready: " + lunaLibReady);
+        System.out.println("Current values:");
+        System.out.println("  enable_fuel: " + enable_fuel);
+        System.out.println("  enable_supplies: " + enable_supplies);
+        System.out.println("  fuel_per_day: " + fuel_per_day);
+        System.out.println("  supplies_per_crew: " + supplies_per_crew);
+        System.out.println("  percent_supply_limit: " + percent_supply_limit);
+        System.out.println("  hard_supply_limit: " + hard_supply_limit);
+        System.out.println("  crew_usage: " + crew_usage);
+        System.out.println("  no_crew_gen: " + no_crew_gen);
+        System.out.println("  no_crew_rate: " + no_crew_rate);
+        System.out.println("================================");
+        LOG.info("[Ramscoop] ================================");
     }
 }

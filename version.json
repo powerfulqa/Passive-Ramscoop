@@ -1,0 +1,12 @@
+{
+  "version": "0.4.1",
+  "gameVersion": "0.98a-RC8",
+  "modName": "Ramscoop",
+  "modId": "m561_ramscoop",
+  "description": "Automatic fuel and supply generation while traveling through nebulas",
+  "author": "Meridias561, updated by powerfulqa",
+  "url": "https://github.com/yourusername/Passive-Ramscoop",
+  "dependencies": [],
+  "softDependencies": ["lunalib"],
+  "tags": ["utility", "resources", "nebula", "lunalib"]
+}
