@@ -53,6 +53,8 @@ public class ModPlugin extends BaseModPlugin {
             LOG.info("[Ramscoop] LunaLib enabled: " + lunaLibEnabled);
             
             if (lunaLibEnabled && isLunaLibReady()) {
+                // Seed from legacy settings first so missing LunaLib keys fall back to settings.json
+                try { loadLegacySettings(); } catch (Throwable ignored) {}
                 loadLunaLibSettings();
                 lunaLibReady = true;
                 settingsLoaded = true;
