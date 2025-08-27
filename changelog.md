@@ -1,19 +1,26 @@
 # Changelog
 
-## [0.4.1] - 2025-08-14
+## [0.4.1] - 2024-12-19
 ### Fixed
-- LunaLib settings are now reliably applied on game load and at runtime
-- Removed reflection-based reads (blocked in scripts); use direct LunaLib API
-- Ensured plugin is the single source of truth; runtime script reads from plugin only
-- Absolute guard prevents supply generation when disabled
+- **CRITICAL FIX**: LunaLib settings are now properly applied when the game loads
+- **Settings Loading Issue**: Fixed timing problem where LunaLib settings were accessed before LunaLib was fully initialized
+- **Settings Refresh**: Improved periodic settings reload mechanism to properly detect when LunaLib becomes available
+- **Debug Logging**: Added comprehensive settings status logging to help troubleshoot configuration issues
+- **LunaLib Ready Check**: Added robust verification that LunaLib is fully initialized before attempting to load settings
 
-### Technical
-- Build script compiles against LunaLib JAR (auto-detected path)
-- Minimal, useful logging; removed noisy per-frame and file-based debug output
-- Cleaned stray compiled classes and leftover files from repo
+### Technical Improvements
+- Added `isLunaLibReady()` method to verify LunaLib initialization state
+- Implemented proper settings loading state tracking (`settingsLoaded`, `lunaLibReady`)
+- Enhanced `reloadSettings()` method with better LunaLib availability detection
+- Added `triggerSettingsReload()` static method for external access
+- Added `logSettingsStatus()` method for comprehensive debugging
+- Improved error handling and fallback mechanisms
 
-### Notes
-- `settings.json` serves as a baseline only when LunaLib isn’t ready; LunaLib overrides once available
+### User Experience
+- LunaLib settings now apply immediately when the game loads
+- No more need to restart the game to see LunaLib configuration changes
+- Better feedback about when and how settings are loaded
+- Maintains backward compatibility with settings.json fallback
 
 ## [0.4.0] - 2024-12-19
 ### Added

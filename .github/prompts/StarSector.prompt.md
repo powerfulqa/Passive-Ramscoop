@@ -21,6 +21,8 @@ Keep IDs stable unless unavoidable; document save breakage.
 Cross-mod compatibility: avoid invasive replacements.
 
 API is read-only; do not modify.
+API Annotated Documention is here: https://jaghaimo.github.io/starsector-api/annotated.html
+Full API documention here: https://fractalsoftworks.com/starfarer.api/
 
 Asset/file names must match case exactly.
 
