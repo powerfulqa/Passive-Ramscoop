@@ -45,7 +45,7 @@ Primarily for development. Note: this mod uses a non-standard JSON format where 
 - LunaLib 2.0.4+ (required)
 - LunaLib Version Checker supported
 - No known mod conflicts
-- Current version: 0.4.1
+- Current version: 0.5.0
 
 ## Development
 This mod includes build scripts for development:
@@ -59,7 +59,7 @@ Build note: the PowerShell script compiles against the Starsector API and LunaLi
 ## Credits
 - Original mod by Meridias561 ([Nexus Mods profile](https://next.nexusmods.com/profile/Meridias561))
 - Updated for Starsector 0.98a-RC8 by powerfulqa
-- Robust LunaLib settings application finalized in v0.4.1
+- Robust LunaLib settings application finalized in v0.5.0
 
 ## Licence
 Creative Commons Attribution-NonCommercial 4.0 International Licence (CC BY-NC 4.0) with additional restrictions.

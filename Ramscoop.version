@@ -2,7 +2,7 @@
     "masterVersionFile": "https://raw.githubusercontent.com/powerfulqa/Passive-Ramscoop/main/Ramscoop.version",
     "modVersion": {
         "major": 0,
-        "minor": 4,
+        "minor": 5,
         "patch": 0
     },
     "modName": "Ramscoop",
