@@ -7,12 +7,24 @@
 	#Fuel generating
 	#Percent of max fuel to generate per day, as decimal
 	# .1 is 10%, 1 is 100%
-	"fuel_per_day":.1,
+	"fuel_per_day":.04,
+
+	########
+	#Fuel limiting (optional)
+	# Soft cap as a percent of max fuel (1.0 = 100%, 0.75 = 75%)
+	# If omitted, defaults to 1.0 (no soft cap)
+	"percent_fuel_limit":0.2,
+	# Hard cap (absolute fuel units). 0 = disabled
+	"hard_fuel_limit":0,
+	# Margin to keep below the cap (e.g., 1.0 keeps 1 unit free)
+	"fuel_cap_margin":0,
+	# Whether the scoop starts enabled on game load (can be toggled at runtime)
+	"scoop_toggle_default_on":true,
 	
 	########
 	#Supply generating limits
 	#Generate up to this percent of max cargo, as decimal
-	"percent_supply_limit":.35,
+	"percent_supply_limit":.20,
 	#Hard limit on generating supplies, in case you have huge cargo cap
 	#actual limit will be either percent or hard limit, whichever is smaller so you don't fill smaller cargos with all supplies
 	# 0 = no hard limit

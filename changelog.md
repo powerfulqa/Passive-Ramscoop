@@ -1,19 +1,40 @@
 # Changelog
 
-## [0.4.1] - 2025-08-14
+## [0.5.0] - 2025-08-27
+### Added
+- LunaLib tabs: General, Fuel, Supplies.
+- Fuel controls: soft cap (0–100%), hard cap, margin; rate now a percent slider.
+- Global "Scoop Enabled" toggle (runtime) affecting fuel and supplies.
+
+### Changed
+- Defaults: Fuel rate 4%, fuel soft cap 20%, hard cap 0, margin 0. Supplies limit default 0.20.
+- Clamp fuel addition to cap minus margin to prevent 0.1 overfill.
+
 ### Fixed
-- LunaLib settings are now reliably applied on game load and at runtime
-- Removed reflection-based reads (blocked in scripts); use direct LunaLib API
-- Ensured plugin is the single source of truth; runtime script reads from plugin only
-- Absolute guard prevents supply generation when disabled
+- Supplies now respect the global Scoop toggle.
+- LunaLib settings seed from legacy settings.json when missing, then apply immediately.
 
-### Technical
-- Build script compiles against LunaLib JAR (auto-detected path)
-- Minimal, useful logging; removed noisy per-frame and file-based debug output
-- Cleaned stray compiled classes and leftover files from repo
+## [0.4.1] - 2024-12-19
+### Fixed
+- **CRITICAL FIX**: LunaLib settings are now properly applied when the game loads
+- **Settings Loading Issue**: Fixed timing problem where LunaLib settings were accessed before LunaLib was fully initialized
+- **Settings Refresh**: Improved periodic settings reload mechanism to properly detect when LunaLib becomes available
+- **Debug Logging**: Added comprehensive settings status logging to help troubleshoot configuration issues
+- **LunaLib Ready Check**: Added robust verification that LunaLib is fully initialized before attempting to load settings
 
-### Notes
-- `settings.json` serves as a baseline only when LunaLib isn’t ready; LunaLib overrides once available
+### Technical Improvements
+- Added `isLunaLibReady()` method to verify LunaLib initialization state
+- Implemented proper settings loading state tracking (`settingsLoaded`, `lunaLibReady`)
+- Enhanced `reloadSettings()` method with better LunaLib availability detection
+- Added `triggerSettingsReload()` static method for external access
+- Added `logSettingsStatus()` method for comprehensive debugging
+- Improved error handling and fallback mechanisms
+
+### User Experience
+- LunaLib settings now apply immediately when the game loads
+- No more need to restart the game to see LunaLib configuration changes
+- Better feedback about when and how settings are loaded
+- Maintains backward compatibility with settings.json fallback
 
 ## [0.4.0] - 2024-12-19
 ### Added

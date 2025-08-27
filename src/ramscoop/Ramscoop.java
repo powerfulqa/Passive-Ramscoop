@@ -200,18 +200,22 @@ public class Ramscoop implements EveryFrameScript {
             }
          }
 
+        // Read global scoop toggle from fleet memory (defaults true if missing)
+        boolean scoopEnabled = true;
+        try { scoopEnabled = fleet.getMemoryWithoutUpdate().getBoolean("$ramscoop_enabled"); } catch (Throwable ignored) {}
+
          if (hard_supply_limit == 0.0F) {
             maxsupplies = maxpercentsupplies;
          } else {
             maxsupplies = Math.min(maxpercentsupplies, hard_supply_limit);
          }
-
+ 
          if (nebulaMod != null) {
             float days;
             // Absolute guard: never generate supplies when disabled
-            if (!enable_supplies) {
+            if (!enable_supplies || !scoopEnabled) {
                 // keep a clear trace once per reload cycle
-                LOG.info("[Ramscoop] Supplies disabled (nebula present)");
+                LOG.info("[Ramscoop] Supplies disabled (nebula present or scoop off)");
             } else {
                // Calculate supplies generation based on crew settings
                switch (crew_usage) {
@@ -245,7 +249,7 @@ public class Ramscoop implements EveryFrameScript {
                }
 
                // Add supplies based on available space
-               if (fleet.getCargo().getSpaceLeft() > 0.0F && suppliesperday > 0.0F && supplies < maxsupplies) {
+               if (fleet.getCargo().getSpaceLeft() > 0.0F && suppliesperday > 0.0F && supplies < maxsupplies && scoopEnabled) {
                   days = Global.getSector().getClock().convertToDays(amount);
                   float suppliesToAdd;
                   if (suppliesperday * days < minspace) {
@@ -259,15 +263,31 @@ public class Ramscoop implements EveryFrameScript {
                    if (suppliesToAdd > 0.5f) { LOG.info("[Ramscoop] Added supplies: " + suppliesToAdd); }
                }
             }
+ 
+            // Generate fuel with clamping and optional toggle
+            try {
+               // scoopEnabled already computed above
 
-            // Generate fuel if enabled and not at max capacity
-            if (enable_fuel && fuel < fleet.getCargo().getMaxFuel()) {
-               days = Global.getSector().getClock().convertToDays(amount);
-               float fuelToAdd = fuelperday * days;
-               fleet.getCargo().addFuel(fuelToAdd);
-                if (fuelToAdd > 0.5f) { LOG.info("[Ramscoop] Added fuel: " + fuelToAdd); }
-            } else if (!enable_fuel) {
-               LOG.info("[Ramscoop] Fuel generation disabled");
+               if (enable_fuel && scoopEnabled) {
+                  days = Global.getSector().getClock().convertToDays(amount);
+                  float maxFuel = fleet.getCargo().getMaxFuel();
+                  float percentCap = (float)Math.floor(maxFuel * ModPlugin.percent_fuel_limit);
+                  float hardCap = ModPlugin.hard_fuel_limit > 0f ? ModPlugin.hard_fuel_limit : Float.MAX_VALUE;
+                  float targetCap = Math.min(maxFuel, Math.min(percentCap, hardCap));
+                  float margin = Math.max(0f, ModPlugin.fuel_cap_margin);
+                  if (fuel < targetCap - margin) {
+                     float remaining = Math.max(0f, (targetCap - margin) - fuel);
+                     float fuelToAdd = Math.min(fuelperday * days, remaining);
+                     if (fuelToAdd > 0f) {
+                        fleet.getCargo().addFuel(fuelToAdd);
+                        if (fuelToAdd > 0.5f) { LOG.info("[Ramscoop] Added fuel: " + fuelToAdd); }
+                     }
+                  }
+               } else if (!enable_fuel) {
+                  LOG.info("[Ramscoop] Fuel generation disabled");
+               }
+            } catch (Throwable t) {
+               // Non-fatal: keep running supplies even if fuel logic fails
             }
          }
       } catch (Exception e) {
