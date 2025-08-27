@@ -91,7 +91,10 @@ public class ModPlugin extends BaseModPlugin {
             enable_supplies = LunaSettings.getBoolean(MOD_ID, "ramscoop_enable_supplies");
             fuel_per_day = LunaSettings.getDouble(MOD_ID, "ramscoop_fuel_per_day").floatValue();
             // New fuel limiting settings via LunaLib (with safe defaults if missing)
-            try { percent_fuel_limit = LunaSettings.getDouble(MOD_ID, "ramscoop_percent_fuel_limit").floatValue(); } catch (Throwable ignored) {}
+            try {
+                // UI provides 0..100 percent; convert to 0..1 fraction
+                percent_fuel_limit = LunaSettings.getDouble(MOD_ID, "ramscoop_percent_fuel_limit").floatValue() / 100f;
+            } catch (Throwable ignored) {}
             try { hard_fuel_limit = LunaSettings.getDouble(MOD_ID, "ramscoop_hard_fuel_limit").floatValue(); } catch (Throwable ignored) {}
             try { fuel_cap_margin = LunaSettings.getDouble(MOD_ID, "ramscoop_fuel_cap_margin").floatValue(); } catch (Throwable ignored) {}
             percent_supply_limit = LunaSettings.getDouble(MOD_ID, "ramscoop_percent_supply_limit").floatValue();
