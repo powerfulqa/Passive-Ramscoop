@@ -1,7 +1,7 @@
 {
 	"id":"m561_ramscoop",
 	"name":"Ramscoop",
-	"author":"Meridias561, updated by powerfulqa",
+	"author":"PowerfulQA, Original by Meridias561",
 	"version":"0.5.0",
 	"description":"Automatic fuel and supply generation while traveling through nebulas. Features LunaLib integration for in-game configuration.",
 	"gameVersion":"0.98a-RC8",
