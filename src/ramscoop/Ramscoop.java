@@ -259,15 +259,34 @@ public class Ramscoop implements EveryFrameScript {
                    if (suppliesToAdd > 0.5f) { LOG.info("[Ramscoop] Added supplies: " + suppliesToAdd); }
                }
             }
+ 
+            // Generate fuel with clamping and optional toggle
+            try {
+               boolean scoopEnabled = true;
+               try {
+                  scoopEnabled = fleet.getMemoryWithoutUpdate().getBoolean("$ramscoop_enabled");
+               } catch (Throwable ignored) {}
 
-            // Generate fuel if enabled and not at max capacity
-            if (enable_fuel && fuel < fleet.getCargo().getMaxFuel()) {
-               days = Global.getSector().getClock().convertToDays(amount);
-               float fuelToAdd = fuelperday * days;
-               fleet.getCargo().addFuel(fuelToAdd);
-                if (fuelToAdd > 0.5f) { LOG.info("[Ramscoop] Added fuel: " + fuelToAdd); }
-            } else if (!enable_fuel) {
-               LOG.info("[Ramscoop] Fuel generation disabled");
+               if (enable_fuel && scoopEnabled) {
+                  days = Global.getSector().getClock().convertToDays(amount);
+                  float maxFuel = fleet.getCargo().getMaxFuel();
+                  float percentCap = (float)Math.floor(maxFuel * ModPlugin.percent_fuel_limit);
+                  float hardCap = ModPlugin.hard_fuel_limit > 0f ? ModPlugin.hard_fuel_limit : Float.MAX_VALUE;
+                  float targetCap = Math.min(maxFuel, Math.min(percentCap, hardCap));
+                  float margin = Math.max(0f, ModPlugin.fuel_cap_margin);
+                  if (fuel < targetCap - margin) {
+                     float remaining = Math.max(0f, (targetCap - margin) - fuel);
+                     float fuelToAdd = Math.min(fuelperday * days, remaining);
+                     if (fuelToAdd > 0f) {
+                        fleet.getCargo().addFuel(fuelToAdd);
+                        if (fuelToAdd > 0.5f) { LOG.info("[Ramscoop] Added fuel: " + fuelToAdd); }
+                     }
+                  }
+               } else if (!enable_fuel) {
+                  LOG.info("[Ramscoop] Fuel generation disabled");
+               }
+            } catch (Throwable t) {
+               // Non-fatal: keep running supplies even if fuel logic fails
             }
          }
       } catch (Exception e) {
