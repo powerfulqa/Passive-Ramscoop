@@ -33,7 +33,7 @@ public class ModPlugin extends BaseModPlugin {
     
     public ModPlugin() {
         try {
-            LOG.info("[Ramscoop] ModPlugin constructed (v0.5.0)");
+            LOG.info("[Ramscoop] ModPlugin constructed (v0.4.1)");
         } catch (Exception e) {
             System.out.println("Ramscoop: CRITICAL ERROR in constructor: " + e.getMessage());
             e.printStackTrace();

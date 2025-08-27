@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.5.0] - 2025-08-27
+### Added
+- LunaLib tabs: General, Fuel, Supplies.
+- Fuel controls: soft cap (0–100%), hard cap, margin; rate now a percent slider.
+- Global "Scoop Enabled" toggle (runtime) affecting fuel and supplies.
+
+### Changed
+- Defaults: Fuel rate 4%, fuel soft cap 20%, hard cap 0, margin 0. Supplies limit default 0.20.
+- Clamp fuel addition to cap minus margin to prevent 0.1 overfill.
+
+### Fixed
+- Supplies now respect the global Scoop toggle.
+- LunaLib settings seed from legacy settings.json when missing, then apply immediately.
+
 ## [0.4.1] - 2024-12-19
 ### Fixed
 - **CRITICAL FIX**: LunaLib settings are now properly applied when the game loads

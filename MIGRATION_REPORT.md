@@ -1,7 +1,7 @@
 # Ramscoop Migration Report
 
 ## Overview
-This report documents the migration and enhancement of the Ramscoop mod from Starsector 0.95a to Starsector 0.98a-RC8, and the addition of LunaLib support in version 0.4.0.
+This report documents the migration and enhancement of the Ramscoop mod from Starsector 0.95a to Starsector 0.98a-RC8, the addition of LunaLib support in version 0.4.0, and configuration/UI refinements in 0.5.0.
 
 ## Version 0.4.0 - LunaLib Integration
 
@@ -45,6 +45,21 @@ The following settings were mapped from settings.json to LunaLib configuration:
 | supply_per_crew | ramscoop_supply_per_crew | Double | Supply per crew |
 | no_crew_gen | ramscoop_no_crew_gen | Radio | No-crew generation type |
 | no_crew_rate | ramscoop_no_crew_rate | Double | No-crew generation rate |
+
+## Version 0.5.0 - Configuration Refinements
+
+### Key Changes
+- Fuel UI: rate and soft cap are 0–100% sliders; converted to fractions in code
+- Fuel clamping: soft cap (fraction of max), hard cap (absolute), margin (units)
+- Supplies respect the master "Scoop Enabled" toggle
+- Immediate application: toggling in LunaLib updates fleet memory at runtime
+- Defaults aligned for gameplay convenience (fuel 4%/day, soft cap 20%; supplies 20%)
+
+### Files Modified
+- `data/config/LunaSettings.csv` – added tabs and new fields/types; adjusted defaults
+- `settings.json` – aligned fallback defaults (decimal fractions)
+- `src/ramscoop/ModPlugin.java` – convert % sliders to fractions; seed from legacy before LunaLib; sync toggle to memory
+- `src/ramscoop/Ramscoop.java` – clamp fuel adds; guard supplies by master toggle
 
 #### Code Architecture Changes
 - **ModPlugin.java Changes:**
