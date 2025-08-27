@@ -8,12 +8,12 @@ ramscoop_enable_fuel,Enable Fuel Generation,Boolean,true,,Enable automatic fuel 
 ramscoop_enable_supplies,Enable Supply Generation,Boolean,true,,Enable automatic supply generation while traveling through nebulas.,,,General
 ,,,,,,,,
 ramscoop_fuel_header,Fuel Generation,Header,Fuel Generation,,,,,Fuel
-ramscoop_fuel_per_day,Fuel Generation Rate (percent per day),Double,10,,Percent of max fuel to generate per day.,0,100,Fuel
+ramscoop_fuel_per_day,Fuel Generation Rate (percent per day),Double,4,,Percent of max fuel to generate per day.,0,100,Fuel
 ,,,,,,,,
 ramscoop_fuel_limits_header,Fuel Limits,Header,Fuel Limits,,,,,Fuel
-ramscoop_percent_fuel_limit,Fuel Soft Cap (percent of max),Double,100,,"Soft cap as a percent of max fuel (100 = full, 75 = three-quarters).",0,100,Fuel
+ramscoop_percent_fuel_limit,Fuel Soft Cap (percent of max),Double,20,,"Soft cap as a percent of max fuel (100 = full, 75 = three-quarters).",0,100,Fuel
 ramscoop_hard_fuel_limit,Fuel Hard Cap (absolute units),Double,0,,Absolute cap on fuel units (0 = disabled).,0,100000,Fuel
-ramscoop_fuel_cap_margin,Fuel Cap Margin (units),Double,1,,Margin to keep below cap so you have salvage headroom.,0,1000,Fuel
+ramscoop_fuel_cap_margin,Fuel Cap Margin (units),Double,0,,Margin to keep below cap so you have salvage headroom.,0,1000,Fuel
 ,,,,,,,,
 ramscoop_supply_header,Supply Generation,Header,Supply Generation,,,,,Supplies
 ramscoop_percent_supply_limit,Supply Generation Limit,Double,0.35,,"Generate supplies up to this percent of max cargo capacity as decimal. 0.35 = 35 percent of cargo space.",0.1,1.0,Supplies
