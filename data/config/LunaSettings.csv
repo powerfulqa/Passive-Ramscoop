@@ -8,7 +8,7 @@ ramscoop_enable_fuel,Enable Fuel Generation,Boolean,true,,Enable automatic fuel 
 ramscoop_enable_supplies,Enable Supply Generation,Boolean,true,,Enable automatic supply generation while traveling through nebulas.,,,
 ,,,,,,,,
 ramscoop_fuel_header,Fuel Generation,Header,Fuel Generation,,,,,
-ramscoop_fuel_per_day,Fuel Generation Rate,Double,0.1,,"Percent of max fuel to generate per day as decimal. 0.1 = 10 percent of max fuel capacity per day.",0.01,1.0,
+ramscoop_fuel_per_day,Fuel Generation Rate (percent per day),Double,10,,Percent of max fuel to generate per day.,0,100,
 ,,,,,,,,
 ramscoop_fuel_limits_header,Fuel Limits,Header,Fuel Limits,,,,,
 ramscoop_percent_fuel_limit,Fuel Soft Cap (percent of max),Double,100,,"Soft cap as a percent of max fuel (100 = full, 75 = three-quarters).",0,100,
