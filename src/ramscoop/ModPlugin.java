@@ -104,7 +104,16 @@ public class ModPlugin extends BaseModPlugin {
             crew_usage = LunaSettings.getString(MOD_ID, "ramscoop_crew_usage");
             no_crew_gen = LunaSettings.getString(MOD_ID, "ramscoop_no_crew_gen");
             no_crew_rate = LunaSettings.getDouble(MOD_ID, "ramscoop_no_crew_rate").floatValue();
-            try { scoop_toggle_default_on = LunaSettings.getBoolean(MOD_ID, "ramscoop_toggle_default_on"); } catch (Throwable ignored) {}
+            try {
+                scoop_toggle_default_on = LunaSettings.getBoolean(MOD_ID, "ramscoop_toggle_default_on");
+                // Apply immediately at runtime so UI changes take effect without reload
+                try {
+                    com.fs.starfarer.api.campaign.CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
+                    if (fleet != null) {
+                        fleet.getMemoryWithoutUpdate().set("$ramscoop_enabled", scoop_toggle_default_on);
+                    }
+                } catch (Throwable ignored2) {}
+            } catch (Throwable ignored) {}
             
             // Debug logging
             System.out.println("Ramscoop: LunaLib Settings Loaded:");

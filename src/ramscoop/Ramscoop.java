@@ -200,18 +200,22 @@ public class Ramscoop implements EveryFrameScript {
             }
          }
 
+        // Read global scoop toggle from fleet memory (defaults true if missing)
+        boolean scoopEnabled = true;
+        try { scoopEnabled = fleet.getMemoryWithoutUpdate().getBoolean("$ramscoop_enabled"); } catch (Throwable ignored) {}
+
          if (hard_supply_limit == 0.0F) {
             maxsupplies = maxpercentsupplies;
          } else {
             maxsupplies = Math.min(maxpercentsupplies, hard_supply_limit);
          }
-
+ 
          if (nebulaMod != null) {
             float days;
             // Absolute guard: never generate supplies when disabled
-            if (!enable_supplies) {
+            if (!enable_supplies || !scoopEnabled) {
                 // keep a clear trace once per reload cycle
-                LOG.info("[Ramscoop] Supplies disabled (nebula present)");
+                LOG.info("[Ramscoop] Supplies disabled (nebula present or scoop off)");
             } else {
                // Calculate supplies generation based on crew settings
                switch (crew_usage) {
@@ -245,7 +249,7 @@ public class Ramscoop implements EveryFrameScript {
                }
 
                // Add supplies based on available space
-               if (fleet.getCargo().getSpaceLeft() > 0.0F && suppliesperday > 0.0F && supplies < maxsupplies) {
+               if (fleet.getCargo().getSpaceLeft() > 0.0F && suppliesperday > 0.0F && supplies < maxsupplies && scoopEnabled) {
                   days = Global.getSector().getClock().convertToDays(amount);
                   float suppliesToAdd;
                   if (suppliesperday * days < minspace) {
@@ -262,10 +266,7 @@ public class Ramscoop implements EveryFrameScript {
  
             // Generate fuel with clamping and optional toggle
             try {
-               boolean scoopEnabled = true;
-               try {
-                  scoopEnabled = fleet.getMemoryWithoutUpdate().getBoolean("$ramscoop_enabled");
-               } catch (Throwable ignored) {}
+               // scoopEnabled already computed above
 
                if (enable_fuel && scoopEnabled) {
                   days = Global.getSector().getClock().convertToDays(amount);
