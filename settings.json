@@ -24,7 +24,7 @@
 	########
 	#Supply generating limits
 	#Generate up to this percent of max cargo, as decimal
-	"percent_supply_limit":.35,
+	"percent_supply_limit":.20,
 	#Hard limit on generating supplies, in case you have huge cargo cap
 	#actual limit will be either percent or hard limit, whichever is smaller so you don't fill smaller cargos with all supplies
 	# 0 = no hard limit

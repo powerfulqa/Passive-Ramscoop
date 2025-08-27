@@ -16,7 +16,7 @@ ramscoop_hard_fuel_limit,Fuel Hard Cap (absolute units),Double,0,,Absolute cap o
 ramscoop_fuel_cap_margin,Fuel Cap Margin (units),Double,0,,Margin to keep below cap so you have salvage headroom.,0,1000,Fuel
 ,,,,,,,,
 ramscoop_supply_header,Supply Generation,Header,Supply Generation,,,,,Supplies
-ramscoop_percent_supply_limit,Supply Generation Limit,Double,0.35,,"Generate supplies up to this percent of max cargo capacity as decimal. 0.35 = 35 percent of cargo space.",0.1,1.0,Supplies
+ramscoop_percent_supply_limit,Supply Generation Limit,Double,0.20,,"Generate supplies up to this percent of max cargo capacity as decimal. 0.35 = 35 percent of cargo space.",0.1,1.0,Supplies
 ramscoop_hard_supply_limit,Hard Supply Limit,Double,0,,Hard limit on supply generation regardless of cargo space. 0 = no hard limit. Prevents filling smaller cargo holds entirely with supplies.,0,10000,Supplies
 ,,,,,,,,
 ramscoop_crew_header,Crew Usage,Header,Crew Usage,,,,,Supplies
