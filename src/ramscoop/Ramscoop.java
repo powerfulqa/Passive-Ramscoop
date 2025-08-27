@@ -10,6 +10,8 @@ import com.fs.starfarer.api.fleet.MutableFleetStatsAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.campaign.CampaignTerrainAPI;
 import com.fs.starfarer.api.campaign.CampaignTerrainPlugin;
+import com.fs.starfarer.api.campaign.PlanetAPI;
+import org.lwjgl.util.vector.Vector2f;
 import java.util.Locale;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -231,12 +233,43 @@ public class Ramscoop implements EveryFrameScript {
                     if (looksCorona) {
                         try {
                             Object pluginObj = t.getPlugin();
-                            if (pluginObj instanceof CampaignTerrainPlugin) {
-                                CampaignTerrainPlugin ctp = (CampaignTerrainPlugin) pluginObj;
-                                if (ctp.containsEntity(fleet)) { inCorona = true; break; }
+                            if (pluginObj != null) {
+                                // Try containsEntity(SectorEntityToken) via reflection
+                                try {
+                                    Class<?> setClazz = Class.forName("com.fs.starfarer.api.campaign.SectorEntityToken");
+                                    java.lang.reflect.Method m = pluginObj.getClass().getMethod("containsEntity", setClazz);
+                                    Object r = m.invoke(pluginObj, fleet);
+                                    if (r instanceof Boolean && ((Boolean) r)) { inCorona = true; break; }
+                                } catch (Throwable ignoredCE) {}
+                                // Try containsPoint(Vector2f)
+                                try {
+                                    Class<?> v2 = Class.forName("org.lwjgl.util.vector.Vector2f");
+                                    java.lang.reflect.Method m2 = pluginObj.getClass().getMethod("containsPoint", v2);
+                                    Object r2 = m2.invoke(pluginObj, fleet.getLocation());
+                                    if (r2 instanceof Boolean && ((Boolean) r2)) { inCorona = true; break; }
+                                } catch (Throwable ignoredCP) {}
                             }
                         } catch (Throwable ignored4) {}
                     }
+                }
+                // Fallback: distance to star center vs (star radius + buffer)
+                if (!inCorona) {
+                    try {
+                        java.util.List<PlanetAPI> planets = loc.getPlanets();
+                        for (PlanetAPI p : planets) {
+                            try {
+                                if (p.isStar()) {
+                                    Vector2f fp = fleet.getLocation();
+                                    Vector2f sp = p.getLocation();
+                                    float dx = fp.x - sp.x;
+                                    float dy = fp.y - sp.y;
+                                    float dist = (float)Math.sqrt(dx*dx + dy*dy);
+                                    float buffer = 1000f; // conservative corona thickness fallback
+                                    if (dist <= p.getRadius() + buffer) { inCorona = true; break; }
+                                }
+                            } catch (Throwable ignoredStar) {}
+                        }
+                    } catch (Throwable ignoredPlanets) {}
                 }
             }
         } catch (Throwable ignored) {}
@@ -256,11 +289,15 @@ public class Ramscoop implements EveryFrameScript {
                 double coronaPerDayD = Math.floor((double)(maxFuel * ModPlugin.corona_fuel_per_day));
                 float coronaPerDay = (float)coronaPerDayD;
                 float add = coronaPerDay * days;
-                // Reuse normal caps/margin
-                float percentCap = (float)Math.floor(maxFuel * ModPlugin.percent_fuel_limit);
-                float hardCap = ModPlugin.hard_fuel_limit > 0f ? ModPlugin.hard_fuel_limit : Float.MAX_VALUE;
-                float targetCap = Math.min(maxFuel, Math.min(percentCap, hardCap));
-                float margin = Math.max(0f, ModPlugin.fuel_cap_margin);
+                // Use corona caps only
+                float coronaSoft = (float)Math.floor(maxFuel * ModPlugin.corona_percent_fuel_limit);
+                float coronaHard = ModPlugin.corona_hard_fuel_limit;
+                float coronaMargin = ModPlugin.corona_fuel_cap_margin;
+                float hardCap = coronaHard > 0f ? coronaHard : Float.MAX_VALUE;
+                float targetCap = Math.min(maxFuel, Math.min(coronaSoft, hardCap));
+                float margin = Math.max(0f, coronaMargin);
+                // Debug: one-line trace when in corona
+                LOG.info("[Ramscoop] Corona mode: add=" + add + ", soft=" + coronaSoft + ", hard=" + coronaHard + ", margin=" + margin + ", fuel=" + fuel + ", target=" + targetCap);
                 if (fuel < targetCap - margin) {
                     float remaining = Math.max(0f, (targetCap - margin) - fuel);
                     float fuelToAdd = Math.min(add, remaining);
@@ -333,10 +370,12 @@ public class Ramscoop implements EveryFrameScript {
                if (enable_fuel && scoopEnabled) {
                   days = Global.getSector().getClock().convertToDays(amount);
                   float maxFuel = fleet.getCargo().getMaxFuel();
-                  float percentCap = (float)Math.floor(maxFuel * ModPlugin.percent_fuel_limit);
-                  float hardCap = ModPlugin.hard_fuel_limit > 0f ? ModPlugin.hard_fuel_limit : Float.MAX_VALUE;
-                  float targetCap = Math.min(maxFuel, Math.min(percentCap, hardCap));
-                  float margin = Math.max(0f, ModPlugin.fuel_cap_margin);
+                  float nebSoft = (float)Math.floor(maxFuel * ModPlugin.nebula_percent_fuel_limit);
+                  float nebHardCfg = ModPlugin.nebula_hard_fuel_limit;
+                  float nebMargin = ModPlugin.nebula_fuel_cap_margin;
+                  float hardCap = nebHardCfg > 0f ? nebHardCfg : Float.MAX_VALUE;
+                  float targetCap = Math.min(maxFuel, Math.min(nebSoft, hardCap));
+                  float margin = Math.max(0f, nebMargin);
                   if (fuel < targetCap - margin) {
                      float remaining = Math.max(0f, (targetCap - margin) - fuel);
                      float fuelToAdd = Math.min(fuelperday * days, remaining);

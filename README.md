@@ -2,14 +2,14 @@
 # Ramscoop Mod for Starsector
 
 ## Overview
-Ramscoop is a utility mod for Starsector that automatically gathers resources from nebulas, generating fuel and supplies for your fleet over time. As of v0.5.0 it adds precise fuel caps, a runtime master toggle, and a streamlined LunaLib configuration UI.
+Ramscoop is a utility mod for Starsector that automatically gathers resources from nebulas, generating fuel and supplies for your fleet over time. As of v0.6.0 ("Corona Time") it adds separate Nebula/Corona tabs with independent fuel caps, improved corona detection, and a simplified UI (no global caps).
 
 ## Features
 - Automatically generates fuel and supplies while in nebulas
 - Global "Scoop Enabled" toggle (runtime) that affects both fuel and supplies
 - Fuel controls: rate (percent/day), soft cap (0–100%), hard cap (absolute units), and margin (units) to avoid overfill
 - Supply controls: percent-of-cargo soft cap, optional hard cap, crew-usage modes (extra/all/nocrew)
-- Organized LunaLib settings with tabs: General, Fuel, Supplies (LunaLib required)
+- Organized LunaLib settings with tabs: General, Nebula, Corona (LunaLib required)
 - Safe clamping to prevent going 0.1 over the cap
 - LunaLib Version Checker support for automatic updates
 
@@ -20,18 +20,18 @@ Ramscoop is a utility mod for Starsector that automatically gathers resources fr
 
 ## Configuration
 
-### LunaLib Settings
+### LunaLib Settings (v0.6.0)
 Configure all mod settings through the in-game settings menu:
 - Press **F2** during campaign mode to open the settings menu
 - Or access "Mod Settings" when creating a new game
-- Tabs: **General**, **Fuel**, **Supplies** under "Ramscoop Configuration"
+- Tabs: **General**, **Nebula**, **Corona** under "Ramscoop Configuration"
 
 Key settings:
 - General: "Scoop Enabled" (master toggle), enable fuel, enable supplies
-- Fuel: "Fuel Generation Rate (percent per day)", "Fuel Soft Cap (percent of max)", "Fuel Hard Cap (units)", "Fuel Cap Margin (units)"
-- Supplies: "Supply Generation Limit (percent of cargo)", optional hard limit, crew usage and rates
+- Nebula: Fuel Rate (%/day) and Nebula Fuel Caps (soft/hard/margin), plus Supplies (limit, hard limit, crew usage/modes)
+- Corona: Fuel Rate (%/day) and Corona Fuel Caps (soft/hard/margin). No supplies in corona.
 
-Defaults (v0.5.0):
+Defaults (v0.6.0):
 - Fuel rate 4%; fuel soft cap 20%; hard cap 0; margin 0
 - Supply limit 20%; hard limit 0; crew usage "extra"; per-crew 0.1
 
@@ -43,9 +43,8 @@ Primarily for development. Note: this mod uses a non-standard JSON format where 
 - `enable_fuel`: Enable/disable fuel generation
 - `enable_supplies`: Enable/disable supplies generation
 - `fuel_per_day`: Fuel generated per day as a fraction of max fuel (e.g., `.04` = 4%)
-- `percent_fuel_limit`: Fuel soft cap as a fraction of max fuel (e.g., `0.20` = 20%)
-- `hard_fuel_limit`: Absolute fuel cap in units (`0` = disabled)
-- `fuel_cap_margin`: Units to keep below the computed cap (prevents overfill)
+- Nebula fuel: `nebula_fuel_per_day`, `nebula_percent_fuel_limit`, `nebula_hard_fuel_limit`, `nebula_fuel_cap_margin`
+- Corona fuel: `corona_fuel_per_day`, `corona_percent_fuel_limit`, `corona_hard_fuel_limit`, `corona_fuel_cap_margin`
 - `percent_supply_limit`: Fraction of cargo capacity to fill with supplies (`.20` = 20%)
 - `hard_supply_limit`: Hard limit on supply generation (`0` = no limit)
 - `crew_usage`: How crew affects supply generation (`extra`, `all`, or `nocrew` – unquoted)
@@ -56,13 +55,14 @@ Primarily for development. Note: this mod uses a non-standard JSON format where 
 Notes:
 - Fuel soft cap and rate sliders in the UI are 0–100%; the code converts them to fractions internally.
 - The mod clamps fuel additions to the minimum of the soft cap and hard cap, then subtracts the margin; this prevents the historical 0.1 over-cap issue.
+- Corona detection is robust (terrain plugin checks with a star-distance fallback). If corona fuel seems inactive, check starsector.log for a line starting with "[Ramscoop] Corona mode:".
 
 ## Compatibility
 - Starsector 0.98a-RC8
 - LunaLib 2.0.4+ (required)
 - LunaLib Version Checker supported
 - No known mod conflicts
-- Current version: 0.5.0
+- Current version: 0.6.0
 
 ## Development
 This mod includes build scripts for development:

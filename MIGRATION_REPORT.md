@@ -46,6 +46,19 @@ The following settings were mapped from settings.json to LunaLib configuration:
 | no_crew_gen | ramscoop_no_crew_gen | Radio | No-crew generation type |
 | no_crew_rate | ramscoop_no_crew_rate | Double | No-crew generation rate |
 
+## Version 0.6.0 - Corona Time
+
+### Summary
+- Added corona fuel generation with separate caps and rate; supplies remain nebula-only.
+- Moved supplies settings under Nebula; removed Global Fuel Caps concept and use-global toggles.
+- Hardened corona detection using terrain-plugin checks and a star-distance fallback; added a one-line corona diagnostic.
+
+### Files Modified
+- `data/config/LunaSettings.csv` – tabs are now General, Nebula, Corona; no Global caps; supplies under Nebula.
+- `settings.json` – nebula_* and corona_* fuel caps; no global_* keys.
+- `src/ramscoop/ModPlugin.java` – loads nebula/corona fuel caps; legacy supply keys aliased to nebula_*.
+- `src/ramscoop/Ramscoop.java` – detects corona reliably and applies per-tab caps; logs corona mode line.
+
 ## Version 0.5.0 - Configuration Refinements
 
 ### Key Changes

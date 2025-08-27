@@ -19,9 +19,15 @@ public class ModPlugin extends BaseModPlugin {
     public static float percent_supply_limit = 0.35f;
     public static float hard_supply_limit = 0.0f;
     // New fuel limiting settings
-    public static float percent_fuel_limit = 1.0f; // 1.0 = 100% (no soft cap by default)
-    public static float hard_fuel_limit = 0.0f;     // 0 = disabled
-    public static float fuel_cap_margin = 0.0f;     // 0 = no margin, set to 1.0 to keep 1 unit below
+    // Nebula caps
+    public static float nebula_percent_fuel_limit = 1.0f; // fraction
+    public static float nebula_hard_fuel_limit = 0.0f;
+    public static float nebula_fuel_cap_margin = 0.0f;
+    // Corona caps
+    public static float corona_percent_fuel_limit = 1.0f;
+    public static float corona_hard_fuel_limit = 0.0f;
+    public static float corona_fuel_cap_margin = 0.0f;
+    // No global caps; each tab controls its own
     public static boolean scoop_toggle_default_on = true; // default enabled
     public static String crew_usage = "extra";
     public static String no_crew_gen = "percent";
@@ -97,18 +103,18 @@ public class ModPlugin extends BaseModPlugin {
             // UI provides 0..100 percent per day; convert to 0..1 fraction
             fuel_per_day = LunaSettings.getDouble(MOD_ID, "ramscoop_fuel_per_day").floatValue() / 100f;
             // New fuel limiting settings via LunaLib (with safe defaults if missing)
-            try {
-                // UI provides 0..100 percent; convert to 0..1 fraction
-                percent_fuel_limit = LunaSettings.getDouble(MOD_ID, "ramscoop_percent_fuel_limit").floatValue() / 100f;
-            } catch (Throwable ignored) {}
-            try { hard_fuel_limit = LunaSettings.getDouble(MOD_ID, "ramscoop_hard_fuel_limit").floatValue(); } catch (Throwable ignored) {}
-            try { fuel_cap_margin = LunaSettings.getDouble(MOD_ID, "ramscoop_fuel_cap_margin").floatValue(); } catch (Throwable ignored) {}
+            // Nebula caps via UI (percent sliders)
+            try { nebula_percent_fuel_limit = LunaSettings.getDouble(MOD_ID, "nebula_percent_fuel_limit").floatValue() / 100f; } catch (Throwable ignored) {}
+            try { nebula_hard_fuel_limit = LunaSettings.getDouble(MOD_ID, "nebula_hard_fuel_limit").floatValue(); } catch (Throwable ignored) {}
+            try { nebula_fuel_cap_margin = LunaSettings.getDouble(MOD_ID, "nebula_fuel_cap_margin").floatValue(); } catch (Throwable ignored) {}
+            
             percent_supply_limit = LunaSettings.getDouble(MOD_ID, "ramscoop_percent_supply_limit").floatValue();
             hard_supply_limit = LunaSettings.getDouble(MOD_ID, "ramscoop_hard_supply_limit").floatValue();
             supplies_per_crew = LunaSettings.getDouble(MOD_ID, "ramscoop_supply_per_crew").floatValue();
-            crew_usage = LunaSettings.getString(MOD_ID, "ramscoop_crew_usage");
-            no_crew_gen = LunaSettings.getString(MOD_ID, "ramscoop_no_crew_gen");
-            no_crew_rate = LunaSettings.getDouble(MOD_ID, "ramscoop_no_crew_rate").floatValue();
+            // Supply settings now live under Nebula as duplicates; read either key
+            try { crew_usage = LunaSettings.getString(MOD_ID, "nebula_crew_usage"); } catch (Throwable e1) { try { crew_usage = LunaSettings.getString(MOD_ID, "ramscoop_crew_usage"); } catch (Throwable ignored) {} }
+            try { no_crew_gen = LunaSettings.getString(MOD_ID, "nebula_no_crew_gen"); } catch (Throwable e2) { try { no_crew_gen = LunaSettings.getString(MOD_ID, "ramscoop_no_crew_gen"); } catch (Throwable ignored) {} }
+            try { no_crew_rate = LunaSettings.getDouble(MOD_ID, "nebula_no_crew_rate").floatValue(); } catch (Throwable e3) { try { no_crew_rate = LunaSettings.getDouble(MOD_ID, "ramscoop_no_crew_rate").floatValue(); } catch (Throwable ignored) {} }
             // Corona (UI provides percent/day for fuel rate)
             try { corona_enable_fuel = LunaSettings.getBoolean(MOD_ID, "corona_enable_fuel"); } catch (Throwable ignored) {}
             try { corona_fuel_per_day = LunaSettings.getDouble(MOD_ID, "corona_fuel_per_day").floatValue() / 100f; } catch (Throwable ignored) {}
@@ -132,18 +138,24 @@ public class ModPlugin extends BaseModPlugin {
             System.out.println("  fuel_per_day: " + fuel_per_day);
             System.out.println("  supplies_per_crew: " + supplies_per_crew);
             System.out.println("  crew_usage: " + crew_usage);
-            System.out.println("  percent_fuel_limit: " + percent_fuel_limit);
-            System.out.println("  hard_fuel_limit: " + hard_fuel_limit);
-            System.out.println("  fuel_cap_margin: " + fuel_cap_margin);
+            System.out.println("  nebula_percent_fuel_limit: " + nebula_percent_fuel_limit);
+            System.out.println("  nebula_hard_fuel_limit: " + nebula_hard_fuel_limit);
+            System.out.println("  nebula_fuel_cap_margin: " + nebula_fuel_cap_margin);
+            System.out.println("  corona_percent_fuel_limit: " + corona_percent_fuel_limit);
+            System.out.println("  corona_hard_fuel_limit: " + corona_hard_fuel_limit);
+            System.out.println("  corona_fuel_cap_margin: " + corona_fuel_cap_margin);
             System.out.println("  scoop_toggle_default_on: " + scoop_toggle_default_on);
             // Single-line summary for easy grep
             System.out.println(
                 "Ramscoop: Final settings from LunaLib -> fuel=" + enable_fuel +
                 ", supplies=" + enable_supplies +
                 ", fuel_per_day=" + fuel_per_day +
-                ", percent_fuel_limit=" + percent_fuel_limit +
-                ", hard_fuel_limit=" + hard_fuel_limit +
-                ", fuel_cap_margin=" + fuel_cap_margin +
+                ", nebula_percent_fuel_limit=" + nebula_percent_fuel_limit +
+                ", nebula_hard_fuel_limit=" + nebula_hard_fuel_limit +
+                ", nebula_fuel_cap_margin=" + nebula_fuel_cap_margin +
+                ", corona_percent_fuel_limit=" + corona_percent_fuel_limit +
+                ", corona_hard_fuel_limit=" + corona_hard_fuel_limit +
+                ", corona_fuel_cap_margin=" + corona_fuel_cap_margin +
                 ", percent_supply_limit=" + percent_supply_limit +
                 ", hard_supply_limit=" + hard_supply_limit +
                 ", crew_usage=" + crew_usage +
@@ -153,9 +165,12 @@ public class ModPlugin extends BaseModPlugin {
             LOG.info("[Ramscoop] Final settings from LunaLib -> fuel=" + enable_fuel +
                     ", supplies=" + enable_supplies +
                     ", fuel_per_day=" + fuel_per_day +
-                    ", percent_fuel_limit=" + percent_fuel_limit +
-                    ", hard_fuel_limit=" + hard_fuel_limit +
-                    ", fuel_cap_margin=" + fuel_cap_margin +
+                    ", nebula_percent_fuel_limit=" + nebula_percent_fuel_limit +
+                    ", nebula_hard_fuel_limit=" + nebula_hard_fuel_limit +
+                    ", nebula_fuel_cap_margin=" + nebula_fuel_cap_margin +
+                    ", corona_percent_fuel_limit=" + corona_percent_fuel_limit +
+                    ", corona_hard_fuel_limit=" + corona_hard_fuel_limit +
+                    ", corona_fuel_cap_margin=" + corona_fuel_cap_margin +
                     ", percent_supply_limit=" + percent_supply_limit +
                     ", hard_supply_limit=" + hard_supply_limit +
                     ", crew_usage=" + crew_usage +
@@ -182,24 +197,18 @@ public class ModPlugin extends BaseModPlugin {
                 fuel_per_day = (float)config.getDouble("fuel_per_day");
             }
             // Optional new fuel limit settings (legacy JSON)
-            if (config.has("percent_fuel_limit")) {
-                percent_fuel_limit = (float)config.getDouble("percent_fuel_limit");
-            }
-            if (config.has("hard_fuel_limit")) {
-                hard_fuel_limit = (float)config.getDouble("hard_fuel_limit");
-            }
-            if (config.has("fuel_cap_margin")) {
-                fuel_cap_margin = (float)config.getDouble("fuel_cap_margin");
-            }
+            if (config.has("nebula_percent_fuel_limit")) nebula_percent_fuel_limit = (float)config.getDouble("nebula_percent_fuel_limit");
+            if (config.has("nebula_hard_fuel_limit")) nebula_hard_fuel_limit = (float)config.getDouble("nebula_hard_fuel_limit");
+            if (config.has("nebula_fuel_cap_margin")) nebula_fuel_cap_margin = (float)config.getDouble("nebula_fuel_cap_margin");
             
-            supplies_per_crew = (float)config.getDouble("supply_per_crew");
             percent_supply_limit = (float)config.getDouble("percent_supply_limit");
             hard_supply_limit = (float)config.getDouble("hard_supply_limit");
             
-            // Use flexible parsing for non-standard JSON values
-            crew_usage = config.get("crew_usage").toString();
-            no_crew_gen = config.get("no_crew_gen").toString();
-            no_crew_rate = (float)config.getDouble("no_crew_rate");
+            supplies_per_crew = (float)config.getDouble("supply_per_crew");
+            // Accept new nebula_* keys or legacy names
+            if (config.has("nebula_crew_usage")) crew_usage = config.get("nebula_crew_usage").toString(); else crew_usage = config.get("crew_usage").toString();
+            if (config.has("nebula_no_crew_gen")) no_crew_gen = config.get("nebula_no_crew_gen").toString(); else no_crew_gen = config.get("no_crew_gen").toString();
+            if (config.has("nebula_no_crew_rate")) no_crew_rate = (float)config.getDouble("nebula_no_crew_rate"); else no_crew_rate = (float)config.getDouble("no_crew_rate");
             if (config.has("scoop_toggle_default_on")) {
                 try { scoop_toggle_default_on = config.getBoolean("scoop_toggle_default_on"); } catch (Throwable ignored) {}
             }
@@ -221,9 +230,12 @@ public class ModPlugin extends BaseModPlugin {
         LOG.info("[Ramscoop] Snapshot onGameLoad -> fuel=" + enable_fuel +
                 ", supplies=" + enable_supplies +
                 ", fuel_per_day=" + fuel_per_day +
-                ", percent_fuel_limit=" + percent_fuel_limit +
-                ", hard_fuel_limit=" + hard_fuel_limit +
-                ", fuel_cap_margin=" + fuel_cap_margin +
+                ", nebula_percent_fuel_limit=" + nebula_percent_fuel_limit +
+                ", nebula_hard_fuel_limit=" + nebula_hard_fuel_limit +
+                ", nebula_fuel_cap_margin=" + nebula_fuel_cap_margin +
+                ", corona_percent_fuel_limit=" + corona_percent_fuel_limit +
+                ", corona_hard_fuel_limit=" + corona_hard_fuel_limit +
+                ", corona_fuel_cap_margin=" + corona_fuel_cap_margin +
                 ", percent_supply_limit=" + percent_supply_limit +
                 ", hard_supply_limit=" + hard_supply_limit +
                 ", crew_usage=" + crew_usage +
