@@ -1,23 +1,23 @@
 {
 	#To turn on/off the fuel and supplies generating
-	"enable_fuel":false,
+	"enable_fuel":true,
 	"enable_supplies":true,
 
 	########
 	#Fuel generating
 	#Percent of max fuel to generate per day, as decimal
 	# .1 is 10%, 1 is 100%
-	"fuel_per_day":.04,
+	"nebula_fuel_per_day":.04,
 
 	########
 	#Fuel limiting (optional)
 	# Soft cap as a percent of max fuel (1.0 = 100%, 0.75 = 75%)
 	# If omitted, defaults to 1.0 (no soft cap)
-	"percent_fuel_limit":0.2,
+	"nebula_percent_fuel_limit":0.2,
 	# Hard cap (absolute fuel units). 0 = disabled
-	"hard_fuel_limit":0,
+	"nebula_hard_fuel_limit":0,
 	# Margin to keep below the cap (e.g., 1.0 keeps 1 unit free)
-	"fuel_cap_margin":0,
+	"nebula_fuel_cap_margin":0,
 	# Whether the scoop starts enabled on game load (can be toggled at runtime)
 	"scoop_toggle_default_on":true,
 	
@@ -51,4 +51,16 @@
 	"no_crew_gen":percent,
 	#put the value you want for the percent or flat rate here, decimal or int
 	"no_crew_rate":.1
+,
+
+	########
+	#Corona settings (fallback if LunaLib missing)
+	"corona_enable_fuel":true,
+	# Percent of max fuel per day in corona (fraction; .25 = 25%)
+	"corona_fuel_per_day":.25,
+	# Corona caps
+	"corona_percent_fuel_limit":0.2,
+	"corona_hard_fuel_limit":0,
+	"corona_fuel_cap_margin":0,
+	# no supply drain in corona; rely on vanilla effects
 }

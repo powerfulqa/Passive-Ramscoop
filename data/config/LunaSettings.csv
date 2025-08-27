@@ -7,22 +7,32 @@ ramscoop_toggle_default_on,Scoop Enabled,Boolean,true,,Enable/disable Ramscoop g
 ramscoop_enable_fuel,Enable Fuel Generation,Boolean,true,,Enable automatic fuel generation while traveling through nebulas.,,,General
 ramscoop_enable_supplies,Enable Supply Generation,Boolean,true,,Enable automatic supply generation while traveling through nebulas.,,,General
 ,,,,,,,,
-ramscoop_fuel_header,Fuel Generation,Header,Fuel Generation,,,,,Fuel
-ramscoop_fuel_per_day,Fuel Generation Rate (percent per day),Double,4,,Percent of max fuel to generate per day.,0,100,Fuel
+nebula_header,Nebula,Header,Nebula Settings,,,,,Nebula
+nebula_enable_fuel,Enable Fuel (Nebula),Boolean,true,,Enable fuel generation in nebula.,,,Nebula
+nebula_fuel_per_day,Fuel Generation Rate in Nebula (percent/day),Double,4,,Percent of max fuel per day while in nebula.,0,100,Nebula
 ,,,,,,,,
-ramscoop_fuel_limits_header,Fuel Limits,Header,Fuel Limits,,,,,Fuel
-ramscoop_percent_fuel_limit,Fuel Soft Cap (percent of max),Double,20,,"Soft cap as a percent of max fuel (100 = full, 75 = three-quarters).",0,100,Fuel
-ramscoop_hard_fuel_limit,Fuel Hard Cap (absolute units),Double,0,,Absolute cap on fuel units (0 = disabled).,0,100000,Fuel
-ramscoop_fuel_cap_margin,Fuel Cap Margin (units),Double,0,,Margin to keep below cap so you have salvage headroom.,0,1000,Fuel
+nebula_fuel_limits_header,Nebula Fuel Caps,Header,Nebula Fuel Caps,,,,,Nebula
+nebula_percent_fuel_limit,Nebula Fuel Soft Cap (percent of max),Double,20,,"Soft cap as a percent of max fuel (100 = full, 75 = three-quarters).",0,100,Nebula
+nebula_hard_fuel_limit,Nebula Fuel Hard Cap (absolute units),Double,0,,Absolute cap on fuel units (0 = disabled).,0,100000,Nebula
+nebula_fuel_cap_margin,Nebula Fuel Cap Margin (units),Double,0,,Margin to keep below cap so you have salvage headroom.,0,1000,Nebula
 ,,,,,,,,
-ramscoop_supply_header,Supply Generation,Header,Supply Generation,,,,,Supplies
-ramscoop_percent_supply_limit,Supply Generation Limit,Double,0.20,,"Generate supplies up to this percent of max cargo capacity as decimal. 0.35 = 35 percent of cargo space.",0.1,1.0,Supplies
-ramscoop_hard_supply_limit,Hard Supply Limit,Double,0,,Hard limit on supply generation regardless of cargo space. 0 = no hard limit. Prevents filling smaller cargo holds entirely with supplies.,0,10000,Supplies
+nebula_supply_header,Nebula Supply Generation,Header,Nebula Supply Generation,,,,,Nebula
+nebula_percent_supply_limit,Supply Generation Limit,Double,0.20,,Generate supplies up to this fraction of cargo capacity.,0.1,1.0,Nebula
+nebula_hard_supply_limit,Hard Supply Limit,Double,0,,Hard limit on supplies in nebula (0 = none).,0,10000,Nebula
+nebula_crew_header,Crew Usage,Header,Crew Usage,,,,,Nebula
+nebula_crew_usage,Crew Usage Mode,Radio,extra,"extra, all, nocrew","[extra] = over min; [all] = all crew; [nocrew] = ignore crew",,,Nebula
+nebula_supply_per_crew,Supply per Crew,Double,0.1,,Supplies each crew generates per day.,0.01,10.0,Nebula
+nebula_nocrew_header,No-Crew Generation,Header,No-Crew Generation,,,,,Nebula
+nebula_no_crew_gen,No-Crew Generation Type,Radio,percent,"percent, flat","For nocrew: percent of cargo/day or flat units/day.",,,Nebula
+nebula_no_crew_rate,No-Crew Generation Rate,Double,0.1,,Rate used with nocrew mode.,0.01,10.0,Nebula
 ,,,,,,,,
-ramscoop_crew_header,Crew Usage,Header,Crew Usage,,,,,Supplies
-ramscoop_crew_usage,Crew Usage Mode,Radio,extra,"extra, all, nocrew","[extra] = use crew over fleet minimum; [all] = use all crew; [nocrew] = don't use crew for calculation",,,Supplies
-ramscoop_supply_per_crew,Supply per Crew,Double,0.1,,Amount of supplies each crew member generates per day (decimal or integer).,0.01,10.0,Supplies
+##### Supplies tab removed; moved into Nebula
 ,,,,,,,,
-ramscoop_nocrew_header,No-Crew Generation,Header,No-Crew Generation,,,,,Supplies
-ramscoop_no_crew_gen,No-Crew Generation Type,Radio,percent,"percent, flat","When crew usage is set to [nocrew]: [percent] = percentage of max cargo per day; [flat] = flat supplies per day",,,Supplies
-ramscoop_no_crew_rate,No-Crew Generation Rate,Double,0.1,,Value for percent or flat rate generation when not using crew. For percent mode: 0.1 = 10 percent of cargo per day.,0.01,10.0,Supplies
+corona_header,Corona,Header,Corona Settings,,,,,Corona
+corona_enable_fuel,Enable Fuel (Corona),Boolean,true,,Enable fuel generation in star corona.,,,Corona
+corona_fuel_per_day,Fuel Generation Rate in Corona (percent/day),Double,25,,Percent of max fuel per day while in corona.,0,100,Corona
+,,,,,,,,
+corona_fuel_limits_header,Corona Fuel Caps,Header,Corona Fuel Caps,,,,,Corona
+corona_percent_fuel_limit,Corona Fuel Soft Cap (percent of max),Double,20,,Soft cap as a percent of max fuel while in corona.,0,100,Corona
+corona_hard_fuel_limit,Corona Fuel Hard Cap (absolute units),Double,0,,Absolute cap on fuel units in corona (0 = disabled).,0,100000,Corona
+corona_fuel_cap_margin,Corona Fuel Cap Margin (units),Double,0,,Margin to keep below cap while in corona.,0,1000,Corona
