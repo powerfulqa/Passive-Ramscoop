@@ -2,7 +2,7 @@
 # Ramscoop Mod for Starsector
 
 ## Overview
-Ramscoop is a utility mod for Starsector that automatically gathers resources from nebulas, generating fuel and supplies for your fleet over time. As of v0.6.0 ("Corona Time") it adds separate Nebula/Corona tabs with independent fuel caps, improved corona detection, and a simplified UI (no global caps).
+Ramscoop is a utility mod for Starsector that automatically gathers resources from nebulas and star coronas, generating fuel and supplies for your fleet over time. As of v0.6.0 ("Corona Time") it adds separate Nebula/Corona tabs with independent fuel caps, improved corona detection, and a simplified UI (no global caps).
 
 ## Features
 - Automatically generates fuel and supplies while in nebulas
@@ -77,6 +77,7 @@ Build note: the PowerShell script compiles against the Starsector API and LunaLi
 - Original mod by Meridias561 ([Nexus Mods profile](https://next.nexusmods.com/profile/Meridias561))
 - Updated for Starsector 0.98a-RC8 by powerfulqa
 - Robust LunaLib settings application finalized in v0.4.1
+- Additional Play Testing and UX consideration @Nerhtal
 
 ## Licence
 Creative Commons Attribution-NonCommercial 4.0 International Licence (CC BY-NC 4.0) with additional restrictions.

@@ -136,6 +136,7 @@ Context: Fix ensured LunaLib settings are applied on game load/runtime and overr
 - Provide a minimal fallback: if LunaLib is enabled but not yet ready, load baseline values from `settings.json` (with `Global.getSettings().loadJSON("settings.json", modId)`) and retry later.
 - Add an absolute guard in runtime logic to never generate when a feature is disabled (e.g., skip supplies generation when `enable_supplies == false`).
 - Convert 0–100% LunaLib sliders to 0–1 fractions in code; document the mapping in `README.md`.
+- Load both Nebula and Corona cap keys from LunaLib and from `settings.json` as fallback (`nebula_percent_fuel_limit`, `nebula_hard_fuel_limit`, `nebula_fuel_cap_margin`, and their `corona_*` counterparts); convert 0–100% sliders to fractions.
 - Seed from `settings.json` first to provide defaults for missing LunaLib keys, then apply LunaLib values; sync runtime toggles (e.g., `$ramscoop_enabled`) to fleet memory immediately so UI changes take effect.
 - Prefer per-context caps over a single global set: keep Nebula and Corona caps independent to avoid UX confusion.
 - Corona detection: check terrain plugins (containsEntity/containsPoint) and fall back to star distance (planet.isStar() + radius+buffer).

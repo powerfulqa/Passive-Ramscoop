@@ -13,19 +13,7 @@
 
 ### Fixed
 - Cases where corona detection failed are now covered by fallback; added a one-line diagnostic when corona fuel runs.
-
-## [0.6.0] - 2025-08-27 (Corona Time)
-### Added
-- Corona fuel generation with independent caps (soft/hard/margin) and per-tab rate.
-- Nebula tab includes supplies controls; Corona tab is fuel-only.
-- Robust corona detection with terrain-plugin checks and star-distance fallback.
-
-### Changed
-- Removed Global Fuel Caps and use-global toggles; per-tab caps only.
-- Tabs: General, Nebula, Corona.
-
-### Fixed
-- Improved corona detection reliability and added a one-line diagnostic when corona fuel runs.
+- Corona fuel caps were not applied in some cases due to caps not being loaded; loading fixed and caps now respected.
 
 ## [0.5.0] - 2025-08-27
 ### Added

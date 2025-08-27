@@ -119,6 +119,10 @@ public class ModPlugin extends BaseModPlugin {
             try { corona_enable_fuel = LunaSettings.getBoolean(MOD_ID, "corona_enable_fuel"); } catch (Throwable ignored) {}
             try { corona_fuel_per_day = LunaSettings.getDouble(MOD_ID, "corona_fuel_per_day").floatValue() / 100f; } catch (Throwable ignored) {}
             try { corona_caps_reuse = LunaSettings.getBoolean(MOD_ID, "corona_caps_reuse"); } catch (Throwable ignored) {}
+            // Corona caps via UI (percent slider for soft cap)
+            try { corona_percent_fuel_limit = LunaSettings.getDouble(MOD_ID, "corona_percent_fuel_limit").floatValue() / 100f; } catch (Throwable ignored) {}
+            try { corona_hard_fuel_limit = LunaSettings.getDouble(MOD_ID, "corona_hard_fuel_limit").floatValue(); } catch (Throwable ignored) {}
+            try { corona_fuel_cap_margin = LunaSettings.getDouble(MOD_ID, "corona_fuel_cap_margin").floatValue(); } catch (Throwable ignored) {}
             try {
                 scoop_toggle_default_on = LunaSettings.getBoolean(MOD_ID, "ramscoop_toggle_default_on");
                 // Apply immediately at runtime so UI changes take effect without reload
@@ -216,6 +220,9 @@ public class ModPlugin extends BaseModPlugin {
             if (config.has("corona_enable_fuel")) corona_enable_fuel = config.getBoolean("corona_enable_fuel");
             if (config.has("corona_fuel_per_day")) corona_fuel_per_day = (float)config.getDouble("corona_fuel_per_day");
             if (config.has("corona_caps_reuse")) corona_caps_reuse = config.getBoolean("corona_caps_reuse");
+            if (config.has("corona_percent_fuel_limit")) corona_percent_fuel_limit = (float)config.getDouble("corona_percent_fuel_limit");
+            if (config.has("corona_hard_fuel_limit")) corona_hard_fuel_limit = (float)config.getDouble("corona_hard_fuel_limit");
+            if (config.has("corona_fuel_cap_margin")) corona_fuel_cap_margin = (float)config.getDouble("corona_fuel_cap_margin");
         } catch (Exception e) {
             throw new RuntimeException("Failed to load legacy settings", e);
         }

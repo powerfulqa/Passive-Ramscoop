@@ -52,6 +52,7 @@ The following settings were mapped from settings.json to LunaLib configuration:
 - Added corona fuel generation with separate caps and rate; supplies remain nebula-only.
 - Moved supplies settings under Nebula; removed Global Fuel Caps concept and use-global toggles.
 - Hardened corona detection using terrain-plugin checks and a star-distance fallback; added a one-line corona diagnostic.
+ - Fixed: Corona cap values now loaded from LunaLib/settings.json (previously defaulted to 100% if not read), ensuring caps are respected in corona.
 
 ### Files Modified
 - `data/config/LunaSettings.csv` – tabs are now General, Nebula, Corona; no Global caps; supplies under Nebula.
