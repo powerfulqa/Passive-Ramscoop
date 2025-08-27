@@ -7,6 +7,10 @@ import com.fs.starfarer.api.campaign.CampaignFleetAPI;
 import com.fs.starfarer.api.campaign.FleetDataAPI;
 import com.fs.starfarer.api.combat.MutableStat.StatMod;
 import com.fs.starfarer.api.fleet.MutableFleetStatsAPI;
+import com.fs.starfarer.api.campaign.LocationAPI;
+import com.fs.starfarer.api.campaign.CampaignTerrainAPI;
+import com.fs.starfarer.api.campaign.CampaignTerrainPlugin;
+import java.util.Locale;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
@@ -204,12 +208,70 @@ public class Ramscoop implements EveryFrameScript {
         boolean scoopEnabled = true;
         try { scoopEnabled = fleet.getMemoryWithoutUpdate().getBoolean("$ramscoop_enabled"); } catch (Throwable ignored) {}
 
+        // Detect corona terrain
+        boolean inCorona = false;
+        try {
+            LocationAPI loc = fleet.getContainingLocation();
+            if (loc != null) {
+                for (CampaignTerrainAPI t : loc.getTerrainCopy()) {
+                    boolean looksCorona = false;
+                    try {
+                        String type = t.getType();
+                        looksCorona = type != null && type.toLowerCase(Locale.ROOT).contains("corona");
+                    } catch (Throwable ignored2) {}
+                    if (!looksCorona) {
+                        try {
+                            Object plugin = t.getPlugin();
+                            if (plugin != null) {
+                                String cn = plugin.getClass().getName().toLowerCase(Locale.ROOT);
+                                looksCorona = cn.contains("corona");
+                            }
+                        } catch (Throwable ignored3) {}
+                    }
+                    if (looksCorona) {
+                        try {
+                            Object pluginObj = t.getPlugin();
+                            if (pluginObj instanceof CampaignTerrainPlugin) {
+                                CampaignTerrainPlugin ctp = (CampaignTerrainPlugin) pluginObj;
+                                if (ctp.containsEntity(fleet)) { inCorona = true; break; }
+                            }
+                        } catch (Throwable ignored4) {}
+                    }
+                }
+            }
+        } catch (Throwable ignored) {}
+
          if (hard_supply_limit == 0.0F) {
             maxsupplies = maxpercentsupplies;
          } else {
             maxsupplies = Math.min(maxpercentsupplies, hard_supply_limit);
          }
  
+        // Corona behavior (takes precedence if detected)
+        if (inCorona) {
+            float days = Global.getSector().getClock().convertToDays(amount);
+            // Fuel: generate faster in corona if enabled
+            if (ModPlugin.corona_enable_fuel && enable_fuel && scoopEnabled) {
+                float maxFuel = fleet.getCargo().getMaxFuel();
+                double coronaPerDayD = Math.floor((double)(maxFuel * ModPlugin.corona_fuel_per_day));
+                float coronaPerDay = (float)coronaPerDayD;
+                float add = coronaPerDay * days;
+                // Reuse normal caps/margin
+                float percentCap = (float)Math.floor(maxFuel * ModPlugin.percent_fuel_limit);
+                float hardCap = ModPlugin.hard_fuel_limit > 0f ? ModPlugin.hard_fuel_limit : Float.MAX_VALUE;
+                float targetCap = Math.min(maxFuel, Math.min(percentCap, hardCap));
+                float margin = Math.max(0f, ModPlugin.fuel_cap_margin);
+                if (fuel < targetCap - margin) {
+                    float remaining = Math.max(0f, (targetCap - margin) - fuel);
+                    float fuelToAdd = Math.min(add, remaining);
+                    if (fuelToAdd > 0f) {
+                        fleet.getCargo().addFuel(fuelToAdd);
+                    }
+                }
+            }
+            return;
+        }
+
          if (nebulaMod != null) {
             float days;
             // Absolute guard: never generate supplies when disabled

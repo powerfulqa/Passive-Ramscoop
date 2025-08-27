@@ -26,6 +26,11 @@ public class ModPlugin extends BaseModPlugin {
     public static String crew_usage = "extra";
     public static String no_crew_gen = "percent";
     public static float no_crew_rate = 0.1f;
+    // Corona settings
+    public static boolean corona_enable_fuel = true;
+    public static float corona_fuel_per_day = 0.25f; // fraction of max per day
+    public static boolean corona_caps_reuse = true;
+    // no corona supply drain
     
     // Track if LunaLib is being used and if we've successfully loaded settings
     private static boolean lunaLibReady = false;
@@ -104,6 +109,10 @@ public class ModPlugin extends BaseModPlugin {
             crew_usage = LunaSettings.getString(MOD_ID, "ramscoop_crew_usage");
             no_crew_gen = LunaSettings.getString(MOD_ID, "ramscoop_no_crew_gen");
             no_crew_rate = LunaSettings.getDouble(MOD_ID, "ramscoop_no_crew_rate").floatValue();
+            // Corona (UI provides percent/day for fuel rate)
+            try { corona_enable_fuel = LunaSettings.getBoolean(MOD_ID, "corona_enable_fuel"); } catch (Throwable ignored) {}
+            try { corona_fuel_per_day = LunaSettings.getDouble(MOD_ID, "corona_fuel_per_day").floatValue() / 100f; } catch (Throwable ignored) {}
+            try { corona_caps_reuse = LunaSettings.getBoolean(MOD_ID, "corona_caps_reuse"); } catch (Throwable ignored) {}
             try {
                 scoop_toggle_default_on = LunaSettings.getBoolean(MOD_ID, "ramscoop_toggle_default_on");
                 // Apply immediately at runtime so UI changes take effect without reload
@@ -194,6 +203,10 @@ public class ModPlugin extends BaseModPlugin {
             if (config.has("scoop_toggle_default_on")) {
                 try { scoop_toggle_default_on = config.getBoolean("scoop_toggle_default_on"); } catch (Throwable ignored) {}
             }
+            // Corona legacy
+            if (config.has("corona_enable_fuel")) corona_enable_fuel = config.getBoolean("corona_enable_fuel");
+            if (config.has("corona_fuel_per_day")) corona_fuel_per_day = (float)config.getDouble("corona_fuel_per_day");
+            if (config.has("corona_caps_reuse")) corona_caps_reuse = config.getBoolean("corona_caps_reuse");
         } catch (Exception e) {
             throw new RuntimeException("Failed to load legacy settings", e);
         }

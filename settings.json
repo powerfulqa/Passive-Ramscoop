@@ -1,6 +1,6 @@
 {
 	#To turn on/off the fuel and supplies generating
-	"enable_fuel":false,
+	"enable_fuel":true,
 	"enable_supplies":true,
 
 	########
@@ -51,4 +51,14 @@
 	"no_crew_gen":percent,
 	#put the value you want for the percent or flat rate here, decimal or int
 	"no_crew_rate":.1
+,
+
+	########
+	#Corona settings (fallback if LunaLib missing)
+	"corona_enable_fuel":true,
+	# Percent of max fuel per day in corona (fraction; .25 = 25%)
+	"corona_fuel_per_day":.25,
+	# Reuse normal fuel caps/margin in corona
+	"corona_caps_reuse":true,
+	# no supply drain in corona; rely on vanilla effects
 }

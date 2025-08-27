@@ -26,3 +26,8 @@ ramscoop_supply_per_crew,Supply per Crew,Double,0.1,,Amount of supplies each cre
 ramscoop_nocrew_header,No-Crew Generation,Header,No-Crew Generation,,,,,Supplies
 ramscoop_no_crew_gen,No-Crew Generation Type,Radio,percent,"percent, flat","When crew usage is set to [nocrew]: [percent] = percentage of max cargo per day; [flat] = flat supplies per day",,,Supplies
 ramscoop_no_crew_rate,No-Crew Generation Rate,Double,0.1,,Value for percent or flat rate generation when not using crew. For percent mode: 0.1 = 10 percent of cargo per day.,0.01,10.0,Supplies
+,,,,,,,,
+corona_header,Corona,Header,Corona Settings,,,,,Corona
+corona_enable_fuel,Enable Fuel (Corona),Boolean,true,,Enable fuel generation in star corona.,,,Corona
+corona_fuel_per_day,Fuel Generation Rate in Corona (percent/day),Double,25,,Percent of max fuel per day while in corona.,0,100,Corona
+corona_caps_reuse,Use Normal Fuel Caps (soft/hard/margin),Boolean,true,,Reuse normal caps and margin for corona.,,,Corona
