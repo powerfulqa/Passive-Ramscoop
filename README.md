@@ -1,4 +1,3 @@
-
 # Ramscoop Mod for Starsector
 
 ## Overview
@@ -20,7 +19,7 @@ Ramscoop is a utility mod for Starsector that automatically gathers resources fr
 
 ## Configuration
 
-### LunaLib Settings (v0.6.0)
+### LunaLib Settings (v0.6.1)
 Configure all mod settings through the in-game settings menu:
 - Press **F2** during campaign mode to open the settings menu
 - Or access "Mod Settings" when creating a new game
@@ -31,7 +30,7 @@ Key settings:
 - Nebula: Fuel Rate (%/day) and Nebula Fuel Caps (soft/hard/margin), plus Supplies (limit, hard limit, crew usage/modes)
 - Corona: Fuel Rate (%/day) and Corona Fuel Caps (soft/hard/margin). No supplies in corona.
 
-Defaults (v0.6.0):
+Defaults (v0.6.1):
 - Fuel rate 4%; fuel soft cap 20%; hard cap 0; margin 0
 - Supply limit 20%; hard limit 0; crew usage "extra"; per-crew 0.1
 
@@ -62,14 +61,14 @@ Notes:
 - LunaLib 2.0.4+ (required)
 - LunaLib Version Checker supported
 - No known mod conflicts
-- Current version: 0.6.0
+- Current version: 0.6.1
 
 ## Development
 This mod includes build scripts for development:
 - `build.ps1` – PowerShell build script
 - `build.bat` – Windows batch build script
 
-See [CHANGELOG.md](CHANGELOG.md) for version history and [MIGRATION_REPORT.md](MIGRATION_REPORT.md) for technical migration details.
+See [changelog.md](changelog.md) for version history and [MIGRATION_REPORT.md](MIGRATION_REPORT.md) for technical migration details.
 
 Build note: the PowerShell script compiles against the Starsector API and LunaLib. If your LunaLib folder name differs from `03_LunaLib-2.0.4`, update the LunaLib path in `build.ps1` accordingly.
 

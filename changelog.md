@@ -1,5 +1,9 @@
 # Changelog
-# Changelog
+
+## [0.6.1] - 2025-08-28
+### Fixed
+- Minor documentation updates and version bump to 0.6.1
+- Small code clean up
 
 ## [0.6.0] - 2025-08-27 (Corona Time)
 ### Added

@@ -52,7 +52,6 @@
 	#put the value you want for the percent or flat rate here, decimal or int
 	"no_crew_rate":.1
 ,
-
 	########
 	#Corona settings (fallback if LunaLib missing)
 	"corona_enable_fuel":true,
