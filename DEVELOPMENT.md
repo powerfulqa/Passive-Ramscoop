@@ -41,6 +41,19 @@ Passive-Ramscoop/
    - The built JAR will be placed in the `jars` directory
    - Launch Starsector to test your changes
 
+### Building dev helper locally
+If you want to compile the development-only helper (`dev/src/ramscoop/TestModPlugin.java`) locally for debugging, ensure the Starsector API JAR is on your classpath and run the following from PowerShell:
+
+```powershell
+$API = "C:\Program Files (x86)\Fractal Softworks\Starsector\starfarer.api.jar"
+javac -classpath "$API" -d out dev\src\ramscoop\TestModPlugin.java
+jar cf jars\TestModHelper.jar -C out .
+```
+
+Notes:
+- The `dev/` folder is intentionally ignored and not included in release builds.
+- The helper requires the Starsector API JAR to compile; adjust `$API` if your installation path differs.
+
 3. **Source Control:**
    - The repository contains both source code and compiled assets
    - Build scripts and artefacts should be excluded from git where appropriate
