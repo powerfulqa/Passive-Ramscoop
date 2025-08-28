@@ -1,4 +1,4 @@
-# Changelog
+# Changelog 
 
 ## [0.6.1] - 2025-08-28
 ### Fixed
