@@ -101,7 +101,7 @@ public class ModPlugin extends BaseModPlugin {
             enable_fuel = LunaSettings.getBoolean(MOD_ID, "ramscoop_enable_fuel");
             enable_supplies = LunaSettings.getBoolean(MOD_ID, "ramscoop_enable_supplies");
             // UI provides 0..100 percent per day; convert to 0..1 fraction
-            fuel_per_day = LunaSettings.getDouble(MOD_ID, "ramscoop_fuel_per_day").floatValue() / 100f;
+            fuel_per_day = LunaSettings.getDouble(MOD_ID, "nebula_fuel_per_day").floatValue() / 100f; // Matches CSV key for nebula
             // New fuel limiting settings via LunaLib (with safe defaults if missing)
             // Nebula caps via UI (percent sliders)
             try { nebula_percent_fuel_limit = LunaSettings.getDouble(MOD_ID, "nebula_percent_fuel_limit").floatValue() / 100f; } catch (Throwable ignored) {}
