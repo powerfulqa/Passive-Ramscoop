@@ -1,9 +1,9 @@
 {
-  "version": "0.6.0",
+  "version": "0.6.1,
   "gameVersion": "0.98a-RC8",
   "modName": "Ramscoop",
   "modId": "m561_ramscoop",
-  "description": "Configurable fuel and supply generation while traveling through nebulas",
+  "description": "Configurable fuel and supply generation when traveling through nebulas and coronas",
   "author": "PowerfulQA, original by Meridias561",
   "url": "https://github.com/powerfulqa/Passive-Ramscoop",
   "dependencies": ["lunalib"],
