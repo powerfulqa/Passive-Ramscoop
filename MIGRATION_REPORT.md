@@ -1,7 +1,47 @@
 # Ramscoop Migration Report
 
 ## Overview
-This report documents the migration and enhancement of the Ramscoop mod from Starsector 0.95a to Starsector 0.98a-RC8, the addition of LunaLib support in version 0.4.0, and configuration/UI refinements in 0.5.0.
+This report documents the migration and enhancement of the Ramscoop mod from Starsector 0.95a to Starsector 0.98a-RC8, the addition of LunaLib support in version 0.4.0, and configuration/UI refinements in 0.5.0>.
+
+## Version 0.6.0 - Corona Time
+
+### Summary
+- Added corona fuel generation with separate caps and rate; supplies remain nebula-only.
+- Moved supplies settings under Nebula; removed Global Fuel Caps concept and use-global toggles.
+- Hardened corona detection using terrain-plugin checks and a star-distance fallback; added a one-line corona diagnostic.
+- Fixed: Corona cap values now loaded from LunaLib/settings.json (previously defaulted to 100% if not read), ensuring caps are respected in corona.
+
+### Files Modified
+- `data/config/LunaSettings.csv` – tabs are now General, Nebula, Corona; no Global caps; supplies under Nebula.
+- `settings.json` – nebula_* and corona_* fuel caps; no global_* keys.
+- `src/ramscoop/ModPlugin.java` – loads nebula/corona fuel caps; legacy supply keys aliased to nebula_*.
+- `src/ramscoop/Ramscoop.java` – detects corona reliably and applies per-tab caps; logs corona mode line.
+
+## Version 0.5.0 - Configuration Refinements
+
+### Key Changes
+- Fuel UI: rate and soft cap are 0–100% sliders; converted to fractions in code
+- Fuel clamping: soft cap (fraction of max), hard cap (absolute), margin (units)
+- Supplies respect the master "Scoop Enabled" toggle
+- Immediate application: toggling in LunaLib updates fleet memory at runtime
+- Defaults aligned for gameplay convenience (fuel 4%/day, soft cap 20%; supplies 20%)
+
+### Files Modified
+- `data/config/LunaSettings.csv` – added tabs and new fields/types; adjusted defaults
+- `settings.json` – aligned fallback defaults (decimal fractions)
+- `src/ramscoop/ModPlugin.java` – convert % sliders to fractions; seed from legacy before LunaLib; sync toggle to memory
+- `src/ramscoop/Ramscoop.java` – clamp fuel adds; guard supplies by master toggle
+
+#### Code Architecture Changes
+- **ModPlugin.java Changes:**
+  - Added `MOD_ID` constant for consistent mod identification
+  - Implemented `loadSettings()` method with smart detection of available settings sources
+  - Added `loadLunaLibSettings()` using reflection for dynamic LunaLib access
+  - Enhanced `loadLegacySettings()` with better error handling
+  - Added `fuel_per_day` variable to match LunaLib configuration
+
+**Ramscoop.java Changes:**
+  - Updated fuel generation calculation to use `ModPlugin.fuel_per_day` instead of `supplies_per_crew`
 
 ## Version 0.4.0 - LunaLib Integration
 
@@ -45,46 +85,6 @@ The following settings were mapped from settings.json to LunaLib configuration:
 | supply_per_crew | ramscoop_supply_per_crew | Double | Supply per crew |
 | no_crew_gen | ramscoop_no_crew_gen | Radio | No-crew generation type |
 | no_crew_rate | ramscoop_no_crew_rate | Double | No-crew generation rate |
-
-## Version 0.6.0 - Corona Time
-
-### Summary
-- Added corona fuel generation with separate caps and rate; supplies remain nebula-only.
-- Moved supplies settings under Nebula; removed Global Fuel Caps concept and use-global toggles.
-- Hardened corona detection using terrain-plugin checks and a star-distance fallback; added a one-line corona diagnostic.
- - Fixed: Corona cap values now loaded from LunaLib/settings.json (previously defaulted to 100% if not read), ensuring caps are respected in corona.
-
-### Files Modified
-- `data/config/LunaSettings.csv` – tabs are now General, Nebula, Corona; no Global caps; supplies under Nebula.
-- `settings.json` – nebula_* and corona_* fuel caps; no global_* keys.
-- `src/ramscoop/ModPlugin.java` – loads nebula/corona fuel caps; legacy supply keys aliased to nebula_*.
-- `src/ramscoop/Ramscoop.java` – detects corona reliably and applies per-tab caps; logs corona mode line.
-
-## Version 0.5.0 - Configuration Refinements
-
-### Key Changes
-- Fuel UI: rate and soft cap are 0–100% sliders; converted to fractions in code
-- Fuel clamping: soft cap (fraction of max), hard cap (absolute), margin (units)
-- Supplies respect the master "Scoop Enabled" toggle
-- Immediate application: toggling in LunaLib updates fleet memory at runtime
-- Defaults aligned for gameplay convenience (fuel 4%/day, soft cap 20%; supplies 20%)
-
-### Files Modified
-- `data/config/LunaSettings.csv` – added tabs and new fields/types; adjusted defaults
-- `settings.json` – aligned fallback defaults (decimal fractions)
-- `src/ramscoop/ModPlugin.java` – convert % sliders to fractions; seed from legacy before LunaLib; sync toggle to memory
-- `src/ramscoop/Ramscoop.java` – clamp fuel adds; guard supplies by master toggle
-
-#### Code Architecture Changes
-- **ModPlugin.java Changes:**
-  - Added `MOD_ID` constant for consistent mod identification
-  - Implemented `loadSettings()` method with smart detection of available settings sources
-  - Added `loadLunaLibSettings()` using reflection for dynamic LunaLib access
-  - Enhanced `loadLegacySettings()` with better error handling
-  - Added `fuel_per_day` variable to match LunaLib configuration
-
-- **Ramscoop.java Changes:**
-  - Updated fuel generation calculation to use `ModPlugin.fuel_per_day` instead of `supplies_per_crew`
 
 ## Version 0.3.0 - API Migration (Previous)
 

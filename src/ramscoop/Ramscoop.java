@@ -16,6 +16,7 @@ import java.util.Locale;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map.Entry;
+import com.fs.starfarer.api.util.IntervalUtil;
 
 public class Ramscoop implements EveryFrameScript {
    private static final Logger LOG = Global.getLogger(Ramscoop.class);
@@ -36,48 +37,17 @@ public class Ramscoop implements EveryFrameScript {
    // Load legacy config only once if LunaLib is not enabled
    private boolean jsonLoaded = false;
    
+   private final IntervalUtil interval = new IntervalUtil(0.09f, 0.11f); // ~0.1 days; adjust if needed for balance.
+   private float elapsedSinceTick = 0f;
+   
    public Ramscoop() {
       LOG.info("[Ramscoop] Initialized");
       // Proactively ask plugin to attempt loading if not done yet
       try { ramscoop.ModPlugin.reloadSettings(); } catch (Throwable ignored) {}
    }
 
-    // Lightweight file-based debug logger to ensure messages are captured even if stdout is filtered
-     private void debugLog(String message) { /* trimmed */ }
-   
    public boolean isNebula(StatMod mod) {
       return mod != null && mod.source != null && mod.source.contains("nebula_stat_mod");
-   }
-
-   // Reflective helpers to support LunaLib API variations (2-arg or 3-arg with default)
-   private static boolean reflectGetBoolean(Object target, Class<?> clazz, String method, String modId, String key, boolean defVal) throws Exception {
-      try {
-         return (Boolean) clazz.getMethod(method, String.class, String.class).invoke(target, modId, key);
-      } catch (NoSuchMethodException nsme) {
-         try {
-            return (Boolean) clazz.getMethod(method, String.class, String.class, boolean.class).invoke(target, modId, key, defVal);
-         } catch (NoSuchMethodException nsme2) {
-            return (Boolean) clazz.getMethod(method, String.class, String.class, Boolean.class).invoke(target, modId, key, Boolean.valueOf(defVal));
-         }
-      }
-   }
-   private static double reflectGetDouble(Object target, Class<?> clazz, String method, String modId, String key, double defVal) throws Exception {
-      try {
-         return (Double) clazz.getMethod(method, String.class, String.class).invoke(target, modId, key);
-      } catch (NoSuchMethodException nsme) {
-         try {
-            return (Double) clazz.getMethod(method, String.class, String.class, double.class).invoke(target, modId, key, defVal);
-         } catch (NoSuchMethodException nsme2) {
-            return (Double) clazz.getMethod(method, String.class, String.class, Double.class).invoke(target, modId, key, Double.valueOf(defVal));
-         }
-      }
-   }
-   private static String reflectGetString(Object target, Class<?> clazz, String method, String modId, String key, String defVal) throws Exception {
-      try {
-         return (String) clazz.getMethod(method, String.class, String.class).invoke(target, modId, key);
-      } catch (NoSuchMethodException nsme) {
-         return (String) clazz.getMethod(method, String.class, String.class, String.class).invoke(target, modId, key, defVal);
-      }
    }
 
    private void loadSettingsFromJsonOnceIfNeeded() {
@@ -103,64 +73,25 @@ public class Ramscoop implements EveryFrameScript {
       }
    }
 
-   private void readLunaLibEveryFrame() {
-      try {
-         Class<?> lunaSettingsClass = Class.forName("lunalib.lunaSettings.LunaSettings");
-         String modId = "m561_ramscoop";
-         // Try static first
-         try {
-            enable_fuel = reflectGetBoolean(null, lunaSettingsClass, "getBoolean", modId, "ramscoop_enable_fuel", enable_fuel);
-             // Default supplies to false if read fails, to avoid accidental generation
-             enable_supplies = reflectGetBoolean(null, lunaSettingsClass, "getBoolean", modId, "ramscoop_enable_supplies", false);
-            fuel_per_day = (float) reflectGetDouble(null, lunaSettingsClass, "getDouble", modId, "ramscoop_fuel_per_day", fuel_per_day);
-            percent_supply_limit = (float) reflectGetDouble(null, lunaSettingsClass, "getDouble", modId, "ramscoop_percent_supply_limit", percent_supply_limit);
-            hard_supply_limit = (float) reflectGetDouble(null, lunaSettingsClass, "getDouble", modId, "ramscoop_hard_supply_limit", hard_supply_limit);
-            supplies_per_crew = (float) reflectGetDouble(null, lunaSettingsClass, "getDouble", modId, "ramscoop_supply_per_crew", supplies_per_crew);
-            crew_usage = reflectGetString(null, lunaSettingsClass, "getString", modId, "ramscoop_crew_usage", crew_usage);
-            no_crew_gen = reflectGetString(null, lunaSettingsClass, "getString", modId, "ramscoop_no_crew_gen", no_crew_gen);
-            no_crew_rate = (float) reflectGetDouble(null, lunaSettingsClass, "getDouble", modId, "ramscoop_no_crew_rate", no_crew_rate);
-             debugLog("LunaLib read (static): fuel=" + enable_fuel + ", supplies=" + enable_supplies);
-            return;
-         } catch (Throwable staticFail) {
-            // Fallback to instance
-            Object inst;
-            try {
-               inst = lunaSettingsClass.getField("INSTANCE").get(null);
-            } catch (NoSuchFieldException nsf) {
-               inst = lunaSettingsClass.newInstance();
-            }
-            enable_fuel = reflectGetBoolean(inst, lunaSettingsClass, "getBoolean", modId, "ramscoop_enable_fuel", enable_fuel);
-             // Default supplies to false if read fails, to avoid accidental generation
-             enable_supplies = reflectGetBoolean(inst, lunaSettingsClass, "getBoolean", modId, "ramscoop_enable_supplies", false);
-            fuel_per_day = (float) reflectGetDouble(inst, lunaSettingsClass, "getDouble", modId, "ramscoop_fuel_per_day", fuel_per_day);
-            percent_supply_limit = (float) reflectGetDouble(inst, lunaSettingsClass, "getDouble", modId, "ramscoop_percent_supply_limit", percent_supply_limit);
-            hard_supply_limit = (float) reflectGetDouble(inst, lunaSettingsClass, "getDouble", modId, "ramscoop_hard_supply_limit", hard_supply_limit);
-            supplies_per_crew = (float) reflectGetDouble(inst, lunaSettingsClass, "getDouble", modId, "ramscoop_supply_per_crew", supplies_per_crew);
-            crew_usage = reflectGetString(inst, lunaSettingsClass, "getString", modId, "ramscoop_crew_usage", crew_usage);
-            no_crew_gen = reflectGetString(inst, lunaSettingsClass, "getString", modId, "ramscoop_no_crew_gen", no_crew_gen);
-            no_crew_rate = (float) reflectGetDouble(inst, lunaSettingsClass, "getDouble", modId, "ramscoop_no_crew_rate", no_crew_rate);
-             debugLog("LunaLib read (instance): fuel=" + enable_fuel + ", supplies=" + enable_supplies);
-         }
-      } catch (ClassNotFoundException e) {
-         // LunaLib not present
-      } catch (Throwable t) {
-         // Keep previous values on error
-      }
-   }
-
+   // Wrap advance contents in try-catch to fix syntax error
    public void advance(float amount) {
       try {
-			// Read current settings from ModPlugin (single source of truth)
-			enable_fuel = ModPlugin.enable_fuel;
-			enable_supplies = ModPlugin.enable_supplies;
-			fuel_per_day = ModPlugin.fuel_per_day;
-			supplies_per_crew = ModPlugin.supplies_per_crew;
-			percent_supply_limit = ModPlugin.percent_supply_limit;
-			hard_supply_limit = ModPlugin.hard_supply_limit;
-			crew_usage = ModPlugin.crew_usage;
-			no_crew_gen = ModPlugin.no_crew_gen;
-			no_crew_rate = ModPlugin.no_crew_rate;
-			debugLog("Pulled settings from ModPlugin: fuel=" + enable_fuel + ", supplies=" + enable_supplies);
+         interval.advance(amount);
+         elapsedSinceTick += amount;
+         if (!interval.intervalElapsed()) return; // Skip until tick fires
+         float daysElapsed = Global.getSector().getClock().convertToDays(elapsedSinceTick);
+         elapsedSinceTick = 0f;
+
+         // Pull settings less often (cache locally; update only on interval)
+         enable_fuel = ModPlugin.enable_fuel;
+         enable_supplies = ModPlugin.enable_supplies;
+         fuel_per_day = ModPlugin.fuel_per_day;
+         supplies_per_crew = ModPlugin.supplies_per_crew;
+         percent_supply_limit = ModPlugin.percent_supply_limit;
+         hard_supply_limit = ModPlugin.hard_supply_limit;
+         crew_usage = ModPlugin.crew_usage;
+         no_crew_gen = ModPlugin.no_crew_gen;
+         no_crew_rate = ModPlugin.no_crew_rate;
 
          // Debug: Always log that we're running (but throttle it)
             // one-time trace per cycle kept minimal
@@ -206,190 +137,190 @@ public class Ramscoop implements EveryFrameScript {
             }
          }
 
-        // Read global scoop toggle from fleet memory (defaults true if missing)
-        boolean scoopEnabled = true;
-        try { scoopEnabled = fleet.getMemoryWithoutUpdate().getBoolean("$ramscoop_enabled"); } catch (Throwable ignored) {}
-
-        // Detect corona terrain
-        boolean inCorona = false;
-        try {
-            LocationAPI loc = fleet.getContainingLocation();
-            if (loc != null) {
-                for (CampaignTerrainAPI t : loc.getTerrainCopy()) {
-                    boolean looksCorona = false;
-                    try {
-                        String type = t.getType();
-                        looksCorona = type != null && type.toLowerCase(Locale.ROOT).contains("corona");
-                    } catch (Throwable ignored2) {}
-                    if (!looksCorona) {
-                        try {
-                            Object plugin = t.getPlugin();
-                            if (plugin != null) {
-                                String cn = plugin.getClass().getName().toLowerCase(Locale.ROOT);
-                                looksCorona = cn.contains("corona");
-                            }
-                        } catch (Throwable ignored3) {}
-                    }
-                    if (looksCorona) {
-                        try {
-                            Object pluginObj = t.getPlugin();
-                            if (pluginObj != null) {
-                                // Try containsEntity(SectorEntityToken) via reflection
-                                try {
-                                    Class<?> setClazz = Class.forName("com.fs.starfarer.api.campaign.SectorEntityToken");
-                                    java.lang.reflect.Method m = pluginObj.getClass().getMethod("containsEntity", setClazz);
-                                    Object r = m.invoke(pluginObj, fleet);
-                                    if (r instanceof Boolean && ((Boolean) r)) { inCorona = true; break; }
-                                } catch (Throwable ignoredCE) {}
-                                // Try containsPoint(Vector2f)
-                                try {
-                                    Class<?> v2 = Class.forName("org.lwjgl.util.vector.Vector2f");
-                                    java.lang.reflect.Method m2 = pluginObj.getClass().getMethod("containsPoint", v2);
-                                    Object r2 = m2.invoke(pluginObj, fleet.getLocation());
-                                    if (r2 instanceof Boolean && ((Boolean) r2)) { inCorona = true; break; }
-                                } catch (Throwable ignoredCP) {}
-                            }
-                        } catch (Throwable ignored4) {}
-                    }
-                }
-                // Fallback: distance to star center vs (star radius + buffer)
-                if (!inCorona) {
-                    try {
-                        java.util.List<PlanetAPI> planets = loc.getPlanets();
-                        for (PlanetAPI p : planets) {
-                            try {
-                                if (p.isStar()) {
-                                    Vector2f fp = fleet.getLocation();
-                                    Vector2f sp = p.getLocation();
-                                    float dx = fp.x - sp.x;
-                                    float dy = fp.y - sp.y;
-                                    float dist = (float)Math.sqrt(dx*dx + dy*dy);
-                                    float buffer = 1000f; // conservative corona thickness fallback
-                                    if (dist <= p.getRadius() + buffer) { inCorona = true; break; }
-                                }
-                            } catch (Throwable ignoredStar) {}
-                        }
-                    } catch (Throwable ignoredPlanets) {}
-                }
-            }
-        } catch (Throwable ignored) {}
-
          if (hard_supply_limit == 0.0F) {
             maxsupplies = maxpercentsupplies;
          } else {
             maxsupplies = Math.min(maxpercentsupplies, hard_supply_limit);
          }
- 
-        // Corona behavior (takes precedence if detected)
-        if (inCorona) {
-            float days = Global.getSector().getClock().convertToDays(amount);
-            // Fuel: generate faster in corona if enabled
-            if (ModPlugin.corona_enable_fuel && enable_fuel && scoopEnabled) {
-                float maxFuel = fleet.getCargo().getMaxFuel();
-                double coronaPerDayD = Math.floor((double)(maxFuel * ModPlugin.corona_fuel_per_day));
-                float coronaPerDay = (float)coronaPerDayD;
-                float add = coronaPerDay * days;
-                // Use corona caps only
-                float coronaSoft = (float)Math.floor(maxFuel * ModPlugin.corona_percent_fuel_limit);
-                float coronaHard = ModPlugin.corona_hard_fuel_limit;
-                float coronaMargin = ModPlugin.corona_fuel_cap_margin;
-                float hardCap = coronaHard > 0f ? coronaHard : Float.MAX_VALUE;
-                float targetCap = Math.min(maxFuel, Math.min(coronaSoft, hardCap));
-                float margin = Math.max(0f, coronaMargin);
-                // Debug: one-line trace when in corona
-                LOG.info("[Ramscoop] Corona mode: add=" + add + ", soft=" + coronaSoft + ", hard=" + coronaHard + ", margin=" + margin + ", fuel=" + fuel + ", target=" + targetCap);
-                if (fuel < targetCap - margin) {
-                    float remaining = Math.max(0f, (targetCap - margin) - fuel);
-                    float fuelToAdd = Math.min(add, remaining);
-                    if (fuelToAdd > 0f) {
-                        fleet.getCargo().addFuel(fuelToAdd);
-                    }
-                }
-            }
-            return;
-        }
 
-         if (nebulaMod != null) {
-            float days;
-            // Absolute guard: never generate supplies when disabled
-            if (!enable_supplies || !scoopEnabled) {
-                // keep a clear trace once per reload cycle
-                LOG.info("[Ramscoop] Supplies disabled (nebula present or scoop off)");
-            } else {
-               // Calculate supplies generation based on crew settings
-               switch (crew_usage) {
-                  case "nocrew":
-                     switch (no_crew_gen) {
-                        case "percent":
-                           suppliesperdayd = Math.floor((double)(fleet.getCargo().getMaxCapacity() * no_crew_rate));
-                           suppliesperday = (float)suppliesperdayd;
-                           break;
-                        case "flat":
-                           suppliesperday = no_crew_rate;
-                           break;
+         // Restore scoop toggle check (from original line 210)
+         boolean scoopEnabled = true;
+         try { scoopEnabled = fleet.getMemoryWithoutUpdate().getBoolean("$ramscoop_enabled"); } catch (Throwable ignored) {}
+
+         // Restore corona detection and generation (from original lines 214-310), with caps
+         boolean inCorona = false;
+         try {
+             LocationAPI loc = fleet.getContainingLocation();
+             if (loc != null) {
+                 for (CampaignTerrainAPI t : loc.getTerrainCopy()) {
+                     boolean looksCorona = false;
+                     try {
+                         String type = t.getType();
+                         looksCorona = type != null && type.toLowerCase(Locale.ROOT).contains("corona");
+                     } catch (Throwable ignored2) {}
+                     if (!looksCorona) {
+                         try {
+                             Object plugin = t.getPlugin();
+                             if (plugin != null) {
+                                 String cn = plugin.getClass().getName().toLowerCase(Locale.ROOT);
+                                 looksCorona = cn.contains("corona");
+                             }
+                         } catch (Throwable ignored3) {}
                      }
-                     break;
-                  case "all":
-                     suppliesperday = currentcrew * supplies_per_crew;
-                     break;
-                  case "extra":
-                     if (currentcrew > minimumcrew) {
-                        extracrew = currentcrew - minimumcrew;
-                        suppliesperday = extracrew * supplies_per_crew;
+                     if (looksCorona) {
+                         try {
+                             Object pluginObj = t.getPlugin();
+                             if (pluginObj != null) {
+                                 // Try containsEntity
+                                 try {
+                                     Class<?> setClazz = Class.forName("com.fs.starfarer.api.campaign.SectorEntityToken");
+                                     java.lang.reflect.Method m = pluginObj.getClass().getMethod("containsEntity", setClazz);
+                                     Object r = m.invoke(pluginObj, fleet);
+                                     if (r instanceof Boolean && ((Boolean) r)) { inCorona = true; break; }
+                                 } catch (Throwable ignoredCE) {}
+                                 // Try containsPoint
+                                 try {
+                                     Class<?> v2 = Class.forName("org.lwjgl.util.vector.Vector2f");
+                                     java.lang.reflect.Method m2 = pluginObj.getClass().getMethod("containsPoint", v2);
+                                     Object r2 = m2.invoke(pluginObj, fleet.getLocation());
+                                     if (r2 instanceof Boolean && ((Boolean) r2)) { inCorona = true; break; }
+                                 } catch (Throwable ignoredCP) {}
+                             }
+                         } catch (Throwable ignored4) {}
                      }
-                     break;
-               }
+                 }
+                 // Fallback: distance to star
+                 if (!inCorona) {
+                     try {
+                         java.util.List<PlanetAPI> planets = loc.getPlanets();
+                         for (PlanetAPI p : planets) {
+                             try {
+                                 if (p.isStar()) {
+                                     Vector2f fp = fleet.getLocation();
+                                     Vector2f sp = p.getLocation();
+                                     float dx = fp.x - sp.x;
+                                     float dy = fp.y - sp.y;
+                                     float dist = (float)Math.sqrt(dx*dx + dy*dy);
+                                     float buffer = 1000f;
+                                     if (dist <= p.getRadius() + buffer) { inCorona = true; break; }
+                                 }
+                             } catch (Throwable ignoredStar) {}
+                         }
+                     } catch (Throwable ignoredPlanets) {}
+                 }
+             }
+         } catch (Throwable ignored) {}
 
-               // Calculate available space for supplies
-               if (supplies < maxsupplies) {
-                  minspace = Math.min(maxsupplies - supplies, fleet.getCargo().getSpaceLeft());
-               } else {
-                  minspace = fleet.getCargo().getSpaceLeft();
-               }
-
-               // Add supplies based on available space
-               if (fleet.getCargo().getSpaceLeft() > 0.0F && suppliesperday > 0.0F && supplies < maxsupplies && scoopEnabled) {
-                  days = Global.getSector().getClock().convertToDays(amount);
-                  float suppliesToAdd;
-                  if (suppliesperday * days < minspace) {
-                     suppliesToAdd = suppliesperday * days;
-                     fleet.getCargo().addSupplies(suppliesToAdd);
-                  } else {
-                     suppliesToAdd = minspace;
-                     fleet.getCargo().addSupplies(suppliesToAdd);
-                  }
-                   // Optional: keep minimal meaningful trace
-                   if (suppliesToAdd > 0.5f) { LOG.info("[Ramscoop] Added supplies: " + suppliesToAdd); }
-               }
-            }
- 
-            // Generate fuel with clamping and optional toggle
-            try {
-               // scoopEnabled already computed above
-
-               if (enable_fuel && scoopEnabled) {
-                  days = Global.getSector().getClock().convertToDays(amount);
-                  float maxFuel = fleet.getCargo().getMaxFuel();
-                  float nebSoft = (float)Math.floor(maxFuel * ModPlugin.nebula_percent_fuel_limit);
-                  float nebHardCfg = ModPlugin.nebula_hard_fuel_limit;
-                  float nebMargin = ModPlugin.nebula_fuel_cap_margin;
-                  float hardCap = nebHardCfg > 0f ? nebHardCfg : Float.MAX_VALUE;
-                  float targetCap = Math.min(maxFuel, Math.min(nebSoft, hardCap));
-                  float margin = Math.max(0f, nebMargin);
-                  if (fuel < targetCap - margin) {
+         // Corona behavior (takes precedence if detected)
+         if (inCorona) {
+             float days = daysElapsed;
+             // Fuel: generate faster in corona if enabled
+             if (ModPlugin.corona_enable_fuel && enable_fuel && scoopEnabled) {
+                 float maxFuel = fleet.getCargo().getMaxFuel();
+                 double coronaPerDayD = Math.floor((double)(maxFuel * ModPlugin.corona_fuel_per_day));
+                 float coronaPerDay = (float)coronaPerDayD;
+                 float add = coronaPerDay * days;
+                 // Use corona caps
+                 float coronaSoft = (float)Math.floor(maxFuel * ModPlugin.corona_percent_fuel_limit);
+                 float coronaHard = ModPlugin.corona_hard_fuel_limit;
+                 float coronaMargin = ModPlugin.corona_fuel_cap_margin;
+                 float hardCap = coronaHard > 0f ? coronaHard : Float.MAX_VALUE;
+                 float targetCap = Math.min(maxFuel, Math.min(coronaSoft, hardCap));
+                 float margin = Math.max(0f, coronaMargin);
+                 // Diagnostic log per prompt (minimal)
+                 LOG.info("[Ramscoop] Corona mode: add=" + add + ", soft=" + coronaSoft + ", hard=" + coronaHard + ", margin=" + margin + ", fuel=" + fuel + ", target=" + targetCap);
+                 if (fuel < targetCap - margin) {
                      float remaining = Math.max(0f, (targetCap - margin) - fuel);
-                     float fuelToAdd = Math.min(fuelperday * days, remaining);
+                     float fuelToAdd = Math.min(add, remaining);
                      if (fuelToAdd > 0f) {
-                        fleet.getCargo().addFuel(fuelToAdd);
-                        if (fuelToAdd > 0.5f) { LOG.info("[Ramscoop] Added fuel: " + fuelToAdd); }
+                         fleet.getCargo().addFuel(fuelToAdd);
                      }
-                  }
-               } else if (!enable_fuel) {
-                  LOG.info("[Ramscoop] Fuel generation disabled");
-               }
-            } catch (Throwable t) {
-               // Non-fatal: keep running supplies even if fuel logic fails
-            }
+                 }
+             }
+             return;
+         }
+
+         // Adjust structure: Move fuel logic inside nebula if, declare days once per block
+
+         // Nebula block
+         if (nebulaMod != null) {
+             float days = daysElapsed; // aggregated time since last tick
+
+             // Supplies
+             if (!enable_supplies || !scoopEnabled) {
+                 LOG.info("[Ramscoop] Supplies disabled (nebula present or scoop off)");
+             } else {
+                 // Calculate supplies generation based on crew settings
+                 switch (crew_usage) {
+                    case "nocrew":
+                       switch (no_crew_gen) {
+                          case "percent":
+                             suppliesperdayd = Math.floor((double)(fleet.getCargo().getMaxCapacity() * no_crew_rate));
+                             suppliesperday = (float)suppliesperdayd;
+                             break;
+                          case "flat":
+                             suppliesperday = no_crew_rate;
+                             break;
+                       }
+                       break;
+                    case "all":
+                       suppliesperday = currentcrew * supplies_per_crew;
+                       break;
+                    case "extra":
+                       if (currentcrew > minimumcrew) {
+                          extracrew = currentcrew - minimumcrew;
+                          suppliesperday = extracrew * supplies_per_crew;
+                       }
+                       break;
+                 }
+
+                 // Calculate available space for supplies
+                 if (supplies < maxsupplies) {
+                    minspace = Math.min(maxsupplies - supplies, fleet.getCargo().getSpaceLeft());
+                 } else {
+                    minspace = fleet.getCargo().getSpaceLeft();
+                 }
+
+                 // Add supplies based on available space
+                 if (fleet.getCargo().getSpaceLeft() > 0.0F && suppliesperday > 0.0F && supplies < maxsupplies) {
+                    float suppliesToAdd;
+                    if (suppliesperday * days < minspace) {
+                       suppliesToAdd = suppliesperday * days;
+                       fleet.getCargo().addSupplies(suppliesToAdd);
+                    } else {
+                       suppliesToAdd = minspace;
+                       fleet.getCargo().addSupplies(suppliesToAdd);
+                    }
+                     // Optional: keep minimal meaningful trace
+                     if (suppliesToAdd > 0.5f) { LOG.info("[Ramscoop] Added supplies: " + suppliesToAdd); }
+                 }
+             }
+
+             // Fuel (move try inside)
+             try {
+                 if (enable_fuel && scoopEnabled) {
+                     // No need to redeclare days; use the one above
+                     float maxFuel = fleet.getCargo().getMaxFuel();
+                     float nebSoft = (float)Math.floor(maxFuel * ModPlugin.nebula_percent_fuel_limit);
+                     float nebHardCfg = ModPlugin.nebula_hard_fuel_limit;
+                     float nebMargin = ModPlugin.nebula_fuel_cap_margin;
+                     float hardCap = nebHardCfg > 0f ? nebHardCfg : Float.MAX_VALUE;
+                     float targetCap = Math.min(maxFuel, Math.min(nebSoft, hardCap));
+                     float margin = Math.max(0f, nebMargin);
+                     if (fuel < targetCap - margin) {
+                         float remaining = Math.max(0f, (targetCap - margin) - fuel);
+                         float fuelToAdd = Math.min(fuelperday * days, remaining);
+                         if (fuelToAdd > 0f) {
+                             fleet.getCargo().addFuel(fuelToAdd);
+                             if (fuelToAdd > 0.5f) { LOG.info("[Ramscoop] Added fuel: " + fuelToAdd); }
+                         }
+                     }
+                 } else if (!enable_fuel) {
+                     LOG.info("[Ramscoop] Fuel generation disabled");
+                 }
+             } catch (Throwable t) {
+                 // Non-fatal
+             }
          }
       } catch (Exception e) {
          // Use simple println for logging errors to avoid log4j dependency issues

@@ -101,7 +101,7 @@ public class ModPlugin extends BaseModPlugin {
             enable_fuel = LunaSettings.getBoolean(MOD_ID, "ramscoop_enable_fuel");
             enable_supplies = LunaSettings.getBoolean(MOD_ID, "ramscoop_enable_supplies");
             // UI provides 0..100 percent per day; convert to 0..1 fraction
-            fuel_per_day = LunaSettings.getDouble(MOD_ID, "ramscoop_fuel_per_day").floatValue() / 100f;
+            fuel_per_day = LunaSettings.getDouble(MOD_ID, "nebula_fuel_per_day").floatValue() / 100f; // Matches CSV key for nebula
             // New fuel limiting settings via LunaLib (with safe defaults if missing)
             // Nebula caps via UI (percent sliders)
             try { nebula_percent_fuel_limit = LunaSettings.getDouble(MOD_ID, "nebula_percent_fuel_limit").floatValue() / 100f; } catch (Throwable ignored) {}
@@ -135,23 +135,8 @@ public class ModPlugin extends BaseModPlugin {
             } catch (Throwable ignored) {}
             
             // Debug logging
-            System.out.println("Ramscoop: LunaLib Settings Loaded:");
-            LOG.info("[Ramscoop] LunaLib Settings Loaded");
-            System.out.println("  enable_fuel: " + enable_fuel);
-            System.out.println("  enable_supplies: " + enable_supplies);
-            System.out.println("  fuel_per_day: " + fuel_per_day);
-            System.out.println("  supplies_per_crew: " + supplies_per_crew);
-            System.out.println("  crew_usage: " + crew_usage);
-            System.out.println("  nebula_percent_fuel_limit: " + nebula_percent_fuel_limit);
-            System.out.println("  nebula_hard_fuel_limit: " + nebula_hard_fuel_limit);
-            System.out.println("  nebula_fuel_cap_margin: " + nebula_fuel_cap_margin);
-            System.out.println("  corona_percent_fuel_limit: " + corona_percent_fuel_limit);
-            System.out.println("  corona_hard_fuel_limit: " + corona_hard_fuel_limit);
-            System.out.println("  corona_fuel_cap_margin: " + corona_fuel_cap_margin);
-            System.out.println("  scoop_toggle_default_on: " + scoop_toggle_default_on);
-            // Single-line summary for easy grep
-            System.out.println(
-                "Ramscoop: Final settings from LunaLib -> fuel=" + enable_fuel +
+            LOG.info(
+                "[Ramscoop] Final settings from LunaLib -> fuel=" + enable_fuel +
                 ", supplies=" + enable_supplies +
                 ", fuel_per_day=" + fuel_per_day +
                 ", nebula_percent_fuel_limit=" + nebula_percent_fuel_limit +
@@ -166,26 +151,8 @@ public class ModPlugin extends BaseModPlugin {
                 ", no_crew_gen=" + no_crew_gen +
                 ", no_crew_rate=" + no_crew_rate
             );
-            LOG.info("[Ramscoop] Final settings from LunaLib -> fuel=" + enable_fuel +
-                    ", supplies=" + enable_supplies +
-                    ", fuel_per_day=" + fuel_per_day +
-                    ", nebula_percent_fuel_limit=" + nebula_percent_fuel_limit +
-                    ", nebula_hard_fuel_limit=" + nebula_hard_fuel_limit +
-                    ", nebula_fuel_cap_margin=" + nebula_fuel_cap_margin +
-                    ", corona_percent_fuel_limit=" + corona_percent_fuel_limit +
-                    ", corona_hard_fuel_limit=" + corona_hard_fuel_limit +
-                    ", corona_fuel_cap_margin=" + corona_fuel_cap_margin +
-                    ", percent_supply_limit=" + percent_supply_limit +
-                    ", hard_supply_limit=" + hard_supply_limit +
-                    ", crew_usage=" + crew_usage +
-                    ", no_crew_gen=" + no_crew_gen +
-                    ", no_crew_rate=" + no_crew_rate);
-            
-            // Listener optional; our runtime script periodically calls reloadSettings()
         } catch (Exception e) {
-            System.out.println("Ramscoop: Failed to load LunaLib settings: " + e.getMessage());
-            LOG.error("[Ramscoop] Failed to load LunaLib settings", e);
-            e.printStackTrace();
+            LOG.warn("[Ramscoop] Failed to load LunaLib settings: " + e.getMessage(), e);
             throw new RuntimeException("Failed to load LunaLib settings", e);
         }
     }

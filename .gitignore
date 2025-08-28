@@ -27,6 +27,7 @@ exclude.txt
 *.log
 
 # Project files
+/dev/
 /.cache/
 /.idea/
 /.vscode/
