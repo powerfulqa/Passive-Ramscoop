@@ -64,7 +64,7 @@
 
 ### Changed
 - **Settings Loading**: LunaLib settings now take priority over settings.json
-- **Configuration Interface**: 9 configurable settings organized in logical sections
+- **Configuration Interface**: 9 configurable settings organised in logical sections
 - **Real-time Configuration**: Changes apply immediately without restart
 
 ### Fixed
@@ -80,13 +80,30 @@
 
 ### Changed
 - **Resource Generation**: Now only occurs in nebula regions
-- **Performance**: Optimized for minimal frame impact
+- **Performance**: Optimised for minimal frame impact
 
-## [0.2.0] - 2024-12-17
+## [0.2c] - 2025-08-11
 ### Added
-- **Basic Resource Generation**: Simple fuel and supply generation
-- **Mod Structure**: Proper Starsector mod organization
+- Final release by original author
+- For StarSector version 0.95a
 
-## [0.1.0] - 2024-12-16
+## [0.2b] - 2021-04-06
 ### Added
-- **Initial Release**: Basic mod framework and structure
+- Updates and improvements by original author
+- For StarSector version 0.95a
+
+## [0.2a] - 2021-04-04
+### Added
+- Minor updates and fixes by original author
+- For StarSector version 0.95a
+
+## [0.2] - 2021-04-03
+### Added
+- Second release by original author
+- For StarSector version 0.95a
+
+## [0.1] - 2021-03-31
+### Added
+- **Initial Release**: Original mod by the original author
+- Basic passive ramscoop functionality
+- For StarSector version 0.95a

@@ -102,7 +102,7 @@ The following settings were mapped from settings.json to LunaLib configuration:
 - Added simple error logging using `System.out.println()` and `printStackTrace()` to avoid dependency on log4j.
 
 #### Code Structure
-- Modernized the switch statement structure for better readability.
+- Modernised the switch statement structure for better readability.
 - Added comments to explain key components of the code.
 
 ## Build Process

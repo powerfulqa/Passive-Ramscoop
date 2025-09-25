@@ -1,60 +1,82 @@
-# Ramscoop Mod for Starsector
+# Passive Ramscoop - Automated Resource Collection for Starsector
+
+## What This Mod Does
+Ever wished your fleet could collect fuel and supplies whilst travelling through nebulae and near stars? The Passive Ramscoop mod makes this dream a reality! Your ships will automatically gather resources as you explore, reducing the need for constant supply runs.
+
+**Perfect for players who want:**
+- Less micromanagement of fuel and supplies
+- More immersive exploration gameplay  
+- Realistic "ramscoop" technology like in science fiction
+- Configurable resource generation that fits your playstyle
 
 ## Overview
-Ramscoop is a utility mod for Starsector that automatically gathers resources from nebulas and star coronas, generating fuel and supplies for your fleet over time. As of v0.6.0 ("Corona Time") it adds separate Nebula/Corona tabs with independent fuel caps, improved corona detection, and a simplified UI (no global caps).
+This mod automatically generates fuel and supplies for your fleet when travelling through nebulae and star coronas. The idea around balancing it was that its used to make sure you can always get some fuel if you are very low by entering a nebula or star corona. This only fills the fuel tank currently to 20% by default, but everything is fully configurable through an easy-to-use in-game settings menu, so you can adjust the rates to match your preferred difficulty level.
 
-## Features
-- Automatically generates fuel and supplies while in nebulas
-- Global "Scoop Enabled" toggle (runtime) that affects both fuel and supplies
-- Fuel controls: rate (percent/day), soft cap (0–100%), hard cap (absolute units), and margin (units) to avoid overfill
-- Supply controls: percent-of-cargo soft cap, optional hard cap, crew-usage modes (extra/all/nocrew)
-- Organized LunaLib settings with tabs: General, Nebula, Corona (LunaLib required)
-- Safe clamping to prevent going 0.1 over the cap
-- LunaLib Version Checker support for automatic updates
+## Key Features
+✨ **Automatic Resource Collection**
+- Fuel generation whilst travelling through nebulae and near star coronas
+- Supply generation in nebulae (with configurable crew usage options)
+- No manual activation required - just fly through space!
+
+🎛️ **Fully Configurable**
+- Easy in-game settings menu (no file editing required)
+- Separate controls for nebula and corona environments
+- Adjustable generation rates, caps, and limits
+- Master on/off toggle for quick disable
+
+🛡️ **Smart & Safe**
+- Prevents overfilling your fuel tanks
+- Respects your cargo capacity limits
+- Balanced default settings that won't break gameplay
+- Works seamlessly with other mods
 
 ## Installation
-1. Extract the mod files to your Starsector `mods` directory. The folder should be named `Passive-Ramscoop`.
-2. Install and enable [LunaLib](https://fractalsoftworks.com/forum/index.php?topic=25658) (required).
-3. Enable Ramscoop in the Starsector launcher.
+1. **Download and install [LunaLib](https://fractalsoftworks.com/forum/index.php?topic=25658)** (required dependency)
+2. **Download this mod** and extract to your Starsector `mods` directory 
+3. **Enable both mods** in the Starsector launcher
+4. **Start playing!** - Settings can be accessed in-game by pressing F2
 
-## Configuration
+> **Note:** LunaLib is required for the in-game settings menu. Without it, the mod will use default settings from a configuration file.
 
-### LunaLib Settings (v0.6.1)
-Configure all mod settings through the in-game settings menu:
-- Press **F2** during campaign mode to open the settings menu
-- Or access "Mod Settings" when creating a new game
-- Tabs: **General**, **Nebula**, **Corona** under "Ramscoop Configuration"
+## How to Use
 
-Key settings:
-- General: "Scoop Enabled" (master toggle), enable fuel, enable supplies
-- Nebula: Fuel Rate (%/day) and Nebula Fuel Caps (soft/hard/margin), plus Supplies (limit, hard limit, crew usage/modes)
-- Corona: Fuel Rate (%/day) and Corona Fuel Caps (soft/hard/margin). No supplies in corona.
+### Quick Start - Default Settings
+The mod works great with default settings! Once installed, you'll automatically collect:
+- **Fuel**: 4% of your maximum fuel capacity per day whilst in nebulae or coronas
+- **Supplies**: Based on your crew size whilst in nebulae (extra crew members generate 0.1 supplies/day each)
+- **Limits**: Fuel stops at 20% of your tank capacity, supplies at 20% of cargo space
 
-Defaults (v0.6.1):
-- Fuel rate 4%; fuel soft cap 20%; hard cap 0; margin 0
-- Supply limit 20%; hard limit 0; crew usage "extra"; per-crew 0.1
+### Customising Your Experience
+Press **F2** in-game to open the settings menu and find "Ramscoop Configuration":
 
-### Manual Configuration (settings.json)
-Primarily for development. Note: this mod uses a non-standard JSON format where some string values are unquoted (e.g., `crew_usage: extra`). LunaLib values are applied first if present; missing keys fall back to `settings.json`.
+**🎮 General Tab**
+- Master on/off switch for the entire mod
+- Enable/disable fuel and supply generation separately
 
-#### Settings Reference:
-- `scoop_toggle_default_on`: true/false master toggle default on load
-- `enable_fuel`: Enable/disable fuel generation
-- `enable_supplies`: Enable/disable supplies generation
-- `fuel_per_day`: Fuel generated per day as a fraction of max fuel (e.g., `.04` = 4%)
-- Nebula fuel: `nebula_fuel_per_day`, `nebula_percent_fuel_limit`, `nebula_hard_fuel_limit`, `nebula_fuel_cap_margin`
-- Corona fuel: `corona_fuel_per_day`, `corona_percent_fuel_limit`, `corona_hard_fuel_limit`, `corona_fuel_cap_margin`
-- `percent_supply_limit`: Fraction of cargo capacity to fill with supplies (`.20` = 20%)
-- `hard_supply_limit`: Hard limit on supply generation (`0` = no limit)
-- `crew_usage`: How crew affects supply generation (`extra`, `all`, or `nocrew` – unquoted)
-- `supply_per_crew`: Supplies generated per crew per day (e.g., `.1`)
-- `no_crew_gen`: For `nocrew`, choose `percent` (fraction of cargo/day) or `flat`
-- `no_crew_rate`: Rate used with `no_crew_gen`
+**🌌 Nebula Tab** 
+- Adjust fuel generation rate (0-100% per day)
+- Set fuel collection limits to prevent overfilling
+- Configure supply generation based on crew or cargo space
+- Choose how crew affects supply generation
 
-Notes:
-- Fuel soft cap and rate sliders in the UI are 0–100%; the code converts them to fractions internally.
-- The mod clamps fuel additions to the minimum of the soft cap and hard cap, then subtracts the margin; this prevents the historical 0.1 over-cap issue.
-- Corona detection is robust (terrain plugin checks with a star-distance fallback). If corona fuel seems inactive, check starsector.log for a line starting with "[Ramscoop] Corona mode:".
+**☀️ Corona Tab**
+- Separate fuel generation settings for star coronas
+- Independent fuel caps and rates
+- (No supply generation in coronas - too dangerous!)
+
+### Troubleshooting
+**Not collecting resources?** 
+- Make sure you're in a nebula (purple/coloured space clouds) or near a star corona
+- Check that the mod is enabled in your F2 settings menu
+- Verify both this mod and LunaLib are enabled in the launcher
+
+**Want different rates?**
+- All generation rates can be adjusted from 0% to 100% per day
+- Set any rate to 0% to disable that type of resource collection
+- Fuel and supply generation can be controlled independently
+
+**Advanced Configuration**
+For modders and advanced users, manual configuration is available through `settings.json`. See the technical documentation section below for details.
 
 ## Compatibility
 - Starsector 0.98a-RC8
@@ -72,11 +94,37 @@ See [changelog.md](changelog.md) for version history and [MIGRATION_REPORT.md](M
 
 Build note: the PowerShell script compiles against the Starsector API and LunaLib. If your LunaLib folder name differs from `03_LunaLib-2.0.4`, update the LunaLib path in `build.ps1` accordingly.
 
-## Credits
-- Original mod by Meridias561 ([Nexus Mods profile](https://next.nexusmods.com/profile/Meridias561))
-- Updated for Starsector 0.98a-RC8 by powerfulqa
-- Robust LunaLib settings application finalized in v0.4.1
-- Additional Play Testing and UX consideration @Nerhtal
+## Credits & History
+🎖️ **Original Creator**: Meridias561 - Created the original Passive Ramscoop mod  
+🛠️ **Current Maintainer**: PowerfulQA - Updated for modern Starsector, added LunaLib integration  
+🧪 **Testing & UX**: @Nerhtal - Playtesting and user experience improvements  
+
+**With permission from the original author**, this mod has been updated and modernised for current Starsector versions with many quality-of-life improvements including the in-game configuration system.
+
+---
+
+## Technical Documentation
+
+### Manual Configuration (settings.json)
+For advanced users and modders. LunaLib settings take priority when available.
+
+#### Key Settings:
+- `scoop_toggle_default_on`: Master toggle default state
+- `enable_fuel`/`enable_supplies`: Enable/disable resource types
+- `fuel_per_day`: Daily fuel generation rate (fraction of max capacity)
+- Nebula/Corona fuel: Independent rate and cap settings
+- `percent_supply_limit`: Supply generation limit (fraction of cargo space)
+- `crew_usage`: Crew usage mode (`extra`, `all`, or `nocrew`)
+
+### Development
+Build scripts available for developers:
+- `build.ps1` – PowerShell build script  
+- `build.bat` – Windows batch build script
+
+See [DEVELOPMENT.md](DEVELOPMENT.md) for detailed development information.
+
+## Version History
+See [changelog.md](changelog.md) for complete version history and [MIGRATION_REPORT.md](MIGRATION_REPORT.md) for technical migration details.
 
 ## Licence
 Creative Commons Attribution-NonCommercial 4.0 International Licence (CC BY-NC 4.0) with additional restrictions.

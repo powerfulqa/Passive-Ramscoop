@@ -91,7 +91,7 @@ Please ensure you test your changes thoroughly before submitting.
 
 ## Licence
 
-This project is licensed under the Creative Commons Attribution-NonCommercial 4.0 International Licence (CC BY-NC 4.0) – see the [LICENSE.txt](LICENSE.txt) file for details.
+This project is licenced under the Creative Commons Attribution-NonCommercial 4.0 International Licence (CC BY-NC 4.0) – see the [LICENSE.txt](LICENSE.txt) file for details.
 
 This licence allows:
 - Free use and modification of the mod for personal use
