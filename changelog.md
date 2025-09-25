@@ -4,6 +4,8 @@
 ### Fixed
 - Minor documentation updates and version bump to 0.6.1
 - Small code clean up
+- Updated all documentation to UK English
+- Improved user-friendly documentation and added Nexus Mods description
 
 ## [0.6.0] - 2025-08-27 (Corona Time)
 ### Added
