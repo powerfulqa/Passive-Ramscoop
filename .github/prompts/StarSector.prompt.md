@@ -1,4 +1,4 @@
-Role & Goal
+﻿Role & Goal
 Senior Java dev for Starsector mods.
 
 Update legacy mods to 0.98a‑RC8 with minimal, behaviour‑preserving changes.
@@ -143,6 +143,11 @@ Context: Fix ensured LunaLib settings are applied on game load/runtime and overr
 - Keep logging minimal and useful:
   - One snapshot line on game load with the final resolved values.
   - Optional rare traces for meaningful adds or disabled paths.
+- **LunaSettings.csv key naming discipline** (critical for avoiding runtime crashes):
+  - Every `LunaSettings.getDouble/getBoolean/getString(modId, "key_name")` call in code MUST have a matching `fieldID` in `data/config/LunaSettings.csv`.
+  - Use consistent naming conventions: if code uses `ramscoop_` prefix for general settings, CSV should match.
+  - Audit all LunaSettings API calls against CSV when adding new settings or renaming existing ones.
+  - Consider using a search pattern to validate: grep for `LunaSettings.get.*\(".*",\s*"([^"]+)"` and cross-reference with CSV fieldID column.
 
 ### Don’t
 - Don’t access `Global` in static initializers or during class load (can break plugin construction).
@@ -163,3 +168,23 @@ Context: Fix ensured LunaLib settings are applied on game load/runtime and overr
   - Nebula detection: use `MutableFleetStatsAPI` with `"nebula_stat_mod"` marker.
   - If a LunaLib control appears in the wrong tab or with an unexpected range, fix the `tab` column and `minValue/maxValue` in `data/config/LunaSettings.csv` and rebuild.
   - If corona fuel doesn’t run: confirm the log shows a "[Ramscoop] Corona mode:" line; if absent, verify terrain detection or adjust the fallback buffer around the star radius.
+- **If LunaLib crashes with "Value X of type Y not found in JSONObject":**
+  - **Root Cause**: LunaLib can't find a setting key that code is trying to load.
+
+  - **Fix**: Ensure ALL keys referenced in code via `LunaSettings.getDouble/getBoolean/getString(modId, key)` exist in `data/config/LunaSettings.csv` with matching `fieldID`.
+  - **Key naming**: fieldID in CSV must exactly match the key string in code (case-sensitive).
+  - **Validation**: Grep code for `LunaSettings.get` calls and verify each key exists in CSV.
+  - **Null handling**: Wrap LunaSettings calls in try-catch blocks to handle missing/uninitialized settings gracefully:
+    ``java
+    try {
+        value = LunaSettings.getDouble(MOD_ID, "key_name");
+    } catch (Exception e) {
+        value = DEFAULT_VALUE; // fallback
+    }
+    ``
+  - **Common mistakes**:
+    - Using different key names in code vs CSV (e.g., `ramscoop_percent_supply_limit` in code but `nebula_percent_supply_limit` in CSV).
+    - Missing keys entirely in CSV that code expects (e.g., code calls `ramscoop_supply_per_crew` but CSV only has `nebula_supply_per_crew`).
+    - Forgetting that LunaLib settings are only saved after user interaction - first load will have null values unless defaults are in CSV.
+  - **Backward compatibility**: When renaming keys, consider keeping old keys marked as "(Legacy)" in CSV for saves that have old settings.
+  - **Testing**: After CSV changes, delete `m561_ramscoop.json` (or your mod's JSON) from `saves/common/LunaSettings/` to force regeneration with new keys.
