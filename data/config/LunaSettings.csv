@@ -17,8 +17,8 @@ nebula_hard_fuel_limit,Nebula Fuel Hard Cap (absolute units),Double,0,,Absolute 
 nebula_fuel_cap_margin,Nebula Fuel Cap Margin (units),Double,0,,Margin to keep below cap so you have salvage headroom.,0,1000,Nebula
 ,,,,,,,,
 nebula_supply_header,Nebula Supply Generation,Header,Nebula Supply Generation,,,,,Nebula
-nebula_percent_supply_limit,Supply Generation Limit,Double,0.20,,Generate supplies up to this fraction of cargo capacity.,0.1,1.0,Nebula
-nebula_hard_supply_limit,Hard Supply Limit,Double,0,,Hard limit on supplies in nebula (0 = none).,0,10000,Nebula
+ramscoop_percent_supply_limit,Supply Generation Limit,Double,0.20,,Generate supplies up to this fraction of cargo capacity.,0.1,1.0,Nebula
+ramscoop_hard_supply_limit,Hard Supply Limit,Double,0,,Hard limit on supplies in nebula (0 = none).,0,10000,Nebula
 nebula_crew_header,Crew Usage,Header,Crew Usage,,,,,Nebula
 nebula_crew_usage,Crew Usage Mode,Radio,extra,"extra, all, nocrew","[extra] = over min; [all] = all crew; [nocrew] = ignore crew",,,Nebula
 nebula_supply_per_crew,Supply per Crew,Double,0.1,,Supplies each crew generates per day.,0.01,10.0,Nebula

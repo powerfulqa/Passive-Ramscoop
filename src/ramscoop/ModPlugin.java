@@ -108,9 +108,10 @@ public class ModPlugin extends BaseModPlugin {
             try { nebula_hard_fuel_limit = LunaSettings.getDouble(MOD_ID, "nebula_hard_fuel_limit").floatValue(); } catch (Throwable ignored) {}
             try { nebula_fuel_cap_margin = LunaSettings.getDouble(MOD_ID, "nebula_fuel_cap_margin").floatValue(); } catch (Throwable ignored) {}
             
-            percent_supply_limit = LunaSettings.getDouble(MOD_ID, "ramscoop_percent_supply_limit").floatValue();
-            hard_supply_limit = LunaSettings.getDouble(MOD_ID, "ramscoop_hard_supply_limit").floatValue();
-            supplies_per_crew = LunaSettings.getDouble(MOD_ID, "ramscoop_supply_per_crew").floatValue();
+            // Supply limit settings with null-handling (fixed: nebula_* → ramscoop_* key names)
+            try { percent_supply_limit = LunaSettings.getDouble(MOD_ID, "ramscoop_percent_supply_limit").floatValue(); } catch (Throwable ignored) {}
+            try { hard_supply_limit = LunaSettings.getDouble(MOD_ID, "ramscoop_hard_supply_limit").floatValue(); } catch (Throwable ignored) {}
+            try { supplies_per_crew = LunaSettings.getDouble(MOD_ID, "ramscoop_supply_per_crew").floatValue(); } catch (Throwable ignored) {}
             // Supply settings now live under Nebula as duplicates; read either key
             try { crew_usage = LunaSettings.getString(MOD_ID, "nebula_crew_usage"); } catch (Throwable e1) { try { crew_usage = LunaSettings.getString(MOD_ID, "ramscoop_crew_usage"); } catch (Throwable ignored) {} }
             try { no_crew_gen = LunaSettings.getString(MOD_ID, "nebula_no_crew_gen"); } catch (Throwable e2) { try { no_crew_gen = LunaSettings.getString(MOD_ID, "ramscoop_no_crew_gen"); } catch (Throwable ignored) {} }

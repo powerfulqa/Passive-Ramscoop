@@ -1,5 +1,11 @@
 # Changelog 
 
+## [0.6.2] - 2025-10-09
+### Fixed
+- Fixed LunaLib settings loading crash: changed `nebula_percent_supply_limit` → `ramscoop_percent_supply_limit` and `nebula_hard_supply_limit` → `ramscoop_hard_supply_limit` in `LunaSettings.csv` to match code expectations
+- Added null-handling for supply limit settings to prevent `NullPointerException` when LunaLib settings haven't been initialized yet
+- Users reported errors: "Value ramscoop_percent_supply_limit of type Double not found in JSONObject" - now resolved
+
 ## [0.6.1] - 2025-08-28
 ### Fixed
 - Minor documentation updates and version bump to 0.6.1
