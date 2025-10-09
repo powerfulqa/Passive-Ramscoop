@@ -4,6 +4,9 @@
 ### Fixed
 - Fixed LunaLib settings loading crash: changed `nebula_percent_supply_limit` → `ramscoop_percent_supply_limit` and `nebula_hard_supply_limit` → `ramscoop_hard_supply_limit` in `LunaSettings.csv` to match code expectations
 - Added null-handling for supply limit settings to prevent `NullPointerException` when LunaLib settings haven't been initialized yet
+- Added missing `ramscoop_supply_per_crew` key to CSV (code expected this, but CSV only had `nebula_supply_per_crew`)
+- Added missing `corona_caps_reuse` setting to CSV for corona fuel cap reuse control
+- Kept `nebula_supply_per_crew` as legacy key for backward compatibility
 - Users reported errors: "Value ramscoop_percent_supply_limit of type Double not found in JSONObject" - now resolved
 
 ## [0.6.1] - 2025-08-28
