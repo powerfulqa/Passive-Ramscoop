@@ -90,9 +90,9 @@ This mod includes build scripts for development:
 - `build.ps1` – PowerShell build script
 - `build.bat` – Windows batch build script
 
-See [changelog.md](changelog.md) for version history and [MIGRATION_REPORT.md](MIGRATION_REPORT.md) for technical migration details.
+See [CHANGELOG.md](CHANGELOG.md) for version history and [docs/MIGRATION_REPORT.md](docs/MIGRATION_REPORT.md) for technical migration details.
 
-Build note: the PowerShell script compiles against the Starsector API and LunaLib. If your LunaLib folder name differs from `03_LunaLib`, update the script or symlink accordingly.LunaLib-2.0.4`, update the LunaLib path in `build.ps1` accordingly.
+Build note: the PowerShell script compiles against the Starsector API and LunaLib. If your LunaLib folder name differs from `03_LunaLib`, update the LunaLib path in `build.ps1` accordingly.
 
 ## Credits & History
 🎖️ **Original Creator**: Meridias561 - Created the original Passive Ramscoop mod  
@@ -121,10 +121,10 @@ Build scripts available for developers:
 - `build.ps1` – PowerShell build script  
 - `build.bat` – Windows batch build script
 
-See [DEVELOPMENT.md](DEVELOPMENT.md) for detailed development information.
+See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for detailed development information.
 
 ## Version History
-See [changelog.md](changelog.md) for complete version history and [MIGRATION_REPORT.md](MIGRATION_REPORT.md) for technical migration details.
+See [CHANGELOG.md](CHANGELOG.md) for complete version history and [docs/MIGRATION_REPORT.md](docs/MIGRATION_REPORT.md) for technical migration details.
 
 ## Licence
 Creative Commons Attribution-NonCommercial 4.0 International Licence (CC BY-NC 4.0) with additional restrictions.
