@@ -83,7 +83,7 @@ For modders and advanced users, manual configuration is available through `setti
 - LunaLib 2.0.4+ (required)
 - LunaLib Version Checker supported
 - No known mod conflicts
-- Current version: 0.6.2
+- Current version: 0.6.3
 
 ## Development
 This mod includes build scripts for development:
@@ -92,7 +92,7 @@ This mod includes build scripts for development:
 
 See [changelog.md](changelog.md) for version history and [MIGRATION_REPORT.md](MIGRATION_REPORT.md) for technical migration details.
 
-Build note: the PowerShell script compiles against the Starsector API and LunaLib. If your LunaLib folder name differs from `03_LunaLib-2.0.4`, update the LunaLib path in `build.ps1` accordingly.
+Build note: the PowerShell script compiles against the Starsector API and LunaLib. If your LunaLib folder name differs from `03_LunaLib`, update the script or symlink accordingly.LunaLib-2.0.4`, update the LunaLib path in `build.ps1` accordingly.
 
 ## Credits & History
 🎖️ **Original Creator**: Meridias561 - Created the original Passive Ramscoop mod  

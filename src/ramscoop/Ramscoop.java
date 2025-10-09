@@ -20,28 +20,45 @@ import com.fs.starfarer.api.util.IntervalUtil;
 
 public class Ramscoop implements EveryFrameScript {
    private static final Logger LOG = Global.getLogger(Ramscoop.class);
-   private float settingsCheckTimer = 0f;
-   private static final float SETTINGS_CHECK_INTERVAL = 10f;
    
-   // Store settings used by generation
+   // Debug flag - set to false for production builds
+   private static final boolean DEBUG_MODE = false;
+   
+   // Constants for intervals and defaults
+   private static final float SETTINGS_CHECK_INTERVAL = 10f; // Check settings every 10 seconds
+   private static final float INTERVAL_MIN = 0.09f; // Minimum interval between generation ticks
+   private static final float INTERVAL_MAX = 0.11f; // Maximum interval between generation ticks
+   private static final float DEFAULT_FUEL_PER_DAY = 0.1f;
+   private static final float DEFAULT_SUPPLIES_PER_CREW = 0.1f;
+   private static final float DEFAULT_PERCENT_SUPPLY_LIMIT = 0.35f;
+   private static final float DEFAULT_HARD_SUPPLY_LIMIT = 0.0f;
+   private static final String DEFAULT_CREW_USAGE = "extra";
+   private static final String DEFAULT_NO_CREW_GEN = "percent";
+   private static final float DEFAULT_NO_CREW_RATE = 0.1f;
+   
+   private float settingsCheckTimer = 0f;
+   
+   // Store settings used by generation (updated from ModPlugin periodically)
    private boolean enable_fuel = true;
    private boolean enable_supplies = true;
-   private float fuel_per_day = 0.1f;
-   private float supplies_per_crew = 0.1f;
-   private float percent_supply_limit = 0.35f;
-   private float hard_supply_limit = 0.0f;
-   private String crew_usage = "extra";
-   private String no_crew_gen = "percent";
-   private float no_crew_rate = 0.1f;
+   private float fuel_per_day = DEFAULT_FUEL_PER_DAY;
+   private float supplies_per_crew = DEFAULT_SUPPLIES_PER_CREW;
+   private float percent_supply_limit = DEFAULT_PERCENT_SUPPLY_LIMIT;
+   private float hard_supply_limit = DEFAULT_HARD_SUPPLY_LIMIT;
+   private String crew_usage = DEFAULT_CREW_USAGE;
+   private String no_crew_gen = DEFAULT_NO_CREW_GEN;
+   private float no_crew_rate = DEFAULT_NO_CREW_RATE;
    
    // Load legacy config only once if LunaLib is not enabled
    private boolean jsonLoaded = false;
    
-   private final IntervalUtil interval = new IntervalUtil(0.09f, 0.11f); // ~0.1 days; adjust if needed for balance.
+   private final IntervalUtil interval = new IntervalUtil(INTERVAL_MIN, INTERVAL_MAX);
    private float elapsedSinceTick = 0f;
    
    public Ramscoop() {
-      LOG.info("[Ramscoop] Initialized");
+      if (DEBUG_MODE) {
+         LOG.info("[Ramscoop] Initialized");
+      }
       // Proactively ask plugin to attempt loading if not done yet
       try { ramscoop.ModPlugin.reloadSettings(); } catch (Throwable ignored) {}
    }
@@ -227,8 +244,10 @@ public class Ramscoop implements EveryFrameScript {
                  float hardCap = coronaHard > 0f ? coronaHard : Float.MAX_VALUE;
                  float targetCap = Math.min(maxFuel, Math.min(coronaSoft, hardCap));
                  float margin = Math.max(0f, coronaMargin);
-                 // Diagnostic log per prompt (minimal)
-                 LOG.info("[Ramscoop] Corona mode: add=" + add + ", soft=" + coronaSoft + ", hard=" + coronaHard + ", margin=" + margin + ", fuel=" + fuel + ", target=" + targetCap);
+                 // Diagnostic log (debug only)
+                 if (DEBUG_MODE) {
+                     LOG.info("[Ramscoop] Corona mode: add=" + add + ", soft=" + coronaSoft + ", hard=" + coronaHard + ", margin=" + margin + ", fuel=" + fuel + ", target=" + targetCap);
+                 }
                  if (fuel < targetCap - margin) {
                      float remaining = Math.max(0f, (targetCap - margin) - fuel);
                      float fuelToAdd = Math.min(add, remaining);
@@ -248,7 +267,9 @@ public class Ramscoop implements EveryFrameScript {
 
              // Supplies
              if (!enable_supplies || !scoopEnabled) {
-                 LOG.info("[Ramscoop] Supplies disabled (nebula present or scoop off)");
+                 if (DEBUG_MODE) {
+                     LOG.info("[Ramscoop] Supplies disabled (nebula present or scoop off)");
+                 }
              } else {
                  // Calculate supplies generation based on crew settings
                  switch (crew_usage) {
@@ -291,8 +312,10 @@ public class Ramscoop implements EveryFrameScript {
                        suppliesToAdd = minspace;
                        fleet.getCargo().addSupplies(suppliesToAdd);
                     }
-                     // Optional: keep minimal meaningful trace
-                     if (suppliesToAdd > 0.5f) { LOG.info("[Ramscoop] Added supplies: " + suppliesToAdd); }
+                     // Debug logging only
+                     if (DEBUG_MODE && suppliesToAdd > 0.5f) { 
+                         LOG.info("[Ramscoop] Added supplies: " + suppliesToAdd); 
+                     }
                  }
              }
 
@@ -312,11 +335,15 @@ public class Ramscoop implements EveryFrameScript {
                          float fuelToAdd = Math.min(fuelperday * days, remaining);
                          if (fuelToAdd > 0f) {
                              fleet.getCargo().addFuel(fuelToAdd);
-                             if (fuelToAdd > 0.5f) { LOG.info("[Ramscoop] Added fuel: " + fuelToAdd); }
+                             if (DEBUG_MODE && fuelToAdd > 0.5f) { 
+                                 LOG.info("[Ramscoop] Added fuel: " + fuelToAdd); 
+                             }
                          }
                      }
                  } else if (!enable_fuel) {
-                     LOG.info("[Ramscoop] Fuel generation disabled");
+                     if (DEBUG_MODE) {
+                         LOG.info("[Ramscoop] Fuel generation disabled");
+                     }
                  }
              } catch (Throwable t) {
                  // Non-fatal

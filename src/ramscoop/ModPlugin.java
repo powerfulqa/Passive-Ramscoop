@@ -11,41 +11,58 @@ public class ModPlugin extends BaseModPlugin {
     private static final Logger LOG = Global.getLogger(ModPlugin.class);
     public static final String MOD_ID = "m561_ramscoop";
     
-    // Default values (fallbacks; will be overridden by LunaLib or settings.json)
+    // Default constant values (fallbacks if LunaLib/settings.json not available)
+    private static final float DEFAULT_FUEL_PER_DAY = 0.1f;
+    private static final float DEFAULT_SUPPLIES_PER_CREW = 0.1f;
+    private static final float DEFAULT_PERCENT_SUPPLY_LIMIT = 0.35f;
+    private static final float DEFAULT_HARD_SUPPLY_LIMIT = 0.0f;
+    private static final float DEFAULT_PERCENT_FUEL_LIMIT = 1.0f; // 100% - no limit by default
+    private static final float DEFAULT_HARD_FUEL_LIMIT = 0.0f; // disabled by default
+    private static final float DEFAULT_FUEL_CAP_MARGIN = 0.0f;
+    private static final float DEFAULT_CORONA_FUEL_PER_DAY = 0.25f; // 25% max fuel per day
+    private static final float DEFAULT_NO_CREW_RATE = 0.1f;
+    private static final String DEFAULT_CREW_USAGE = "extra";
+    private static final String DEFAULT_NO_CREW_GEN = "percent";
+    
+    // Runtime settings (loaded from LunaLib or settings.json, defaults above used as fallback)
     public static boolean enable_fuel = true;
     public static boolean enable_supplies = true;
-    public static float fuel_per_day = 0.1f;
-    public static float supplies_per_crew = 0.1f;
-    public static float percent_supply_limit = 0.35f;
-    public static float hard_supply_limit = 0.0f;
-    // New fuel limiting settings
+    public static float fuel_per_day = DEFAULT_FUEL_PER_DAY;
+    public static float supplies_per_crew = DEFAULT_SUPPLIES_PER_CREW;
+    public static float percent_supply_limit = DEFAULT_PERCENT_SUPPLY_LIMIT;
+    public static float hard_supply_limit = DEFAULT_HARD_SUPPLY_LIMIT;
     // Nebula caps
-    public static float nebula_percent_fuel_limit = 1.0f; // fraction
-    public static float nebula_hard_fuel_limit = 0.0f;
-    public static float nebula_fuel_cap_margin = 0.0f;
+    public static float nebula_percent_fuel_limit = DEFAULT_PERCENT_FUEL_LIMIT;
+    public static float nebula_hard_fuel_limit = DEFAULT_HARD_FUEL_LIMIT;
+    public static float nebula_fuel_cap_margin = DEFAULT_FUEL_CAP_MARGIN;
     // Corona caps
-    public static float corona_percent_fuel_limit = 1.0f;
-    public static float corona_hard_fuel_limit = 0.0f;
-    public static float corona_fuel_cap_margin = 0.0f;
-    // No global caps; each tab controls its own
-    public static boolean scoop_toggle_default_on = true; // default enabled
-    public static String crew_usage = "extra";
-    public static String no_crew_gen = "percent";
-    public static float no_crew_rate = 0.1f;
+    public static float corona_percent_fuel_limit = DEFAULT_PERCENT_FUEL_LIMIT;
+    public static float corona_hard_fuel_limit = DEFAULT_HARD_FUEL_LIMIT;
+    public static float corona_fuel_cap_margin = DEFAULT_FUEL_CAP_MARGIN;
+    // Runtime toggles and modes
+    public static boolean scoop_toggle_default_on = true;
+    public static String crew_usage = DEFAULT_CREW_USAGE;
+    public static String no_crew_gen = DEFAULT_NO_CREW_GEN;
+    public static float no_crew_rate = DEFAULT_NO_CREW_RATE;
     // Corona settings
     public static boolean corona_enable_fuel = true;
-    public static float corona_fuel_per_day = 0.25f; // fraction of max per day
+    public static float corona_fuel_per_day = DEFAULT_CORONA_FUEL_PER_DAY;
     public static boolean corona_caps_reuse = true;
-    // no corona supply drain
     
     // Track if LunaLib is being used and if we've successfully loaded settings
     private static boolean lunaLibReady = false;
     private static boolean settingsLoaded = false;
     
+    // Debug flag - set to false for production builds
+    private static final boolean DEBUG_MODE = false;
+    
     public ModPlugin() {
         try {
-            LOG.info("[Ramscoop] ModPlugin constructed (v0.4.1)");
+            if (DEBUG_MODE) {
+                LOG.info("[Ramscoop] ModPlugin constructed (v0.6.2)");
+            }
         } catch (Exception e) {
+            // Critical errors should always be reported
             System.out.println("Ramscoop: CRITICAL ERROR in constructor: " + e.getMessage());
             e.printStackTrace();
         }

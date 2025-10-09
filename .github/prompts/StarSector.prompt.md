@@ -201,3 +201,22 @@ Context: Fix ensured LunaLib settings are applied on game load/runtime and overr
     - Forgetting that LunaLib settings are only saved after user interaction - first load will have null values unless defaults are in CSV.
   - **Backward compatibility**: When renaming keys, consider keeping old keys marked as "(Legacy)" in CSV for saves that have old settings.
   - **Testing**: After CSV changes, delete `m561_ramscoop.json` (or your mod's JSON) from `saves/common/LunaSettings/` to force regeneration with new keys.
+- **If LunaLib crashes with "MissingFormatArgumentException" when opening settings menu:**
+  - **Root Cause**: LunaLib uses Java's `String.format()` to display setting descriptions in tooltips. The percent sign (`%`) is a special format specifier character.
+  - **Symptom**: Crash when hovering over settings or opening certain tabs, error like `java.util.MissingFormatArgumentException: Format specifier '% o'`
+  - **Fix**: Escape ALL percent signs in `data/config/LunaSettings.csv` descriptions as `%%`:
+    - WRONG: `"Generate 4% of max fuel per day"` → Crashes with `% o` format error
+    - CORRECT: `"Generate 4%% of max fuel per day"` → Displays as "Generate 4% of max fuel per day"
+  - **Common mistakes**:
+    - Using single `%` in any description text that contains spaces after it (e.g., `4% of`, `20% per`, `10% capacity`)
+    - Forgetting that `%%` in the CSV becomes a single `%` when displayed to users
+    - Not testing the settings menu after changing descriptions
+  - **Validation**: After updating descriptions, always:
+    1. Open the game
+    2. Open LunaLib settings menu (default key: `=`)
+    3. Navigate to your mod's tabs
+    4. Hover over EVERY setting to ensure tooltips display without crashing
+  - **Examples of safe descriptions**:
+    - `"Rate of 25%% per day"` → Displays as "Rate of 25% per day" ✅
+    - `"Stops at 100%% capacity"` → Displays as "Stops at 100% capacity" ✅
+    - `"Uses 0.1 (equals 10%% of cargo)"` → Displays as "Uses 0.1 (equals 10% of cargo)" ✅

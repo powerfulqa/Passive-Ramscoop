@@ -1,5 +1,21 @@
 # Changelog 
 
+## [0.6.3] - 2025-10-09
+### Fixed
+- Fixed crash when opening LunaLib settings menu (percent signs in descriptions are now properly escaped as %%)
+- Eliminated excessive debug logging that was bloating log files (174+ entries per session reduced to 0)
+
+### Changed
+- Improved all LunaSettings descriptions with detailed explanations and practical examples for better user experience
+- Code cleanup: Added descriptive constants for all default values (improved maintainability)
+- All debug logging now controlled by DEBUG_MODE flag (set to false for production builds)
+
+### Technical
+- Added DEBUG_MODE flag to both ModPlugin and Ramscoop classes
+- Conditionalized 7 debug logging statements
+- No functionality changes to fuel/supply generation mechanics
+- 100% backward compatible with existing saves and configurations
+
 ## [0.6.2] - 2025-10-09
 ### Fixed
 - Fixed key mismatch: nebula_percent_supply_limit -> ramscoop_percent_supply_limit
