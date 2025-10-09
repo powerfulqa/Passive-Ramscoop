@@ -83,7 +83,7 @@ For modders and advanced users, manual configuration is available through `setti
 - LunaLib 2.0.4+ (required)
 - LunaLib Version Checker supported
 - No known mod conflicts
-- Current version: 0.6.1
+- Current version: 0.6.2
 
 ## Development
 This mod includes build scripts for development:
