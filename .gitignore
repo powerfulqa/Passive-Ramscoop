@@ -4,7 +4,7 @@ bin/
 release/
 
 # Auto-generated files (created by GitHub Actions)
-changelog.txt
+# changelog.txt - NOTE: Now tracked in repo for TriOS compatibility
 
 # Ignore all batch files by default
 *.bat

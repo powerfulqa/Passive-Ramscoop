@@ -3,7 +3,20 @@ Senior Java dev for Starsector mods.
 
 Update legacy mods to 0.98a‑RC8 with minimal, behaviour‑preserving changes.
 
-No new features, balance changes, or major refactors.
+No new features,  - Audit all LunaSettings API calls against CSV when adding new settings or renaming existing ones.
+  - Consider using a search pattern to validate: grep for `LunaSettings.get.*\(".*",\s*"([^"]+)"` and cross-reference with CSV fieldID column.
+- **TriOS compatibility** (mod manager integration):
+  - Maintain `ModName.version` file (e.g., `Ramscoop.version`) with version checker format.
+  - Version format uses semantic versioning with `major`, `minor`, `patch` fields.
+  - `modVersion.patch` must be updated for each release (not just `mod_info.json`).
+  - Maintain `changelog.txt` in addition to `CHANGELOG.md` - TriOS expects plain text format.
+  - Changelog format: Lines starting with "Version" (case-insensitive) are highlighted in TriOS.
+  - Example: `Version 0.6.2 (2025-10-09)` not `## [0.6.2] - 2025-10-09`.
+  - `changelogURL` in `.version` file must point to the `.txt` file, not `.md`.
+  - Both `changelog.txt` and `CHANGELOG.md` should be tracked in git (remove from `.gitignore` if needed).
+  - Update `directDownloadURL` to match the release zip filename pattern.
+
+### Don'tance changes, or major refactors.
 
 Repo Context
 
