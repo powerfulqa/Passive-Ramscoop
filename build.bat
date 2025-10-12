@@ -2,14 +2,36 @@
 setlocal enabledelayedexpansion
 
 :: Configuration
-set SS_DIR=C:\Program Files (x86)\Fractal Softworks\Starsector
+:: Try to detect Starsector installation. Prefer Program Files (x86), fall back to G:\Starsector
+set "SS_DIR="
+set "PF86="
+for /f "usebackq tokens=*" %%I in ("%ProgramFiles(x86)%") do set "PF86=%%~I"
+if defined PF86 (
+    set "DEFAULT_SS_DIR=%PF86%\Fractal Softworks\Starsector"
+) else (
+    set "DEFAULT_SS_DIR=C:\Program Files (x86)\Fractal Softworks\Starsector"
+)
+if exist "%DEFAULT_SS_DIR%" (
+    set "SS_DIR=%DEFAULT_SS_DIR%"
+    echo Using Starsector directory: %SS_DIR%
+) else if exist "G:\Starsector" (
+    set "SS_DIR=G:\Starsector"
+    echo Using Starsector directory: %SS_DIR%
+) else (
+    rem Neither path found; default to DEFAULT_SS_DIR and warn
+    set "SS_DIR=%DEFAULT_SS_DIR%"
+    echo WARNING: Could not find Starsector installation in %DEFAULT_SS_DIR% or G:\Starsector
+    echo Please edit build.bat and set SS_DIR to your Starsector installation path.
+)
 set MOD_NAME=Passive-Ramscoop
 set MOD_ID=m561_ramscoop
 set SRC_DIR=%cd%\src
 set OUT_DIR=%cd%\jars
+set OUT_CLASSES=%cd%\build\classes
 
 :: Create directories if they don't exist
 if not exist "%OUT_DIR%" mkdir "%OUT_DIR%"
+if not exist "%OUT_CLASSES%" mkdir "%OUT_CLASSES%"
 
 :: Set up classpath with all necessary libraries from Starsector
 set CLASSPATH="%SS_DIR%\starsector-core\starfarer.api.jar"
@@ -26,7 +48,7 @@ set CLASSPATH=%CLASSPATH%;"%SS_DIR%\starsector-core\log4j-1.2.9.jar"
 
 :: Compile Java files
 echo Compiling Java files...
-javac --release 8 -cp %CLASSPATH% -d "%SRC_DIR%" "%SRC_DIR%\ramscoop\*.java"
+javac --release 8 -cp %CLASSPATH% -d "%OUT_CLASSES%" %SRC_DIR%\ramscoop\*.java
 if %ERRORLEVEL% NEQ 0 (
     echo Compilation failed!
     exit /b %ERRORLEVEL%
@@ -44,6 +66,7 @@ for /f "tokens=*" %%i in ('where java') do (
 )
 
 :: Use jar from Java installation or fall back to jar command if in PATH
+cd "%OUT_CLASSES%"
 if exist "%JAVA_BIN%jar.exe" (
     echo Using jar from: %JAVA_BIN%jar.exe
     "%JAVA_BIN%jar.exe" cf "%OUT_DIR%\Ramscoop.jar" ramscoop\*.class

@@ -26,6 +26,8 @@ nebula_supply_per_crew,Supply per Crew (Legacy),Double,0.1,,"Legacy compatibilit
 nebula_nocrew_header,No-Crew Generation,Header,No-Crew Generation,,,,,Nebula
 nebula_no_crew_gen,No-Crew Generation Type,Radio,percent,"percent, flat","When crew usage mode is set to 'nocrew', this determines the generation method: [percent] = percentage of cargo capacity per day; [flat] = fixed number of supply units per day.",,,Nebula
 nebula_no_crew_rate,No-Crew Generation Rate,Double,0.1,,"Generation rate used when crew usage is 'nocrew'. If type is 'percent', this is the fraction of cargo capacity generated per day (0.1 = 10%% of cargo/day). If type is 'flat', this is the absolute number of supplies generated per day.",0.01,10.0,Nebula
+ramscoop_enable_visual_feedback,Enable Visual Feedback,Boolean,true,,"Show visual indicators when ramscoop is active (e.g., floating text on fleet).",,,General
+ramscoop_floating_text_scale,Floating Text Duration (seconds),Double,0.7,,"How long (in seconds) the floating text remains visible after Ramscoop toggles.",0.1,3.0,General
 ,,,,,,,,
 ##### Supplies tab removed; moved into Nebula
 ,,,,,,,,

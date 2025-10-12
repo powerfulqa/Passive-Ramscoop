@@ -10,7 +10,7 @@ import lunalib.lunaSettings.LunaSettings;
 public class ModPlugin extends BaseModPlugin {
     private static final Logger LOG = Global.getLogger(ModPlugin.class);
     public static final String MOD_ID = "m561_ramscoop";
-    
+
     // Default constant values (fallbacks if LunaLib/settings.json not available)
     private static final float DEFAULT_FUEL_PER_DAY = 0.1f;
     private static final float DEFAULT_SUPPLIES_PER_CREW = 0.1f;
@@ -23,8 +23,9 @@ public class ModPlugin extends BaseModPlugin {
     private static final float DEFAULT_NO_CREW_RATE = 0.1f;
     private static final String DEFAULT_CREW_USAGE = "extra";
     private static final String DEFAULT_NO_CREW_GEN = "percent";
-    
-    // Runtime settings (loaded from LunaLib or settings.json, defaults above used as fallback)
+
+    // Runtime settings (loaded from LunaLib or settings.json, defaults above used
+    // as fallback)
     public static boolean enable_fuel = true;
     public static boolean enable_supplies = true;
     public static float fuel_per_day = DEFAULT_FUEL_PER_DAY;
@@ -48,14 +49,17 @@ public class ModPlugin extends BaseModPlugin {
     public static boolean corona_enable_fuel = true;
     public static float corona_fuel_per_day = DEFAULT_CORONA_FUEL_PER_DAY;
     public static boolean corona_caps_reuse = true;
-    
+    // Visual feedback
+    public static boolean enable_visual_feedback = true;
+    public static float floating_text_duration = 0.7f;
+
     // Track if LunaLib is being used and if we've successfully loaded settings
     private static boolean lunaLibReady = false;
     private static boolean settingsLoaded = false;
-    
+
     // Debug flag - set to false for production builds
     private static final boolean DEBUG_MODE = false;
-    
+
     public ModPlugin() {
         try {
             if (DEBUG_MODE) {
@@ -67,8 +71,9 @@ public class ModPlugin extends BaseModPlugin {
             e.printStackTrace();
         }
     }
-    
-    // Simple readiness: treat LunaLib as ready if the mod is enabled; API calls will work when it's initialized
+
+    // Simple readiness: treat LunaLib as ready if the mod is enabled; API calls
+    // will work when it's initialized
     private static boolean isLunaLibReady() {
         return Global.getSettings().getModManager().isModEnabled("lunalib");
     }
@@ -79,10 +84,14 @@ public class ModPlugin extends BaseModPlugin {
             // Check if LunaLib is ready
             boolean lunaLibEnabled = Global.getSettings().getModManager().isModEnabled("lunalib");
             LOG.info("[Ramscoop] LunaLib enabled: " + lunaLibEnabled);
-            
+
             if (lunaLibEnabled && isLunaLibReady()) {
-                // Seed from legacy settings first so missing LunaLib keys fall back to settings.json
-                try { loadLegacySettings(); } catch (Throwable ignored) {}
+                // Seed from legacy settings first so missing LunaLib keys fall back to
+                // settings.json
+                try {
+                    loadLegacySettings();
+                } catch (Throwable ignored) {
+                }
                 loadLunaLibSettings();
                 lunaLibReady = true;
                 settingsLoaded = true;
@@ -111,36 +120,97 @@ public class ModPlugin extends BaseModPlugin {
         }
         LOG.info("[Ramscoop] Settings load complete");
     }
-    
+
     private static void loadLunaLibSettings() {
         try {
             // Direct API calls (LunaLib is a required dependency)
             enable_fuel = LunaSettings.getBoolean(MOD_ID, "ramscoop_enable_fuel");
             enable_supplies = LunaSettings.getBoolean(MOD_ID, "ramscoop_enable_supplies");
             // UI provides 0..100 percent per day; convert to 0..1 fraction
-            fuel_per_day = LunaSettings.getDouble(MOD_ID, "nebula_fuel_per_day").floatValue() / 100f; // Matches CSV key for nebula
+            fuel_per_day = LunaSettings.getDouble(MOD_ID, "nebula_fuel_per_day").floatValue() / 100f; // Matches CSV key
+                                                                                                      // for nebula
             // New fuel limiting settings via LunaLib (with safe defaults if missing)
             // Nebula caps via UI (percent sliders)
-            try { nebula_percent_fuel_limit = LunaSettings.getDouble(MOD_ID, "nebula_percent_fuel_limit").floatValue() / 100f; } catch (Throwable ignored) {}
-            try { nebula_hard_fuel_limit = LunaSettings.getDouble(MOD_ID, "nebula_hard_fuel_limit").floatValue(); } catch (Throwable ignored) {}
-            try { nebula_fuel_cap_margin = LunaSettings.getDouble(MOD_ID, "nebula_fuel_cap_margin").floatValue(); } catch (Throwable ignored) {}
-            
-            // Supply limit settings with null-handling (fixed: nebula_* → ramscoop_* key names)
-            try { percent_supply_limit = LunaSettings.getDouble(MOD_ID, "ramscoop_percent_supply_limit").floatValue(); } catch (Throwable ignored) {}
-            try { hard_supply_limit = LunaSettings.getDouble(MOD_ID, "ramscoop_hard_supply_limit").floatValue(); } catch (Throwable ignored) {}
-            try { supplies_per_crew = LunaSettings.getDouble(MOD_ID, "ramscoop_supply_per_crew").floatValue(); } catch (Throwable ignored) {}
+            try {
+                nebula_percent_fuel_limit = LunaSettings.getDouble(MOD_ID, "nebula_percent_fuel_limit").floatValue()
+                        / 100f;
+            } catch (Throwable ignored) {
+            }
+            try {
+                nebula_hard_fuel_limit = LunaSettings.getDouble(MOD_ID, "nebula_hard_fuel_limit").floatValue();
+            } catch (Throwable ignored) {
+            }
+            try {
+                nebula_fuel_cap_margin = LunaSettings.getDouble(MOD_ID, "nebula_fuel_cap_margin").floatValue();
+            } catch (Throwable ignored) {
+            }
+
+            // Supply limit settings with null-handling (fixed: nebula_* → ramscoop_* key
+            // names)
+            try {
+                percent_supply_limit = LunaSettings.getDouble(MOD_ID, "ramscoop_percent_supply_limit").floatValue();
+            } catch (Throwable ignored) {
+            }
+            try {
+                hard_supply_limit = LunaSettings.getDouble(MOD_ID, "ramscoop_hard_supply_limit").floatValue();
+            } catch (Throwable ignored) {
+            }
+            try {
+                supplies_per_crew = LunaSettings.getDouble(MOD_ID, "ramscoop_supply_per_crew").floatValue();
+            } catch (Throwable ignored) {
+            }
             // Supply settings now live under Nebula as duplicates; read either key
-            try { crew_usage = LunaSettings.getString(MOD_ID, "nebula_crew_usage"); } catch (Throwable e1) { try { crew_usage = LunaSettings.getString(MOD_ID, "ramscoop_crew_usage"); } catch (Throwable ignored) {} }
-            try { no_crew_gen = LunaSettings.getString(MOD_ID, "nebula_no_crew_gen"); } catch (Throwable e2) { try { no_crew_gen = LunaSettings.getString(MOD_ID, "ramscoop_no_crew_gen"); } catch (Throwable ignored) {} }
-            try { no_crew_rate = LunaSettings.getDouble(MOD_ID, "nebula_no_crew_rate").floatValue(); } catch (Throwable e3) { try { no_crew_rate = LunaSettings.getDouble(MOD_ID, "ramscoop_no_crew_rate").floatValue(); } catch (Throwable ignored) {} }
+            try {
+                crew_usage = LunaSettings.getString(MOD_ID, "nebula_crew_usage");
+            } catch (Throwable e1) {
+                try {
+                    crew_usage = LunaSettings.getString(MOD_ID, "ramscoop_crew_usage");
+                } catch (Throwable ignored) {
+                }
+            }
+            try {
+                no_crew_gen = LunaSettings.getString(MOD_ID, "nebula_no_crew_gen");
+            } catch (Throwable e2) {
+                try {
+                    no_crew_gen = LunaSettings.getString(MOD_ID, "ramscoop_no_crew_gen");
+                } catch (Throwable ignored) {
+                }
+            }
+            try {
+                no_crew_rate = LunaSettings.getDouble(MOD_ID, "nebula_no_crew_rate").floatValue();
+            } catch (Throwable e3) {
+                try {
+                    no_crew_rate = LunaSettings.getDouble(MOD_ID, "ramscoop_no_crew_rate").floatValue();
+                } catch (Throwable ignored) {
+                }
+            }
             // Corona (UI provides percent/day for fuel rate)
-            try { corona_enable_fuel = LunaSettings.getBoolean(MOD_ID, "corona_enable_fuel"); } catch (Throwable ignored) {}
-            try { corona_fuel_per_day = LunaSettings.getDouble(MOD_ID, "corona_fuel_per_day").floatValue() / 100f; } catch (Throwable ignored) {}
-            try { corona_caps_reuse = LunaSettings.getBoolean(MOD_ID, "corona_caps_reuse"); } catch (Throwable ignored) {}
+            try {
+                corona_enable_fuel = LunaSettings.getBoolean(MOD_ID, "corona_enable_fuel");
+            } catch (Throwable ignored) {
+            }
+            try {
+                corona_fuel_per_day = LunaSettings.getDouble(MOD_ID, "corona_fuel_per_day").floatValue() / 100f;
+            } catch (Throwable ignored) {
+            }
+            try {
+                corona_caps_reuse = LunaSettings.getBoolean(MOD_ID, "corona_caps_reuse");
+            } catch (Throwable ignored) {
+            }
             // Corona caps via UI (percent slider for soft cap)
-            try { corona_percent_fuel_limit = LunaSettings.getDouble(MOD_ID, "corona_percent_fuel_limit").floatValue() / 100f; } catch (Throwable ignored) {}
-            try { corona_hard_fuel_limit = LunaSettings.getDouble(MOD_ID, "corona_hard_fuel_limit").floatValue(); } catch (Throwable ignored) {}
-            try { corona_fuel_cap_margin = LunaSettings.getDouble(MOD_ID, "corona_fuel_cap_margin").floatValue(); } catch (Throwable ignored) {}
+            try {
+                corona_percent_fuel_limit = LunaSettings.getDouble(MOD_ID, "corona_percent_fuel_limit").floatValue()
+                        / 100f;
+            } catch (Throwable ignored) {
+            }
+            try {
+                corona_hard_fuel_limit = LunaSettings.getDouble(MOD_ID, "corona_hard_fuel_limit").floatValue();
+            } catch (Throwable ignored) {
+            }
+            try {
+                corona_fuel_cap_margin = LunaSettings.getDouble(MOD_ID, "corona_fuel_cap_margin").floatValue();
+            } catch (Throwable ignored) {
+            }
             try {
                 scoop_toggle_default_on = LunaSettings.getBoolean(MOD_ID, "ramscoop_toggle_default_on");
                 // Apply immediately at runtime so UI changes take effect without reload
@@ -149,65 +219,95 @@ public class ModPlugin extends BaseModPlugin {
                     if (fleet != null) {
                         fleet.getMemoryWithoutUpdate().set("$ramscoop_enabled", scoop_toggle_default_on);
                     }
-                } catch (Throwable ignored2) {}
-            } catch (Throwable ignored) {}
-            
+                } catch (Throwable ignored2) {
+                }
+            } catch (Throwable ignored) {
+            }
+            try {
+                enable_visual_feedback = LunaSettings.getBoolean(MOD_ID, "ramscoop_enable_visual_feedback");
+            } catch (Throwable ignored) {
+            }
+            try {
+                floating_text_duration = LunaSettings.getDouble(MOD_ID, "ramscoop_floating_text_scale").floatValue();
+            } catch (Throwable ignored) {
+            }
+
             // Debug logging
             LOG.info(
-                "[Ramscoop] Final settings from LunaLib -> fuel=" + enable_fuel +
-                ", supplies=" + enable_supplies +
-                ", fuel_per_day=" + fuel_per_day +
-                ", nebula_percent_fuel_limit=" + nebula_percent_fuel_limit +
-                ", nebula_hard_fuel_limit=" + nebula_hard_fuel_limit +
-                ", nebula_fuel_cap_margin=" + nebula_fuel_cap_margin +
-                ", corona_percent_fuel_limit=" + corona_percent_fuel_limit +
-                ", corona_hard_fuel_limit=" + corona_hard_fuel_limit +
-                ", corona_fuel_cap_margin=" + corona_fuel_cap_margin +
-                ", percent_supply_limit=" + percent_supply_limit +
-                ", hard_supply_limit=" + hard_supply_limit +
-                ", crew_usage=" + crew_usage +
-                ", no_crew_gen=" + no_crew_gen +
-                ", no_crew_rate=" + no_crew_rate
-            );
+                    "[Ramscoop] Final settings from LunaLib -> fuel=" + enable_fuel +
+                            ", supplies=" + enable_supplies +
+                            ", fuel_per_day=" + fuel_per_day +
+                            ", nebula_percent_fuel_limit=" + nebula_percent_fuel_limit +
+                            ", nebula_hard_fuel_limit=" + nebula_hard_fuel_limit +
+                            ", nebula_fuel_cap_margin=" + nebula_fuel_cap_margin +
+                            ", corona_percent_fuel_limit=" + corona_percent_fuel_limit +
+                            ", corona_hard_fuel_limit=" + corona_hard_fuel_limit +
+                            ", corona_fuel_cap_margin=" + corona_fuel_cap_margin +
+                            ", percent_supply_limit=" + percent_supply_limit +
+                            ", hard_supply_limit=" + hard_supply_limit +
+                            ", crew_usage=" + crew_usage +
+                            ", no_crew_gen=" + no_crew_gen +
+                            ", no_crew_rate=" + no_crew_rate);
         } catch (Exception e) {
             LOG.warn("[Ramscoop] Failed to load LunaLib settings: " + e.getMessage(), e);
             throw new RuntimeException("Failed to load LunaLib settings", e);
         }
     }
-    
+
     private static void loadLegacySettings() {
         try {
             JSONObject config = Global.getSettings().loadJSON("settings.json", MOD_ID);
             enable_fuel = config.getBoolean("enable_fuel");
             enable_supplies = config.getBoolean("enable_supplies");
-            
+
             // Handle fuel_per_day (might not exist in older settings.json)
             if (config.has("fuel_per_day")) {
-                fuel_per_day = (float)config.getDouble("fuel_per_day");
+                fuel_per_day = (float) config.getDouble("fuel_per_day");
             }
             // Optional new fuel limit settings (legacy JSON)
-            if (config.has("nebula_percent_fuel_limit")) nebula_percent_fuel_limit = (float)config.getDouble("nebula_percent_fuel_limit");
-            if (config.has("nebula_hard_fuel_limit")) nebula_hard_fuel_limit = (float)config.getDouble("nebula_hard_fuel_limit");
-            if (config.has("nebula_fuel_cap_margin")) nebula_fuel_cap_margin = (float)config.getDouble("nebula_fuel_cap_margin");
-            
-            percent_supply_limit = (float)config.getDouble("percent_supply_limit");
-            hard_supply_limit = (float)config.getDouble("hard_supply_limit");
-            
-            supplies_per_crew = (float)config.getDouble("supply_per_crew");
+            if (config.has("nebula_percent_fuel_limit"))
+                nebula_percent_fuel_limit = (float) config.getDouble("nebula_percent_fuel_limit");
+            if (config.has("nebula_hard_fuel_limit"))
+                nebula_hard_fuel_limit = (float) config.getDouble("nebula_hard_fuel_limit");
+            if (config.has("nebula_fuel_cap_margin"))
+                nebula_fuel_cap_margin = (float) config.getDouble("nebula_fuel_cap_margin");
+
+            percent_supply_limit = (float) config.getDouble("percent_supply_limit");
+            hard_supply_limit = (float) config.getDouble("hard_supply_limit");
+
+            supplies_per_crew = (float) config.getDouble("supply_per_crew");
             // Accept new nebula_* keys or legacy names
-            if (config.has("nebula_crew_usage")) crew_usage = config.get("nebula_crew_usage").toString(); else crew_usage = config.get("crew_usage").toString();
-            if (config.has("nebula_no_crew_gen")) no_crew_gen = config.get("nebula_no_crew_gen").toString(); else no_crew_gen = config.get("no_crew_gen").toString();
-            if (config.has("nebula_no_crew_rate")) no_crew_rate = (float)config.getDouble("nebula_no_crew_rate"); else no_crew_rate = (float)config.getDouble("no_crew_rate");
+            if (config.has("nebula_crew_usage"))
+                crew_usage = config.get("nebula_crew_usage").toString();
+            else
+                crew_usage = config.get("crew_usage").toString();
+            if (config.has("nebula_no_crew_gen"))
+                no_crew_gen = config.get("nebula_no_crew_gen").toString();
+            else
+                no_crew_gen = config.get("no_crew_gen").toString();
+            if (config.has("nebula_no_crew_rate"))
+                no_crew_rate = (float) config.getDouble("nebula_no_crew_rate");
+            else
+                no_crew_rate = (float) config.getDouble("no_crew_rate");
             if (config.has("scoop_toggle_default_on")) {
-                try { scoop_toggle_default_on = config.getBoolean("scoop_toggle_default_on"); } catch (Throwable ignored) {}
+                try {
+                    scoop_toggle_default_on = config.getBoolean("scoop_toggle_default_on");
+                } catch (Throwable ignored) {
+                }
             }
             // Corona legacy
-            if (config.has("corona_enable_fuel")) corona_enable_fuel = config.getBoolean("corona_enable_fuel");
-            if (config.has("corona_fuel_per_day")) corona_fuel_per_day = (float)config.getDouble("corona_fuel_per_day");
-            if (config.has("corona_caps_reuse")) corona_caps_reuse = config.getBoolean("corona_caps_reuse");
-            if (config.has("corona_percent_fuel_limit")) corona_percent_fuel_limit = (float)config.getDouble("corona_percent_fuel_limit");
-            if (config.has("corona_hard_fuel_limit")) corona_hard_fuel_limit = (float)config.getDouble("corona_hard_fuel_limit");
-            if (config.has("corona_fuel_cap_margin")) corona_fuel_cap_margin = (float)config.getDouble("corona_fuel_cap_margin");
+            if (config.has("corona_enable_fuel"))
+                corona_enable_fuel = config.getBoolean("corona_enable_fuel");
+            if (config.has("corona_fuel_per_day"))
+                corona_fuel_per_day = (float) config.getDouble("corona_fuel_per_day");
+            if (config.has("corona_caps_reuse"))
+                corona_caps_reuse = config.getBoolean("corona_caps_reuse");
+            if (config.has("corona_percent_fuel_limit"))
+                corona_percent_fuel_limit = (float) config.getDouble("corona_percent_fuel_limit");
+            if (config.has("corona_hard_fuel_limit"))
+                corona_hard_fuel_limit = (float) config.getDouble("corona_hard_fuel_limit");
+            if (config.has("corona_fuel_cap_margin"))
+                corona_fuel_cap_margin = (float) config.getDouble("corona_fuel_cap_margin");
         } catch (Exception e) {
             throw new RuntimeException("Failed to load legacy settings", e);
         }
@@ -245,44 +345,62 @@ public class ModPlugin extends BaseModPlugin {
         } catch (Throwable t) {
             // Non-fatal
         }
+        // No debug startup floating text (feature verified in-game)
         LOG.info("[Ramscoop] initialization complete");
     }
-    
+
     /**
      * Public method for reloading settings - can be called by Ramscoop periodically
      * This method will retry LunaLib loading if it wasn't ready before
      */
     public static void reloadSettings() {
-        // Always try to reload if LunaLib is enabled but we haven't successfully used it yet
-        if (Global.getSettings().getModManager().isModEnabled("lunalib") && !lunaLibReady) {
-            System.out.println("Ramscoop: LunaLib is enabled but not ready, attempting to load settings...");
-            LOG.info("[Ramscoop] LunaLib is enabled but not ready, attempting to load settings...");
-            loadSettings();
-        } else if (!settingsLoaded) {
-            // If no settings loaded yet, try to load them
+        // If LunaLib is present, try to refresh LunaLib-backed settings every time
+        // this method is called. This allows runtime toggles (from the LunaLib UI)
+        // to be applied to the player's fleet memory without requiring a reload.
+        try {
+            if (Global.getSettings().getModManager().isModEnabled("lunalib")) {
+                LOG.info("[Ramscoop] Reloading LunaLib settings (runtime refresh)");
+                try {
+                    // Load only the LunaLib-driven values (less heavy than full load)
+                    loadLunaLibSettings();
+                    lunaLibReady = true;
+                    settingsLoaded = true;
+                    LOG.info("[Ramscoop] LunaLib settings reloaded successfully");
+                } catch (Throwable t) {
+                    // Don't throw - we'll retry later. Keep existing values and log.
+                    LOG.warn("[Ramscoop] Failed to reload LunaLib settings: " + t.getMessage());
+                }
+                return;
+            }
+        } catch (Throwable ignored) {
+            // Defensive: if mod manager isn't available for some reason, fall back
+        }
+
+        // If LunaLib isn't enabled or wasn't available, fall back to attempting a
+        // full settings load when nothing has been loaded yet.
+        if (!settingsLoaded) {
             System.out.println("Ramscoop: No settings loaded yet, attempting to load...");
             LOG.info("[Ramscoop] No settings loaded yet, attempting to load...");
             loadSettings();
         } else {
-            System.out.println("Ramscoop: Settings already loaded, LunaLib ready: " + lunaLibReady);
             LOG.info("[Ramscoop] Settings already loaded, LunaLib ready: " + lunaLibReady);
         }
     }
-    
+
     /**
      * Check if settings have been successfully loaded
      */
     public static boolean areSettingsLoaded() {
         return settingsLoaded;
     }
-    
+
     /**
      * Check if LunaLib is ready and we're using it
      */
     public static boolean isUsingLunaLib() {
         return lunaLibReady;
     }
-    
+
     /**
      * Log comprehensive settings status for debugging
      */
