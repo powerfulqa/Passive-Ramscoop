@@ -31,3 +31,14 @@ dev/
 /.cache/
 /.idea/
 /.vscode/
+
+# Java build outputs
+*.class
+*.jar
+temp_jar/
+temp_classes/
+test_install/
+tmp_*
+
+# avoid committing compiled classes in src
+src/**/*.class
