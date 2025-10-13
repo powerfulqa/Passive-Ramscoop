@@ -366,7 +366,7 @@ public class Ramscoop implements EveryFrameScript {
                         lastInNebula = nowInNebula;
                     } else if (lastInNebula.booleanValue() != nowInNebula) {
                         String txt = nowInNebula ? "Ramscoop:Active" : "Ramscoop:Inactive";
-                        Color col = nowInNebula ? Color.GREEN : Color.LIGHT_GRAY;
+                        Color col = nowInNebula ? Color.LIGHT_GRAY : Color.DARK_GRAY;
                         try {
                             fleet.addFloatingText(txt, col, totalDur);
                         } catch (Throwable ignored) {
@@ -378,7 +378,7 @@ public class Ramscoop implements EveryFrameScript {
                     if (lastInCorona == null) {
                         lastInCorona = nowInCorona;
                     } else if (lastInCorona.booleanValue() != nowInCorona) {
-                        String txt = nowInCorona ? "Ramscoop: Corona" : "Ramscoop: Leaving Corona";
+                        String txt = nowInCorona ? "Ramscoop:Active" : "Ramscoop:Inactive";
                         Color col = nowInCorona ? Color.ORANGE : Color.LIGHT_GRAY;
                         try {
                             fleet.addFloatingText(txt, col, totalDur);
