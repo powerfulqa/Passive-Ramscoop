@@ -72,6 +72,29 @@ jobs:
           echo "Error: jars/Ramscoop.jar is missing. Please commit the prebuilt Ramscoop.jar to the repository.";
           exit 1
         fi
+
+        # Sanity-check the JAR: list contents and verify expected classes and MANIFEST
+        echo "Sanity-checking jars/Ramscoop.jar"
+        unzip -l jars/Ramscoop.jar | sed -n '1,120p'
+
+        # Verify required classes are present
+        if ! unzip -l jars/Ramscoop.jar | grep -q "ramscoop/ModPlugin.class"; then
+          echo "Error: ramscoop/ModPlugin.class missing from JAR"; exit 1
+        fi
+        if ! unzip -l jars/Ramscoop.jar | grep -q "ramscoop/Ramscoop.class"; then
+          echo "Error: ramscoop/Ramscoop.class missing from JAR"; exit 1
+        fi
+
+        # Show manifest if present and check for common version attributes
+        if unzip -p jars/Ramscoop.jar META-INF/MANIFEST.MF 2>/dev/null | tee manifest.txt; then
+          if grep -qi "version" manifest.txt; then
+            echo "Manifest contains version info:"; grep -i "version" manifest.txt || true
+          else
+            echo "Manifest present but no version entry found (this is informational)"
+          fi
+        else
+          echo "Warning: No MANIFEST.MF found in JAR (informational)"
+        fi
         
     - name: Generate and validate changelog.txt
       run: |
