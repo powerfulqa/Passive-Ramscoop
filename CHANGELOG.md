@@ -1,5 +1,14 @@
 # Changelog 
 
+## [0.7.0] - 2025-10-13
+### Added
+- Per-event notification toggles (nebula entry/exit, corona entry/exit) exposed via LunaLib so players can independently enable or disable floating-text notifications for each event.
+### Changed
+- Reworked Notification UI: grouped Nebula and Corona notification settings and removed legacy color preset radios in favor of LunaLib HSV color pickers.
+- Default notification colors changed to light gray (#D3D3D3).
+### Removed
+- Removed the delayed "blue" secondary floating-text effect (cosmetic) and its scheduling code.
+
 ## [0.6.3] - 2025-10-09
 ### Fixed
 - Fixed crash when opening LunaLib settings menu (percent signs in descriptions are now properly escaped as %%)
