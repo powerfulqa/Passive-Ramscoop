@@ -101,21 +101,21 @@ if (Test-Path $SS_DIR) {
 }
 
 # Add LunaLib to classpath for direct API access (discover jar dynamically)
-$lunaLibJarDir = Join-Path $SS_DIR 'mods\03_LunaLib-2.0.4\jars'
-if (Test-Path $lunaLibJarDir) {
-    if (Test-Path $lunaLibJarDir) {
-        $lunaJars = Get-ChildItem -Path $lunaLibJarDir -Filter *.jar -File -ErrorAction SilentlyContinue
-        foreach ($j in $lunaJars) { $CLASSPATH += $j.FullName }
-        if ($lunaJars.Count -gt 0) {
-            Write-Host ("Including LunaLib jars: " + ($lunaJars | ForEach-Object { $_.Name } | Sort-Object | Join-String ", ")) -ForegroundColor Cyan
-        } else {
-            Write-Host "WARNING: No LunaLib jars found in $lunaLibJarDir" -ForegroundColor Yellow
-        }
+$lunaLibDir = Get-ChildItem -Path (Join-Path $SS_DIR 'mods') -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -like '*LunaLib*' } | Select-Object -First 1
+$lunaLibJarDir = $null
+if ($lunaLibDir) {
+    $lunaLibJarDir = Join-Path $lunaLibDir.FullName 'jars'
+}
+if ($lunaLibJarDir -and (Test-Path $lunaLibJarDir)) {
+    $lunaJars = Get-ChildItem -Path $lunaLibJarDir -Filter *.jar -File -ErrorAction SilentlyContinue
+    foreach ($j in $lunaJars) { $CLASSPATH += $j.FullName }
+    if ($lunaJars.Count -gt 0) {
+        Write-Host ("Including LunaLib jars: " + ($lunaJars | ForEach-Object { $_.Name } | Sort-Object | Join-String ", ")) -ForegroundColor Cyan
     } else {
-        Write-Host "WARNING: LunaLib not found at $lunaLibJarDir; build will proceed without LunaLib API on classpath" -ForegroundColor Yellow
+        Write-Host "WARNING: No LunaLib jars found in $lunaLibJarDir" -ForegroundColor Yellow
     }
 } else {
-    Write-Host "WARNING: LunaLib not found at $lunaLibJarDir; build will proceed without LunaLib API on classpath" -ForegroundColor Yellow
+    Write-Host "WARNING: LunaLib not found in mods directory; build will proceed without LunaLib API on classpath" -ForegroundColor Yellow
 }
 
 # Build the classpath string (use platform-appropriate separator)
