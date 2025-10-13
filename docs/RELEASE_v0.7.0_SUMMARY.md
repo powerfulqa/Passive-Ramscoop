@@ -22,7 +22,7 @@
 - `CHANGELOG.md`, `changelog.txt` — added v0.7.0 entries
 
 ## Testing
-- Rebuilt JAR with the project's build script and verified compilation
+- Rebuilt JAR with the project's `build.ps1` script and verified compilation
 - Confirmed in-game via user testing that per-event toggles appear and function, notifications respect the master Scoop toggle, and the delayed blue text is removed
 
 ## Notes
