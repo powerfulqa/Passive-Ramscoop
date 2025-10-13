@@ -130,49 +130,39 @@ public class ModPlugin extends BaseModPlugin {
         LOG.info("[Ramscoop] Settings load complete");
     }
 
-    private static void setColorsForTheme(String theme) {
-        if (theme == null) theme = "Default";
-        switch (theme) {
-            case "Default":
-                color_toggle_active = Color.CYAN;
-                color_toggle_active_secondary = Color.BLUE;
-                color_toggle_inactive = Color.LIGHT_GRAY;
-                color_nebula_active = Color.LIGHT_GRAY;
-                color_nebula_inactive = Color.DARK_GRAY;
-                color_corona_active = Color.ORANGE;
-                color_corona_inactive = Color.LIGHT_GRAY;
-                break;
-            case "High Contrast":
-                color_toggle_active = Color.WHITE;
-                color_toggle_active_secondary = Color.YELLOW;
-                color_toggle_inactive = Color.BLACK;
-                color_nebula_active = Color.WHITE;
-                color_nebula_inactive = Color.BLACK;
-                color_corona_active = Color.WHITE;
-                color_corona_inactive = Color.BLACK;
-                break;
-            case "Pastel":
-                color_toggle_active = new Color(173, 216, 230); // Light blue
-                color_toggle_active_secondary = new Color(135, 206, 250); // Lighter blue
-                color_toggle_inactive = new Color(211, 211, 211); // Light gray
-                color_nebula_active = new Color(255, 182, 193); // Light pink
-                color_nebula_inactive = new Color(176, 196, 222); // Light steel blue
-                color_corona_active = new Color(255, 218, 185); // Peach puff
-                color_corona_inactive = new Color(240, 230, 140); // Khaki
-                break;
-            case "Vibrant":
-                color_toggle_active = Color.GREEN;
-                color_toggle_active_secondary = Color.MAGENTA;
-                color_toggle_inactive = Color.RED;
-                color_nebula_active = Color.YELLOW;
-                color_nebula_inactive = Color.CYAN;
-                color_corona_active = Color.PINK;
-                color_corona_inactive = Color.GREEN;
-                break;
-            default:
-                // Fallback to default
-                setColorsForTheme("Default");
-                break;
+    private static void setColorsFromSelection(String activeColorName, String inactiveColorName) {
+        Color activeColor = parseColor(activeColorName);
+        Color inactiveColor = parseColor(inactiveColorName);
+        
+        // Set all active colors to the selected active color
+        color_toggle_active = activeColor;
+        color_toggle_active_secondary = activeColor; // Use same for secondary
+        color_nebula_active = activeColor;
+        color_corona_active = activeColor;
+        
+        // Set all inactive colors to the selected inactive color
+        color_toggle_inactive = inactiveColor;
+        color_nebula_inactive = inactiveColor;
+        color_corona_inactive = inactiveColor;
+    }
+
+    private static Color parseColor(String colorName) {
+        if (colorName == null) return Color.CYAN; // default
+        switch (colorName.toLowerCase()) {
+            case "black": return Color.BLACK;
+            case "blue": return Color.BLUE;
+            case "cyan": return Color.CYAN;
+            case "dark gray": return Color.DARK_GRAY;
+            case "gray": return Color.GRAY;
+            case "green": return Color.GREEN;
+            case "light gray": return Color.LIGHT_GRAY;
+            case "magenta": return Color.MAGENTA;
+            case "orange": return Color.ORANGE;
+            case "pink": return Color.PINK;
+            case "red": return Color.RED;
+            case "white": return Color.WHITE;
+            case "yellow": return Color.YELLOW;
+            default: return Color.CYAN; // fallback
         }
     }
 
@@ -286,8 +276,9 @@ public class ModPlugin extends BaseModPlugin {
             } catch (Throwable ignored) {
             }
             try {
-                String colorTheme = LunaSettings.getString(MOD_ID, "ramscoop_color_theme");
-                setColorsForTheme(colorTheme);
+                String activeColor = LunaSettings.getString(MOD_ID, "ramscoop_color_active");
+                String inactiveColor = LunaSettings.getString(MOD_ID, "ramscoop_color_inactive");
+                setColorsFromSelection(activeColor, inactiveColor);
             } catch (Throwable ignored) {
             }
 

@@ -28,7 +28,8 @@ nebula_no_crew_gen,No-Crew Generation Type,Radio,percent,"percent, flat","When c
 nebula_no_crew_rate,No-Crew Generation Rate,Double,0.1,,"Generation rate used when crew usage is 'nocrew'. If type is 'percent', this is the fraction of cargo capacity generated per day (0.1 = 10%% of cargo/day). If type is 'flat', this is the absolute number of supplies generated per day.",0.01,10.0,Nebula
 ramscoop_enable_visual_feedback,Enable Visual Feedback,Boolean,true,,"Show visual indicators when ramscoop is active (e.g., floating text on fleet).",,,General
 ramscoop_floating_text_scale,Floating Text Duration (seconds),Double,0.7,,"How long (in seconds) the floating text remains visible after Ramscoop toggles.",0.1,3.0,General
-ramscoop_color_theme,Color Theme,Radio,Default,"Default, High Contrast, Pastel, Vibrant","Choose the color scheme for ramscoop floating text notifications.",,,General
+ramscoop_color_active,Active Color,Radio,Cyan,"Black, Blue, Cyan, Dark Gray, Gray, Green, Light Gray, Magenta, Orange, Pink, Red, White, Yellow","Choose the color for active ramscoop notifications (entering nebula/corona, activation).",,,General
+ramscoop_color_inactive,Inactive Color,Radio,Light Gray,"Black, Blue, Cyan, Dark Gray, Gray, Green, Light Gray, Magenta, Orange, Pink, Red, White, Yellow","Choose the color for inactive ramscoop notifications (exiting nebula/corona, deactivation).",,,General
 ,,,,,,,,
 ##### Supplies tab removed; moved into Nebula
 ,,,,,,,,
