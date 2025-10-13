@@ -26,10 +26,6 @@ nebula_supply_per_crew,Supply per Crew (Legacy),Double,0.1,,"Legacy compatibilit
 nebula_nocrew_header,No-Crew Generation,Header,No-Crew Generation,,,,,Nebula
 nebula_no_crew_gen,No-Crew Generation Type,Radio,percent,"percent, flat","When crew usage mode is set to 'nocrew', this determines the generation method: [percent] = percentage of cargo capacity per day; [flat] = fixed number of supply units per day.",,,Nebula
 nebula_no_crew_rate,No-Crew Generation Rate,Double,0.1,,"Generation rate used when crew usage is 'nocrew'. If type is 'percent', this is the fraction of cargo capacity generated per day (0.1 = 10%% of cargo/day). If type is 'flat', this is the absolute number of supplies generated per day.",0.01,10.0,Nebula
-ramscoop_enable_visual_feedback,Enable Visual Feedback,Boolean,true,,"Show visual indicators when ramscoop is active (e.g., floating text on fleet).",,,General
-ramscoop_floating_text_scale,Floating Text Duration (seconds),Double,0.7,,"How long (in seconds) the floating text remains visible after Ramscoop toggles.",0.1,3.0,General
-ramscoop_color_active,Active Color,Radio,Cyan,"Black, Blue, Cyan, Dark Gray, Gray, Green, Light Gray, Magenta, Orange, Pink, Red, White, Yellow","Choose the color for active ramscoop notifications (entering nebula/corona, activation).",,,General
-ramscoop_color_inactive,Inactive Color,Radio,Light Gray,"Black, Blue, Cyan, Dark Gray, Gray, Green, Light Gray, Magenta, Orange, Pink, Red, White, Yellow","Choose the color for inactive ramscoop notifications (exiting nebula/corona, deactivation).",,,General
 ,,,,,,,,
 ##### Supplies tab removed; moved into Nebula
 ,,,,,,,,
@@ -42,3 +38,12 @@ corona_fuel_limits_header,Corona Fuel Caps,Header,Corona Fuel Caps,,,,,Corona
 corona_percent_fuel_limit,Corona Fuel Soft Cap (percent of max),Double,20,,"Soft cap for corona fuel generation as a percentage of maximum fuel capacity. Only used if 'Reuse Nebula Caps' is disabled. Once fuel reaches this threshold, generation stops. Set to 100 to allow filling to full capacity.",0,100,Corona
 corona_hard_fuel_limit,Corona Fuel Hard Cap (absolute units),Double,0,,"Absolute maximum fuel units that can be generated in coronas. Only used if 'Reuse Nebula Caps' is disabled. Set to 0 to disable this hard cap and rely only on the percentage cap.",0,100000,Corona
 corona_fuel_cap_margin,Corona Fuel Cap Margin (units),Double,0,,"Buffer zone below the fuel cap for coronas. Only used if 'Reuse Nebula Caps' is disabled. Stops generation when you're this many fuel units below the cap to leave room for other fuel sources.",0,1000,Corona
+,,,,,,,,
+notification_header,Notification Settings,Header,Notification Settings,,,,,Notifications
+ramscoop_enable_visual_feedback,Enable Visual Feedback,Boolean,false,,"Show visual indicators when ramscoop is active (e.g., floating text on fleet).",,,Notifications
+ramscoop_floating_text_scale,Floating Text Duration (seconds),Double,0.7,,"How long (in seconds) the floating text remains visible after Ramscoop toggles.",0.1,3.0,Notifications
+ramscoop_color_nebula_active_v2,Nebula Entry Color selection,Color,#00FFFF,,"Creates a color picker (hex + HSV sliders). Color for entering nebula and ramscoop activation notifications.",,,Notifications
+ramscoop_color_nebula_inactive_v2,Nebula Exit Color selection,Color,#D3D3D3,,"Creates a color picker (hex + HSV sliders). Color for exiting nebula and ramscoop deactivation notifications.",,,Notifications
+
+ramscoop_color_corona_active_v2,Corona Entry Color selection,Color,#FFA500,,"Creates a color picker (hex + HSV sliders). Color for entering corona notifications.",,,Notifications
+ramscoop_color_corona_inactive_v2,Corona Exit Color selection,Color,#D3D3D3,,"Creates a color picker (hex + HSV sliders). Color for exiting corona notifications.",,,Notifications
