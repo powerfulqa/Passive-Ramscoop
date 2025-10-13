@@ -1,5 +1,10 @@
 Changelog 
 
+Version 0.7.1 (2025-10-13)
+Changed
+- Removed legacy color string keys from LunaLib settings - cleaner UI with only Color picker entries
+- Improved LunaLib settings menu appearance by eliminating duplicate legacy entries
+
 Version 0.7.0 (2025-10-13)
 Added
 - Per-event notification toggles for nebula entry/exit and corona entry/exit exposed via LunaLib

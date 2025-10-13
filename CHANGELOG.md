@@ -1,5 +1,10 @@
 # Changelog 
 
+## [0.7.1] - 2025-10-13
+### Changed
+- Removed legacy color string keys from LunaLib settings for cleaner UI
+- Eliminated duplicate legacy entries in settings menu - only Color picker entries remain
+
 ## [0.7.0] - 2025-10-13
 ### Added
 - Per-event notification toggles (nebula entry/exit, corona entry/exit) exposed via LunaLib so players can independently enable or disable floating-text notifications for each event.
