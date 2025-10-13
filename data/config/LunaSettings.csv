@@ -2,7 +2,7 @@ fieldID,fieldName,fieldType,defaultValue,secondaryValue,fieldDescription,minValu
 ramscoop_header,Ramscoop Configuration,Header,Ramscoop Configuration,,,,,General
 # Runtime controls at top
 ramscoop_toggle_header,Runtime,Header,Runtime,,,,,General
-ramscoop_toggle_default_on,Scoop Enabled,Boolean,true,,"Master toggle: Enable or disable all Ramscoop resource generation at runtime. Affects both fuel and supplies generation in nebulae and coronas. Changes take effect immediately without reloading the game.",, ,General
+ramscoop_toggle_default_on,Scoop Enabled,Boolean,true,,"Master toggle: Enable or disable all Ramscoop resource generation at runtime. Affects both fuel and supplies generation in nebulae and coronas.",, ,General
 ,,,,,,,,
 ramscoop_enable_fuel,Enable Fuel Generation,Boolean,true,,"Enable automatic fuel generation while traveling through nebulae. When enabled, your fleet will gradually collect fuel based on the rates configured in the Nebula tab.",,,General
 ramscoop_enable_supplies,Enable Supply Generation,Boolean,true,,"Enable automatic supply generation while traveling through nebulae. When enabled, your fleet will gradually collect supplies based on crew and cargo capacity configured in the Nebula tab.",,,General
@@ -40,10 +40,15 @@ corona_hard_fuel_limit,Corona Fuel Hard Cap (absolute units),Double,0,,"Absolute
 corona_fuel_cap_margin,Corona Fuel Cap Margin (units),Double,0,,"Buffer zone below the fuel cap for coronas. Only used if 'Reuse Nebula Caps' is disabled. Stops generation when you're this many fuel units below the cap to leave room for other fuel sources.",0,1000,Corona
 ,,,,,,,,
 notification_header,Notification Settings,Header,Notification Settings,,,,,Notifications
-ramscoop_enable_visual_feedback,Enable Visual Feedback,Boolean,false,,"Show visual indicators when ramscoop is active (e.g., floating text on fleet).",,,Notifications
+ramscoop_enable_visual_feedback,Master Toggle for Visual Feedback,Boolean,false,,"Main ON/OFF switch for all the visual indicators when ramscoop is active (e.g., floating text on fleet).",,,Notifications
 ramscoop_floating_text_scale,Floating Text Duration (seconds),Double,0.7,,"How long (in seconds) the floating text remains visible after Ramscoop toggles.",0.1,3.0,Notifications
-ramscoop_color_nebula_active_v2,Nebula Entry Color selection,Color,#00FFFF,,"Creates a color picker (hex + HSV sliders). Color for entering nebula and ramscoop activation notifications.",,,Notifications
-ramscoop_color_nebula_inactive_v2,Nebula Exit Color selection,Color,#D3D3D3,,"Creates a color picker (hex + HSV sliders). Color for exiting nebula and ramscoop deactivation notifications.",,,Notifications
-
-ramscoop_color_corona_active_v2,Corona Entry Color selection,Color,#FFA500,,"Creates a color picker (hex + HSV sliders). Color for entering corona notifications.",,,Notifications
-ramscoop_color_corona_inactive_v2,Corona Exit Color selection,Color,#D3D3D3,,"Creates a color picker (hex + HSV sliders). Color for exiting corona notifications.",,,Notifications
+notifications_nebula_header,Nebula Notifications,Header,Nebula Notifications,,,,,Notifications
+ramscoop_notify_nebula_entry,Show Nebula Entry Notification,Boolean,true,,"Show a floating-text notification when entering a nebula.",,,Notifications
+ramscoop_color_nebula_active_v2,Nebula Entry Color selection,Color,#D3D3D3,,"Select a color from the sliders or enter hex code if known. This changes the text color when entering a nebula.",,,Notifications
+ramscoop_notify_nebula_exit,Show Nebula Exit Notification,Boolean,true,,"Show a floating-text notification when exiting a nebula.",,,Notifications
+ramscoop_color_nebula_inactive_v2,Nebula Exit Color selection,Color,#D3D3D3,,"Select a color from the sliders or enter hex code if known. This changes the text color when exiting a nebula.",,,Notifications
+notifications_corona_header,Corona Notifications,Header,Corona Notifications,,,,,Notifications
+ramscoop_notify_corona_entry,Show Corona Entry Notification,Boolean,true,,"Show a floating-text notification when entering a corona.",,,Notifications
+ramscoop_color_corona_active_v2,Corona Entry Color selection,Color,#D3D3D3,,"Select a color from the sliders or enter hex code if known. This changes the text color when entering a corona.",,,Notifications
+ramscoop_notify_corona_exit,Show Corona Exit Notification,Boolean,true,,"Show a floating-text notification when exiting a corona.",,,Notifications
+ramscoop_color_corona_inactive_v2,Corona Exit Color selection,Color,#D3D3D3,,"Select a color from the sliders or enter hex code if known. This changes the text color when exiting a corona",,,Notifications

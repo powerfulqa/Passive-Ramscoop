@@ -53,13 +53,18 @@ public class ModPlugin extends BaseModPlugin {
     // Visual feedback
     public static boolean enable_visual_feedback = false;
     public static float floating_text_duration = 0.7f;
+    // Per-event notification toggles
+    public static boolean notify_nebula_entry = true;
+    public static boolean notify_nebula_exit = true;
+    public static boolean notify_corona_entry = true;
+    public static boolean notify_corona_exit = true;
     // Visual feedback colors
     public static Color color_toggle_active = Color.CYAN;
     public static Color color_toggle_active_secondary = Color.BLUE;
     public static Color color_toggle_inactive = Color.LIGHT_GRAY;
     public static Color color_nebula_active = Color.LIGHT_GRAY;
-    public static Color color_nebula_inactive = Color.DARK_GRAY;
-    public static Color color_corona_active = Color.ORANGE;
+    public static Color color_nebula_inactive = Color.LIGHT_GRAY;
+    public static Color color_corona_active = Color.LIGHT_GRAY;
     public static Color color_corona_inactive = Color.LIGHT_GRAY;
 
     // Track if LunaLib is being used and if we've successfully loaded settings
@@ -402,6 +407,22 @@ public class ModPlugin extends BaseModPlugin {
             } catch (Throwable ignored) {
             }
             try {
+                notify_nebula_entry = LunaSettings.getBoolean(MOD_ID, "ramscoop_notify_nebula_entry");
+            } catch (Throwable ignored) {
+            }
+            try {
+                notify_nebula_exit = LunaSettings.getBoolean(MOD_ID, "ramscoop_notify_nebula_exit");
+            } catch (Throwable ignored) {
+            }
+            try {
+                notify_corona_entry = LunaSettings.getBoolean(MOD_ID, "ramscoop_notify_corona_entry");
+            } catch (Throwable ignored) {
+            }
+            try {
+                notify_corona_exit = LunaSettings.getBoolean(MOD_ID, "ramscoop_notify_corona_exit");
+            } catch (Throwable ignored) {
+            }
+            try {
                 enable_visual_feedback = LunaSettings.getBoolean(MOD_ID, "ramscoop_enable_visual_feedback");
             } catch (Throwable ignored) {
             }
@@ -529,8 +550,12 @@ public class ModPlugin extends BaseModPlugin {
                             ", percent_supply_limit=" + percent_supply_limit +
                             ", hard_supply_limit=" + hard_supply_limit +
                             ", crew_usage=" + crew_usage +
-                            ", no_crew_gen=" + no_crew_gen +
-                            ", no_crew_rate=" + no_crew_rate);
+                                ", no_crew_gen=" + no_crew_gen +
+                                ", no_crew_rate=" + no_crew_rate +
+                                ", notify_nebula_entry=" + notify_nebula_entry +
+                                ", notify_nebula_exit=" + notify_nebula_exit +
+                                ", notify_corona_entry=" + notify_corona_entry +
+                                ", notify_corona_exit=" + notify_corona_exit);
         } catch (Exception e) {
             LOG.warn("[Ramscoop] Failed to load LunaLib settings: " + e.getMessage(), e);
             throw new RuntimeException("Failed to load LunaLib settings", e);

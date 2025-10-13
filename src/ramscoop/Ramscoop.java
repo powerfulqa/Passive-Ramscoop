@@ -64,20 +64,7 @@ public class Ramscoop implements EveryFrameScript {
     private Boolean lastInNebula = null;
     private Boolean lastInCorona = null;
 
-    // Pending blue-transition floating texts (timer counts down each frame)
-    private static class PendingBlue {
-        float timer; // seconds until showing the blue text
-        float dur; // duration of the blue text
-        String txt;
-
-        PendingBlue(float timer, float dur, String txt) {
-            this.timer = timer;
-            this.dur = dur;
-            this.txt = txt;
-        }
-    }
-
-    private final List<PendingBlue> pendingBlue = new ArrayList<>();
+    // (Removed) Pending blue-transition floating texts - this feature was removed
 
     public Ramscoop() {
         if (DEBUG_MODE) {
@@ -211,7 +198,10 @@ public class Ramscoop implements EveryFrameScript {
                 } else if (lastScoopEnabled.booleanValue() != scoopEnabled) {
                     // Toggle changed
                     LOG.info("[Ramscoop] Toggle changed detected: last=" + lastScoopEnabled + " now=" + scoopEnabled);
-                    if (ModPlugin.enable_visual_feedback) {
+                    // Only show visual feedback if visual feedback is enabled and the scoop is
+                    // currently enabled at runtime (prevents notifications when master
+                    // toggle is turned off)
+                    if (ModPlugin.enable_visual_feedback && scoopEnabled) {
                         // clamp duration
                         float totalDur = ModPlugin.floating_text_duration;
                         totalDur = Math.max(0.25f, Math.min(3.0f, totalDur));
@@ -224,12 +214,7 @@ public class Ramscoop implements EveryFrameScript {
                             } catch (Throwable ignoreAdd) {
                                 LOG.warn("[Ramscoop] Failed to add cyan floating text: " + ignoreAdd.getMessage());
                             }
-                            // Schedule blue to appear after half the duration
-                            try {
-                                float delay = Math.max(0.05f, totalDur * 0.5f);
-                                pendingBlue.add(new PendingBlue(delay, totalDur, "Ramscoop Active"));
-                            } catch (Throwable ignoredSched) {
-                            }
+                            // (Removed) scheduling of delayed blue floating-text is disabled.
                         } else {
                             // Deactivation: show grey inactive text
                             String txtGrey = "Ramscoop Inactive";
@@ -249,24 +234,7 @@ public class Ramscoop implements EveryFrameScript {
                 LOG.warn("[Ramscoop] Exception while handling toggle change: " + ignoredToggle.getMessage());
             }
 
-            // Process pending blue transitions (timers count down)
-            try {
-                if (!pendingBlue.isEmpty()) {
-                    Iterator<PendingBlue> it = pendingBlue.iterator();
-                    while (it.hasNext()) {
-                        PendingBlue pb = it.next();
-                        pb.timer -= amount;
-                        if (pb.timer <= 0f) {
-                            try {
-                                fleet.addFloatingText(pb.txt, ModPlugin.color_toggle_active_secondary, pb.dur);
-                            } catch (Throwable ignored) {
-                            }
-                            it.remove();
-                        }
-                    }
-                }
-            } catch (Throwable ignoredPB) {
-            }
+            // (Removed) processing of delayed blue floating texts - feature disabled.
 
             // Restore corona detection and generation (from original lines 214-310), with
             // caps
@@ -358,18 +326,21 @@ public class Ramscoop implements EveryFrameScript {
             try {
                 boolean nowInNebula = nebulaMod != null;
                 boolean nowInCorona = inCorona;
-                if (ModPlugin.enable_visual_feedback) {
+                if (ModPlugin.enable_visual_feedback && scoopEnabled) {
                     float totalDur = ModPlugin.floating_text_duration;
                     totalDur = Math.max(0.25f, Math.min(3.0f, totalDur));
-                    // Nebula enter/exit
+                    // Nebula enter/exit (respect per-event toggles)
                     if (lastInNebula == null) {
                         lastInNebula = nowInNebula;
                     } else if (lastInNebula.booleanValue() != nowInNebula) {
-                        String txt = nowInNebula ? "Ramscoop:Active" : "Ramscoop:Inactive";
-                        Color col = nowInNebula ? ModPlugin.color_nebula_active : ModPlugin.color_nebula_inactive;
-                        try {
-                            fleet.addFloatingText(txt, col, totalDur);
-                        } catch (Throwable ignored) {
+                        boolean show = nowInNebula ? ModPlugin.notify_nebula_entry : ModPlugin.notify_nebula_exit;
+                        if (show) {
+                            String txt = nowInNebula ? "Ramscoop:Active" : "Ramscoop:Inactive";
+                            Color col = nowInNebula ? ModPlugin.color_nebula_active : ModPlugin.color_nebula_inactive;
+                            try {
+                                fleet.addFloatingText(txt, col, totalDur);
+                            } catch (Throwable ignored) {
+                            }
                         }
                         lastInNebula = nowInNebula;
                     }
@@ -378,11 +349,14 @@ public class Ramscoop implements EveryFrameScript {
                     if (lastInCorona == null) {
                         lastInCorona = nowInCorona;
                     } else if (lastInCorona.booleanValue() != nowInCorona) {
-                        String txt = nowInCorona ? "Ramscoop:Active" : "Ramscoop:Inactive";
-                        Color col = nowInCorona ? ModPlugin.color_corona_active : ModPlugin.color_corona_inactive;
-                        try {
-                            fleet.addFloatingText(txt, col, totalDur);
-                        } catch (Throwable ignored) {
+                        boolean show = nowInCorona ? ModPlugin.notify_corona_entry : ModPlugin.notify_corona_exit;
+                        if (show) {
+                            String txt = nowInCorona ? "Ramscoop:Active" : "Ramscoop:Inactive";
+                            Color col = nowInCorona ? ModPlugin.color_corona_active : ModPlugin.color_corona_inactive;
+                            try {
+                                fleet.addFloatingText(txt, col, totalDur);
+                            } catch (Throwable ignored) {
+                            }
                         }
                         lastInCorona = nowInCorona;
                     }
