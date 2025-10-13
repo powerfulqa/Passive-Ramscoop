@@ -218,7 +218,7 @@ public class Ramscoop implements EveryFrameScript {
                         if (scoopEnabled) {
                             // Activation: show cyan immediately, then show blue shortly after
                             String txtCyan = "Ramscoop Active";
-                            Color colCyan = Color.CYAN;
+                            Color colCyan = ModPlugin.color_toggle_active;
                             try {
                                 fleet.addFloatingText(txtCyan, colCyan, totalDur);
                             } catch (Throwable ignoreAdd) {
@@ -233,7 +233,7 @@ public class Ramscoop implements EveryFrameScript {
                         } else {
                             // Deactivation: show grey inactive text
                             String txtGrey = "Ramscoop Inactive";
-                            Color colGrey = Color.LIGHT_GRAY;
+                            Color colGrey = ModPlugin.color_toggle_inactive;
                             try {
                                 fleet.addFloatingText(txtGrey, colGrey, totalDur);
                             } catch (Throwable ignoreAdd) {
@@ -258,7 +258,7 @@ public class Ramscoop implements EveryFrameScript {
                         pb.timer -= amount;
                         if (pb.timer <= 0f) {
                             try {
-                                fleet.addFloatingText(pb.txt, Color.BLUE, pb.dur);
+                                fleet.addFloatingText(pb.txt, ModPlugin.color_toggle_active_secondary, pb.dur);
                             } catch (Throwable ignored) {
                             }
                             it.remove();
@@ -366,7 +366,7 @@ public class Ramscoop implements EveryFrameScript {
                         lastInNebula = nowInNebula;
                     } else if (lastInNebula.booleanValue() != nowInNebula) {
                         String txt = nowInNebula ? "Ramscoop:Active" : "Ramscoop:Inactive";
-                        Color col = nowInNebula ? Color.LIGHT_GRAY : Color.DARK_GRAY;
+                        Color col = nowInNebula ? ModPlugin.color_nebula_active : ModPlugin.color_nebula_inactive;
                         try {
                             fleet.addFloatingText(txt, col, totalDur);
                         } catch (Throwable ignored) {
@@ -379,7 +379,7 @@ public class Ramscoop implements EveryFrameScript {
                         lastInCorona = nowInCorona;
                     } else if (lastInCorona.booleanValue() != nowInCorona) {
                         String txt = nowInCorona ? "Ramscoop:Active" : "Ramscoop:Inactive";
-                        Color col = nowInCorona ? Color.ORANGE : Color.LIGHT_GRAY;
+                        Color col = nowInCorona ? ModPlugin.color_corona_active : ModPlugin.color_corona_inactive;
                         try {
                             fleet.addFloatingText(txt, col, totalDur);
                         } catch (Throwable ignored) {

@@ -6,6 +6,7 @@ import com.fs.starfarer.api.Global;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 import lunalib.lunaSettings.LunaSettings;
+import java.awt.Color;
 
 public class ModPlugin extends BaseModPlugin {
     private static final Logger LOG = Global.getLogger(ModPlugin.class);
@@ -52,6 +53,14 @@ public class ModPlugin extends BaseModPlugin {
     // Visual feedback
     public static boolean enable_visual_feedback = true;
     public static float floating_text_duration = 0.7f;
+    // Visual feedback colors
+    public static Color color_toggle_active = Color.CYAN;
+    public static Color color_toggle_active_secondary = Color.BLUE;
+    public static Color color_toggle_inactive = Color.LIGHT_GRAY;
+    public static Color color_nebula_active = Color.LIGHT_GRAY;
+    public static Color color_nebula_inactive = Color.DARK_GRAY;
+    public static Color color_corona_active = Color.ORANGE;
+    public static Color color_corona_inactive = Color.LIGHT_GRAY;
 
     // Track if LunaLib is being used and if we've successfully loaded settings
     private static boolean lunaLibReady = false;
@@ -121,9 +130,54 @@ public class ModPlugin extends BaseModPlugin {
         LOG.info("[Ramscoop] Settings load complete");
     }
 
+    private static void setColorsForTheme(String theme) {
+        if (theme == null) theme = "Default";
+        switch (theme) {
+            case "Default":
+                color_toggle_active = Color.CYAN;
+                color_toggle_active_secondary = Color.BLUE;
+                color_toggle_inactive = Color.LIGHT_GRAY;
+                color_nebula_active = Color.LIGHT_GRAY;
+                color_nebula_inactive = Color.DARK_GRAY;
+                color_corona_active = Color.ORANGE;
+                color_corona_inactive = Color.LIGHT_GRAY;
+                break;
+            case "High Contrast":
+                color_toggle_active = Color.WHITE;
+                color_toggle_active_secondary = Color.YELLOW;
+                color_toggle_inactive = Color.BLACK;
+                color_nebula_active = Color.WHITE;
+                color_nebula_inactive = Color.BLACK;
+                color_corona_active = Color.WHITE;
+                color_corona_inactive = Color.BLACK;
+                break;
+            case "Pastel":
+                color_toggle_active = new Color(173, 216, 230); // Light blue
+                color_toggle_active_secondary = new Color(135, 206, 250); // Lighter blue
+                color_toggle_inactive = new Color(211, 211, 211); // Light gray
+                color_nebula_active = new Color(255, 182, 193); // Light pink
+                color_nebula_inactive = new Color(176, 196, 222); // Light steel blue
+                color_corona_active = new Color(255, 218, 185); // Peach puff
+                color_corona_inactive = new Color(240, 230, 140); // Khaki
+                break;
+            case "Vibrant":
+                color_toggle_active = Color.GREEN;
+                color_toggle_active_secondary = Color.MAGENTA;
+                color_toggle_inactive = Color.RED;
+                color_nebula_active = Color.YELLOW;
+                color_nebula_inactive = Color.CYAN;
+                color_corona_active = Color.PINK;
+                color_corona_inactive = Color.GREEN;
+                break;
+            default:
+                // Fallback to default
+                setColorsForTheme("Default");
+                break;
+        }
+    }
+
     private static void loadLunaLibSettings() {
         try {
-            // Direct API calls (LunaLib is a required dependency)
             enable_fuel = LunaSettings.getBoolean(MOD_ID, "ramscoop_enable_fuel");
             enable_supplies = LunaSettings.getBoolean(MOD_ID, "ramscoop_enable_supplies");
             // UI provides 0..100 percent per day; convert to 0..1 fraction
@@ -229,6 +283,11 @@ public class ModPlugin extends BaseModPlugin {
             }
             try {
                 floating_text_duration = LunaSettings.getDouble(MOD_ID, "ramscoop_floating_text_scale").floatValue();
+            } catch (Throwable ignored) {
+            }
+            try {
+                String colorTheme = LunaSettings.getString(MOD_ID, "ramscoop_color_theme");
+                setColorsForTheme(colorTheme);
             } catch (Throwable ignored) {
             }
 
