@@ -1,7 +1,12 @@
 # PowerShell build script for Ramscoop mod
 
 # Configuration
+# Default Starsector path; if it doesn't exist, prefer G:\Starsector (user environment)
 $SS_DIR = "C:\Program Files (x86)\Fractal Softworks\Starsector"
+if (-not (Test-Path $SS_DIR) -and (Test-Path "G:\Starsector")) {
+    $SS_DIR = "G:\Starsector"
+    Write-Host "Using Starsector directory: $SS_DIR" -ForegroundColor Cyan
+}
 $MOD_NAME = "Passive-Ramscoop"
 $MOD_ID = "m561_ramscoop"
 $SRC_DIR = "$PWD\src"

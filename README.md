@@ -85,6 +85,15 @@ For modders and advanced users, manual configuration is available through `setti
 - No known mod conflicts
 - Current version: 0.6.3
 
+## What's new (0.7.0)
+- Per-event notification toggles: you can now enable/disable floating notifications separately for nebula entry/exit and corona entry/exit via the LunaLib settings UI.
+- UI rework: color presets removed in favor of HSV color pickers; saved HSV values are now respected correctly.
+- Default notification colours changed to light grey (#D3D3D3) to reduce visual noise; Java default falls back to Color.LIGHT_GRAY.
+- Notifications are now gated by the master "Scoop" toggle at runtime — turning the master toggle off stops all ramscoop notifications immediately.
+
+## TriOS compatibility (quick notes)
+This project supports packaging for TriOS. See `docs/TRIOS_COMPATIBILITY.md` for a short checklist and validation steps you can run before creating a TriOS release.
+
 ## Development
 This mod includes build scripts for development:
 - `build.ps1` – PowerShell build script

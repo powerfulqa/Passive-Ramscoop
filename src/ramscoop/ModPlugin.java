@@ -6,11 +6,12 @@ import com.fs.starfarer.api.Global;
 import org.apache.log4j.Logger;
 import org.json.JSONObject;
 import lunalib.lunaSettings.LunaSettings;
+import java.awt.Color;
 
 public class ModPlugin extends BaseModPlugin {
     private static final Logger LOG = Global.getLogger(ModPlugin.class);
     public static final String MOD_ID = "m561_ramscoop";
-    
+
     // Default constant values (fallbacks if LunaLib/settings.json not available)
     private static final float DEFAULT_FUEL_PER_DAY = 0.1f;
     private static final float DEFAULT_SUPPLIES_PER_CREW = 0.1f;
@@ -23,8 +24,9 @@ public class ModPlugin extends BaseModPlugin {
     private static final float DEFAULT_NO_CREW_RATE = 0.1f;
     private static final String DEFAULT_CREW_USAGE = "extra";
     private static final String DEFAULT_NO_CREW_GEN = "percent";
-    
-    // Runtime settings (loaded from LunaLib or settings.json, defaults above used as fallback)
+
+    // Runtime settings (loaded from LunaLib or settings.json, defaults above used
+    // as fallback)
     public static boolean enable_fuel = true;
     public static boolean enable_supplies = true;
     public static float fuel_per_day = DEFAULT_FUEL_PER_DAY;
@@ -48,14 +50,30 @@ public class ModPlugin extends BaseModPlugin {
     public static boolean corona_enable_fuel = true;
     public static float corona_fuel_per_day = DEFAULT_CORONA_FUEL_PER_DAY;
     public static boolean corona_caps_reuse = true;
-    
+    // Visual feedback
+    public static boolean enable_visual_feedback = false;
+    public static float floating_text_duration = 0.7f;
+    // Per-event notification toggles
+    public static boolean notify_nebula_entry = true;
+    public static boolean notify_nebula_exit = true;
+    public static boolean notify_corona_entry = true;
+    public static boolean notify_corona_exit = true;
+    // Visual feedback colors
+    public static Color color_toggle_active = Color.CYAN;
+    public static Color color_toggle_active_secondary = Color.BLUE;
+    public static Color color_toggle_inactive = Color.LIGHT_GRAY;
+    public static Color color_nebula_active = Color.LIGHT_GRAY;
+    public static Color color_nebula_inactive = Color.LIGHT_GRAY;
+    public static Color color_corona_active = Color.LIGHT_GRAY;
+    public static Color color_corona_inactive = Color.LIGHT_GRAY;
+
     // Track if LunaLib is being used and if we've successfully loaded settings
     private static boolean lunaLibReady = false;
     private static boolean settingsLoaded = false;
-    
+
     // Debug flag - set to false for production builds
     private static final boolean DEBUG_MODE = false;
-    
+
     public ModPlugin() {
         try {
             if (DEBUG_MODE) {
@@ -67,8 +85,62 @@ public class ModPlugin extends BaseModPlugin {
             e.printStackTrace();
         }
     }
-    
-    // Simple readiness: treat LunaLib as ready if the mod is enabled; API calls will work when it's initialized
+
+    @Override
+    public void onApplicationLoad() {
+        // Attempt an early migration of legacy hex/string color values into
+        // LunaLib's Color format so the in-game color picker can render safely.
+        try {
+            if (!Global.getSettings().getModManager().isModEnabled("lunalib")) return;
+        } catch (Throwable t) {
+            return; // Mod manager not available yet
+        }
+
+        try {
+            // Keys we manage
+            String[] keys = new String[] {
+                    "ramscoop_color_nebula_active",
+                    "ramscoop_color_nebula_inactive",
+                    "ramscoop_color_corona_active",
+                    "ramscoop_color_corona_inactive"
+            };
+
+            for (String key : keys) {
+                try {
+                    // If LunaSettings already has a Color, nothing to do
+                    Color existing = null;
+                    try {
+                        existing = LunaSettings.getColor(MOD_ID, key);
+                    } catch (Throwable ignored) {
+                    }
+                    if (existing != null) continue;
+
+                    // Try reading a hex/string fallback and convert it to Color
+                    String hex = null;
+                    try {
+                        hex = LunaSettings.getString(MOD_ID, key);
+                    } catch (Throwable ignored) {
+                    }
+                    if (hex == null) continue;
+
+                    Color parsed = parseHexColor(hex, null);
+                    if (parsed == null) continue;
+
+                    // LunaSettings.setColor isn't available in the public API we compile against
+                    // so we can't write the Color back. We log the migration suggestion instead.
+                    LOG.info("[Ramscoop] Would migrate LunaLib color setting '" + key + "' from hex to Color format if API allowed.");
+                } catch (Throwable inner) {
+                    // Continue migrating other keys even if one fails
+                }
+            }
+        } catch (Throwable t) {
+            // Don't let migration break startup
+            LOG.warn("[Ramscoop] Color migration failed: " + t.getMessage());
+        }
+    }
+
+    // Simple readiness: treat LunaLib as ready if the mod is enabled; API calls
+    // will work when it's initialized
     private static boolean isLunaLibReady() {
         return Global.getSettings().getModManager().isModEnabled("lunalib");
     }
@@ -79,10 +151,14 @@ public class ModPlugin extends BaseModPlugin {
             // Check if LunaLib is ready
             boolean lunaLibEnabled = Global.getSettings().getModManager().isModEnabled("lunalib");
             LOG.info("[Ramscoop] LunaLib enabled: " + lunaLibEnabled);
-            
+
             if (lunaLibEnabled && isLunaLibReady()) {
-                // Seed from legacy settings first so missing LunaLib keys fall back to settings.json
-                try { loadLegacySettings(); } catch (Throwable ignored) {}
+                // Seed from legacy settings first so missing LunaLib keys fall back to
+                // settings.json
+                try {
+                    loadLegacySettings();
+                } catch (Throwable ignored) {
+                }
                 loadLunaLibSettings();
                 lunaLibReady = true;
                 settingsLoaded = true;
@@ -111,36 +187,213 @@ public class ModPlugin extends BaseModPlugin {
         }
         LOG.info("[Ramscoop] Settings load complete");
     }
-    
+
+    private static void setColorsFromSelections(Color nebulaActive, Color nebulaInactive, Color coronaActive, Color coronaInactive) {
+        // Toggle uses nebula colors
+        color_toggle_active = nebulaActive;
+        color_toggle_active_secondary = nebulaActive;
+        color_toggle_inactive = nebulaInactive;
+        
+        // Nebula colors
+        color_nebula_active = nebulaActive;
+        color_nebula_inactive = nebulaInactive;
+        
+        // Corona colors
+        color_corona_active = coronaActive;
+        color_corona_inactive = coronaInactive;
+    }
+
+    private static Color parseColor(String colorName) {
+        if (colorName == null) return Color.CYAN; // default
+        switch (colorName.toLowerCase()) {
+            case "black": return Color.BLACK;
+            case "blue": return Color.BLUE;
+            case "cyan": return Color.CYAN;
+            case "dark gray": return Color.DARK_GRAY;
+            case "gray": return Color.GRAY;
+            case "green": return Color.GREEN;
+            case "light gray": return Color.LIGHT_GRAY;
+            case "magenta": return Color.MAGENTA;
+            case "orange": return Color.ORANGE;
+            case "pink": return Color.PINK;
+            case "red": return Color.RED;
+            case "white": return Color.WHITE;
+            case "yellow": return Color.YELLOW;
+            default: return Color.CYAN; // fallback
+        }
+    }
+
+    /**
+     * Compare two colors for equality (including alpha).
+     */
+    private static boolean colorsEqual(Color a, Color b) {
+        if (a == null && b == null) return true;
+        if (a == null || b == null) return false;
+        return a.getRed() == b.getRed() && a.getGreen() == b.getGreen() && a.getBlue() == b.getBlue() && a.getAlpha() == b.getAlpha();
+    }
+
+    /**
+     * Parse a hex color string like "#RRGGBB" or "RRGGBB" (also handles 8-digit ARGB/RRGGBBAA)
+     */
+    private static Color parseHexColor(String hexColor, Color fallback) {
+        if (hexColor == null) return fallback;
+        String s = hexColor.trim();
+        if (s.startsWith("#")) s = s.substring(1);
+        try {
+            if (s.length() == 6) {
+                int r = Integer.parseInt(s.substring(0, 2), 16);
+                int g = Integer.parseInt(s.substring(2, 4), 16);
+                int b = Integer.parseInt(s.substring(4, 6), 16);
+                return new Color(r, g, b);
+            } else if (s.length() == 8) {
+                int r = Integer.parseInt(s.substring(0, 2), 16);
+                int g = Integer.parseInt(s.substring(2, 4), 16);
+                int b = Integer.parseInt(s.substring(4, 6), 16);
+                int a = Integer.parseInt(s.substring(6, 8), 16);
+                return new Color(r, g, b, a);
+            }
+        } catch (Exception e) {
+            LOG.warn("[Ramscoop] parseHexColor failed for '" + hexColor + "': " + e.getMessage());
+        }
+        return fallback;
+    }
+
+    /**
+     * Compute an "inactive" / desaturated variant of a color by blending with a light gray.
+     */
+    private static Color makeInactive(Color c) {
+        if (c == null) return Color.LIGHT_GRAY;
+        int r = (c.getRed() + 192) / 2;
+        int g = (c.getGreen() + 192) / 2;
+        int b = (c.getBlue() + 192) / 2;
+        int a = c.getAlpha();
+        return new Color(Math.min(255, r), Math.min(255, g), Math.min(255, b), a);
+    }
+
+    /**
+     * Targeted debug: log raw LunaLib stored values for a key both as Color and as String
+     * so we can detect whether the saved value is a Color object or a legacy hex string.
+     */
+    private static void logRawLunaValue(String key) {
+        try {
+            // Try reading as Color
+            try {
+                Color c = LunaSettings.getColor(MOD_ID, key);
+                if (c != null) {
+                    LOG.info(String.format("[Ramscoop] LunaLib stored (Color) for '%s' -> #%02X%02X%02X alpha=%d",
+                            key, c.getRed(), c.getGreen(), c.getBlue(), c.getAlpha()));
+                } else {
+                    LOG.info(String.format("[Ramscoop] LunaLib stored (Color) for '%s' -> null", key));
+                }
+            } catch (Throwable t) {
+                LOG.info(String.format("[Ramscoop] LunaLib getColor('%s') threw: %s", key, t.getClass().getSimpleName()));
+            }
+
+            // Try reading as String (legacy hex storage)
+            try {
+                String s = LunaSettings.getString(MOD_ID, key);
+                if (s != null) {
+                    LOG.info(String.format("[Ramscoop] LunaLib stored (String) for '%s' -> '%s'", key, s));
+                } else {
+                    LOG.info(String.format("[Ramscoop] LunaLib stored (String) for '%s' -> null", key));
+                }
+            } catch (Throwable t) {
+                LOG.info(String.format("[Ramscoop] LunaLib getString('%s') threw: %s", key, t.getClass().getSimpleName()));
+            }
+        } catch (Throwable t) {
+            LOG.warn("[Ramscoop] Failed to inspect LunaLib value for key '" + key + "': " + t.getMessage());
+        }
+    }
+
     private static void loadLunaLibSettings() {
         try {
-            // Direct API calls (LunaLib is a required dependency)
             enable_fuel = LunaSettings.getBoolean(MOD_ID, "ramscoop_enable_fuel");
             enable_supplies = LunaSettings.getBoolean(MOD_ID, "ramscoop_enable_supplies");
             // UI provides 0..100 percent per day; convert to 0..1 fraction
-            fuel_per_day = LunaSettings.getDouble(MOD_ID, "nebula_fuel_per_day").floatValue() / 100f; // Matches CSV key for nebula
+            fuel_per_day = LunaSettings.getDouble(MOD_ID, "nebula_fuel_per_day").floatValue() / 100f; // Matches CSV key
+                                                                                                      // for nebula
             // New fuel limiting settings via LunaLib (with safe defaults if missing)
             // Nebula caps via UI (percent sliders)
-            try { nebula_percent_fuel_limit = LunaSettings.getDouble(MOD_ID, "nebula_percent_fuel_limit").floatValue() / 100f; } catch (Throwable ignored) {}
-            try { nebula_hard_fuel_limit = LunaSettings.getDouble(MOD_ID, "nebula_hard_fuel_limit").floatValue(); } catch (Throwable ignored) {}
-            try { nebula_fuel_cap_margin = LunaSettings.getDouble(MOD_ID, "nebula_fuel_cap_margin").floatValue(); } catch (Throwable ignored) {}
-            
-            // Supply limit settings with null-handling (fixed: nebula_* → ramscoop_* key names)
-            try { percent_supply_limit = LunaSettings.getDouble(MOD_ID, "ramscoop_percent_supply_limit").floatValue(); } catch (Throwable ignored) {}
-            try { hard_supply_limit = LunaSettings.getDouble(MOD_ID, "ramscoop_hard_supply_limit").floatValue(); } catch (Throwable ignored) {}
-            try { supplies_per_crew = LunaSettings.getDouble(MOD_ID, "ramscoop_supply_per_crew").floatValue(); } catch (Throwable ignored) {}
+            try {
+                nebula_percent_fuel_limit = LunaSettings.getDouble(MOD_ID, "nebula_percent_fuel_limit").floatValue()
+                        / 100f;
+            } catch (Throwable ignored) {
+            }
+            try {
+                nebula_hard_fuel_limit = LunaSettings.getDouble(MOD_ID, "nebula_hard_fuel_limit").floatValue();
+            } catch (Throwable ignored) {
+            }
+            try {
+                nebula_fuel_cap_margin = LunaSettings.getDouble(MOD_ID, "nebula_fuel_cap_margin").floatValue();
+            } catch (Throwable ignored) {
+            }
+
+            // Supply limit settings with null-handling (fixed: nebula_* → ramscoop_* key
+            // names)
+            try {
+                percent_supply_limit = LunaSettings.getDouble(MOD_ID, "ramscoop_percent_supply_limit").floatValue();
+            } catch (Throwable ignored) {
+            }
+            try {
+                hard_supply_limit = LunaSettings.getDouble(MOD_ID, "ramscoop_hard_supply_limit").floatValue();
+            } catch (Throwable ignored) {
+            }
+            try {
+                supplies_per_crew = LunaSettings.getDouble(MOD_ID, "ramscoop_supply_per_crew").floatValue();
+            } catch (Throwable ignored) {
+            }
             // Supply settings now live under Nebula as duplicates; read either key
-            try { crew_usage = LunaSettings.getString(MOD_ID, "nebula_crew_usage"); } catch (Throwable e1) { try { crew_usage = LunaSettings.getString(MOD_ID, "ramscoop_crew_usage"); } catch (Throwable ignored) {} }
-            try { no_crew_gen = LunaSettings.getString(MOD_ID, "nebula_no_crew_gen"); } catch (Throwable e2) { try { no_crew_gen = LunaSettings.getString(MOD_ID, "ramscoop_no_crew_gen"); } catch (Throwable ignored) {} }
-            try { no_crew_rate = LunaSettings.getDouble(MOD_ID, "nebula_no_crew_rate").floatValue(); } catch (Throwable e3) { try { no_crew_rate = LunaSettings.getDouble(MOD_ID, "ramscoop_no_crew_rate").floatValue(); } catch (Throwable ignored) {} }
+            try {
+                crew_usage = LunaSettings.getString(MOD_ID, "nebula_crew_usage");
+            } catch (Throwable e1) {
+                try {
+                    crew_usage = LunaSettings.getString(MOD_ID, "ramscoop_crew_usage");
+                } catch (Throwable ignored) {
+                }
+            }
+            try {
+                no_crew_gen = LunaSettings.getString(MOD_ID, "nebula_no_crew_gen");
+            } catch (Throwable e2) {
+                try {
+                    no_crew_gen = LunaSettings.getString(MOD_ID, "ramscoop_no_crew_gen");
+                } catch (Throwable ignored) {
+                }
+            }
+            try {
+                no_crew_rate = LunaSettings.getDouble(MOD_ID, "nebula_no_crew_rate").floatValue();
+            } catch (Throwable e3) {
+                try {
+                    no_crew_rate = LunaSettings.getDouble(MOD_ID, "ramscoop_no_crew_rate").floatValue();
+                } catch (Throwable ignored) {
+                }
+            }
             // Corona (UI provides percent/day for fuel rate)
-            try { corona_enable_fuel = LunaSettings.getBoolean(MOD_ID, "corona_enable_fuel"); } catch (Throwable ignored) {}
-            try { corona_fuel_per_day = LunaSettings.getDouble(MOD_ID, "corona_fuel_per_day").floatValue() / 100f; } catch (Throwable ignored) {}
-            try { corona_caps_reuse = LunaSettings.getBoolean(MOD_ID, "corona_caps_reuse"); } catch (Throwable ignored) {}
+            try {
+                corona_enable_fuel = LunaSettings.getBoolean(MOD_ID, "corona_enable_fuel");
+            } catch (Throwable ignored) {
+            }
+            try {
+                corona_fuel_per_day = LunaSettings.getDouble(MOD_ID, "corona_fuel_per_day").floatValue() / 100f;
+            } catch (Throwable ignored) {
+            }
+            try {
+                corona_caps_reuse = LunaSettings.getBoolean(MOD_ID, "corona_caps_reuse");
+            } catch (Throwable ignored) {
+            }
             // Corona caps via UI (percent slider for soft cap)
-            try { corona_percent_fuel_limit = LunaSettings.getDouble(MOD_ID, "corona_percent_fuel_limit").floatValue() / 100f; } catch (Throwable ignored) {}
-            try { corona_hard_fuel_limit = LunaSettings.getDouble(MOD_ID, "corona_hard_fuel_limit").floatValue(); } catch (Throwable ignored) {}
-            try { corona_fuel_cap_margin = LunaSettings.getDouble(MOD_ID, "corona_fuel_cap_margin").floatValue(); } catch (Throwable ignored) {}
+            try {
+                corona_percent_fuel_limit = LunaSettings.getDouble(MOD_ID, "corona_percent_fuel_limit").floatValue()
+                        / 100f;
+            } catch (Throwable ignored) {
+            }
+            try {
+                corona_hard_fuel_limit = LunaSettings.getDouble(MOD_ID, "corona_hard_fuel_limit").floatValue();
+            } catch (Throwable ignored) {
+            }
+            try {
+                corona_fuel_cap_margin = LunaSettings.getDouble(MOD_ID, "corona_fuel_cap_margin").floatValue();
+            } catch (Throwable ignored) {
+            }
             try {
                 scoop_toggle_default_on = LunaSettings.getBoolean(MOD_ID, "ramscoop_toggle_default_on");
                 // Apply immediately at runtime so UI changes take effect without reload
@@ -149,65 +402,220 @@ public class ModPlugin extends BaseModPlugin {
                     if (fleet != null) {
                         fleet.getMemoryWithoutUpdate().set("$ramscoop_enabled", scoop_toggle_default_on);
                     }
-                } catch (Throwable ignored2) {}
-            } catch (Throwable ignored) {}
-            
+                } catch (Throwable ignored2) {
+                }
+            } catch (Throwable ignored) {
+            }
+            try {
+                notify_nebula_entry = LunaSettings.getBoolean(MOD_ID, "ramscoop_notify_nebula_entry");
+            } catch (Throwable ignored) {
+            }
+            try {
+                notify_nebula_exit = LunaSettings.getBoolean(MOD_ID, "ramscoop_notify_nebula_exit");
+            } catch (Throwable ignored) {
+            }
+            try {
+                notify_corona_entry = LunaSettings.getBoolean(MOD_ID, "ramscoop_notify_corona_entry");
+            } catch (Throwable ignored) {
+            }
+            try {
+                notify_corona_exit = LunaSettings.getBoolean(MOD_ID, "ramscoop_notify_corona_exit");
+            } catch (Throwable ignored) {
+            }
+            try {
+                enable_visual_feedback = LunaSettings.getBoolean(MOD_ID, "ramscoop_enable_visual_feedback");
+            } catch (Throwable ignored) {
+            }
+            try {
+                floating_text_duration = LunaSettings.getDouble(MOD_ID, "ramscoop_floating_text_scale").floatValue();
+            } catch (Throwable ignored) {
+            }
+                try {
+                    // First, log raw stored LunaLib values for inspection (helps diagnose HSV picker issues)
+                    logRawLunaValue("ramscoop_color_nebula_active_v2");
+                    logRawLunaValue("ramscoop_color_nebula_inactive_v2");
+                    logRawLunaValue("ramscoop_color_corona_active_v2");
+                    logRawLunaValue("ramscoop_color_corona_inactive_v2");
+
+                    // First try LunaLib's Color API (preferred - provides the HSV picker UI)
+                Color nebulaActive = null;
+                Color nebulaInactive = null;
+                Color coronaActive = null;
+                Color coronaInactive = null;
+                // No preset radio values: rely on LunaLib Color pickers and hex fallbacks
+
+                try {
+                    // Prefer the new v2 keys to avoid reading old malformed stored values
+                    nebulaActive = LunaSettings.getColor(MOD_ID, "ramscoop_color_nebula_active_v2");
+                    // nebulaActive read from LunaLib
+                } catch (Throwable t) {
+                    // not fatal, we'll try fallback below
+                }
+                try {
+                    nebulaInactive = LunaSettings.getColor(MOD_ID, "ramscoop_color_nebula_inactive_v2");
+                    // nebulaInactive read from LunaLib
+                } catch (Throwable t) {
+                }
+                try {
+                    coronaActive = LunaSettings.getColor(MOD_ID, "ramscoop_color_corona_active_v2");
+                    // coronaActive read from LunaLib
+                } catch (Throwable t) {
+                }
+                try {
+                    coronaInactive = LunaSettings.getColor(MOD_ID, "ramscoop_color_corona_inactive_v2");
+                    // coronaInactive read from LunaLib
+                } catch (Throwable t) {
+                }
+
+                // If any of the above are null (LunaLib didn't provide a Color), try reading hex strings (fallback)
+                if (nebulaActive == null) {
+                    try {
+                        // Fallback to old key (string / legacy storage)
+                        String hex = LunaSettings.getString(MOD_ID, "ramscoop_color_nebula_active");
+                        nebulaActive = parseHexColor(hex, color_nebula_active);
+                        // If parsed, write to the v2 key so new Color UI reads a consistent value
+                        if (nebulaActive != null) {
+                            LOG.info("[Ramscoop] Parsed nebula_active hex; keeping for runtime. Recommend clearing LunaLib saved value to enable picker.");
+                        }
+                    } catch (Throwable t) {
+                        nebulaActive = color_nebula_active; // keep existing default
+                    }
+                }
+                if (nebulaInactive == null) {
+                    try {
+                        String hex = LunaSettings.getString(MOD_ID, "ramscoop_color_nebula_inactive");
+                        nebulaInactive = parseHexColor(hex, color_nebula_inactive);
+                        if (nebulaInactive != null) {
+                            LOG.info("[Ramscoop] Parsed nebula_inactive hex; keeping for runtime. Recommend clearing LunaLib saved value to enable picker.");
+                        }
+                    } catch (Throwable t) {
+                        nebulaInactive = color_nebula_inactive;
+                    }
+                }
+                if (coronaActive == null) {
+                    try {
+                        String hex = LunaSettings.getString(MOD_ID, "ramscoop_color_corona_active");
+                        coronaActive = parseHexColor(hex, color_corona_active);
+                        if (coronaActive != null) {
+                            LOG.info("[Ramscoop] Parsed corona_active hex; keeping for runtime. Recommend clearing LunaLib saved value to enable picker.");
+                        }
+                    } catch (Throwable t) {
+                        coronaActive = color_corona_active;
+                    }
+                }
+                if (coronaInactive == null) {
+                    try {
+                        String hex = LunaSettings.getString(MOD_ID, "ramscoop_color_corona_inactive");
+                        coronaInactive = parseHexColor(hex, color_corona_inactive);
+                        if (coronaInactive != null) {
+                            LOG.info("[Ramscoop] Parsed corona_inactive hex; keeping for runtime. Recommend clearing LunaLib saved value to enable picker.");
+                        }
+                    } catch (Throwable t) {
+                        coronaInactive = color_corona_inactive;
+                    }
+                }
+
+                // Allow user-selected presets (radio buttons). If the preset is not Custom,
+                // apply the preset (explicit user intent). If the preset is Custom or
+                // missing, preserve any LunaLib Color value already read above.
+                // Preset radio options removed: rely solely on LunaLib Color pickers and
+                // legacy hex string fallbacks above.
+
+                setColorsFromSelections(nebulaActive, nebulaInactive, coronaActive, coronaInactive);
+
+                // Debug: log resolved colors so we can see what colors are actually being used
+                try {
+                    LOG.info(String.format("[Ramscoop] Resolved colors - nebulaActive: #%02X%02X%02X alpha=%d, nebulaInactive: #%02X%02X%02X alpha=%d, coronaActive: #%02X%02X%02X alpha=%d, coronaInactive: #%02X%02X%02X alpha=%d",
+                            color_nebula_active.getRed(), color_nebula_active.getGreen(), color_nebula_active.getBlue(), color_nebula_active.getAlpha(),
+                            color_nebula_inactive.getRed(), color_nebula_inactive.getGreen(), color_nebula_inactive.getBlue(), color_nebula_inactive.getAlpha(),
+                            color_corona_active.getRed(), color_corona_active.getGreen(), color_corona_active.getBlue(), color_corona_active.getAlpha(),
+                            color_corona_inactive.getRed(), color_corona_inactive.getGreen(), color_corona_inactive.getBlue(), color_corona_inactive.getAlpha()));
+                } catch (Throwable ignored) {
+                }
+            } catch (Throwable t) {
+                LOG.warn("[Ramscoop] Error reading color settings (falling back to defaults): " + t.getMessage());
+            }
+
             // Debug logging
             LOG.info(
-                "[Ramscoop] Final settings from LunaLib -> fuel=" + enable_fuel +
-                ", supplies=" + enable_supplies +
-                ", fuel_per_day=" + fuel_per_day +
-                ", nebula_percent_fuel_limit=" + nebula_percent_fuel_limit +
-                ", nebula_hard_fuel_limit=" + nebula_hard_fuel_limit +
-                ", nebula_fuel_cap_margin=" + nebula_fuel_cap_margin +
-                ", corona_percent_fuel_limit=" + corona_percent_fuel_limit +
-                ", corona_hard_fuel_limit=" + corona_hard_fuel_limit +
-                ", corona_fuel_cap_margin=" + corona_fuel_cap_margin +
-                ", percent_supply_limit=" + percent_supply_limit +
-                ", hard_supply_limit=" + hard_supply_limit +
-                ", crew_usage=" + crew_usage +
-                ", no_crew_gen=" + no_crew_gen +
-                ", no_crew_rate=" + no_crew_rate
-            );
+                    "[Ramscoop] Final settings from LunaLib -> fuel=" + enable_fuel +
+                            ", supplies=" + enable_supplies +
+                            ", fuel_per_day=" + fuel_per_day +
+                            ", nebula_percent_fuel_limit=" + nebula_percent_fuel_limit +
+                            ", nebula_hard_fuel_limit=" + nebula_hard_fuel_limit +
+                            ", nebula_fuel_cap_margin=" + nebula_fuel_cap_margin +
+                            ", corona_percent_fuel_limit=" + corona_percent_fuel_limit +
+                            ", corona_hard_fuel_limit=" + corona_hard_fuel_limit +
+                            ", corona_fuel_cap_margin=" + corona_fuel_cap_margin +
+                            ", percent_supply_limit=" + percent_supply_limit +
+                            ", hard_supply_limit=" + hard_supply_limit +
+                            ", crew_usage=" + crew_usage +
+                                ", no_crew_gen=" + no_crew_gen +
+                                ", no_crew_rate=" + no_crew_rate +
+                                ", notify_nebula_entry=" + notify_nebula_entry +
+                                ", notify_nebula_exit=" + notify_nebula_exit +
+                                ", notify_corona_entry=" + notify_corona_entry +
+                                ", notify_corona_exit=" + notify_corona_exit);
         } catch (Exception e) {
             LOG.warn("[Ramscoop] Failed to load LunaLib settings: " + e.getMessage(), e);
             throw new RuntimeException("Failed to load LunaLib settings", e);
         }
     }
-    
+
     private static void loadLegacySettings() {
         try {
             JSONObject config = Global.getSettings().loadJSON("settings.json", MOD_ID);
             enable_fuel = config.getBoolean("enable_fuel");
             enable_supplies = config.getBoolean("enable_supplies");
-            
+
             // Handle fuel_per_day (might not exist in older settings.json)
             if (config.has("fuel_per_day")) {
-                fuel_per_day = (float)config.getDouble("fuel_per_day");
+                fuel_per_day = (float) config.getDouble("fuel_per_day");
             }
             // Optional new fuel limit settings (legacy JSON)
-            if (config.has("nebula_percent_fuel_limit")) nebula_percent_fuel_limit = (float)config.getDouble("nebula_percent_fuel_limit");
-            if (config.has("nebula_hard_fuel_limit")) nebula_hard_fuel_limit = (float)config.getDouble("nebula_hard_fuel_limit");
-            if (config.has("nebula_fuel_cap_margin")) nebula_fuel_cap_margin = (float)config.getDouble("nebula_fuel_cap_margin");
-            
-            percent_supply_limit = (float)config.getDouble("percent_supply_limit");
-            hard_supply_limit = (float)config.getDouble("hard_supply_limit");
-            
-            supplies_per_crew = (float)config.getDouble("supply_per_crew");
+            if (config.has("nebula_percent_fuel_limit"))
+                nebula_percent_fuel_limit = (float) config.getDouble("nebula_percent_fuel_limit");
+            if (config.has("nebula_hard_fuel_limit"))
+                nebula_hard_fuel_limit = (float) config.getDouble("nebula_hard_fuel_limit");
+            if (config.has("nebula_fuel_cap_margin"))
+                nebula_fuel_cap_margin = (float) config.getDouble("nebula_fuel_cap_margin");
+
+            percent_supply_limit = (float) config.getDouble("percent_supply_limit");
+            hard_supply_limit = (float) config.getDouble("hard_supply_limit");
+
+            supplies_per_crew = (float) config.getDouble("supply_per_crew");
             // Accept new nebula_* keys or legacy names
-            if (config.has("nebula_crew_usage")) crew_usage = config.get("nebula_crew_usage").toString(); else crew_usage = config.get("crew_usage").toString();
-            if (config.has("nebula_no_crew_gen")) no_crew_gen = config.get("nebula_no_crew_gen").toString(); else no_crew_gen = config.get("no_crew_gen").toString();
-            if (config.has("nebula_no_crew_rate")) no_crew_rate = (float)config.getDouble("nebula_no_crew_rate"); else no_crew_rate = (float)config.getDouble("no_crew_rate");
+            if (config.has("nebula_crew_usage"))
+                crew_usage = config.get("nebula_crew_usage").toString();
+            else
+                crew_usage = config.get("crew_usage").toString();
+            if (config.has("nebula_no_crew_gen"))
+                no_crew_gen = config.get("nebula_no_crew_gen").toString();
+            else
+                no_crew_gen = config.get("no_crew_gen").toString();
+            if (config.has("nebula_no_crew_rate"))
+                no_crew_rate = (float) config.getDouble("nebula_no_crew_rate");
+            else
+                no_crew_rate = (float) config.getDouble("no_crew_rate");
             if (config.has("scoop_toggle_default_on")) {
-                try { scoop_toggle_default_on = config.getBoolean("scoop_toggle_default_on"); } catch (Throwable ignored) {}
+                try {
+                    scoop_toggle_default_on = config.getBoolean("scoop_toggle_default_on");
+                } catch (Throwable ignored) {
+                }
             }
             // Corona legacy
-            if (config.has("corona_enable_fuel")) corona_enable_fuel = config.getBoolean("corona_enable_fuel");
-            if (config.has("corona_fuel_per_day")) corona_fuel_per_day = (float)config.getDouble("corona_fuel_per_day");
-            if (config.has("corona_caps_reuse")) corona_caps_reuse = config.getBoolean("corona_caps_reuse");
-            if (config.has("corona_percent_fuel_limit")) corona_percent_fuel_limit = (float)config.getDouble("corona_percent_fuel_limit");
-            if (config.has("corona_hard_fuel_limit")) corona_hard_fuel_limit = (float)config.getDouble("corona_hard_fuel_limit");
-            if (config.has("corona_fuel_cap_margin")) corona_fuel_cap_margin = (float)config.getDouble("corona_fuel_cap_margin");
+            if (config.has("corona_enable_fuel"))
+                corona_enable_fuel = config.getBoolean("corona_enable_fuel");
+            if (config.has("corona_fuel_per_day"))
+                corona_fuel_per_day = (float) config.getDouble("corona_fuel_per_day");
+            if (config.has("corona_caps_reuse"))
+                corona_caps_reuse = config.getBoolean("corona_caps_reuse");
+            if (config.has("corona_percent_fuel_limit"))
+                corona_percent_fuel_limit = (float) config.getDouble("corona_percent_fuel_limit");
+            if (config.has("corona_hard_fuel_limit"))
+                corona_hard_fuel_limit = (float) config.getDouble("corona_hard_fuel_limit");
+            if (config.has("corona_fuel_cap_margin"))
+                corona_fuel_cap_margin = (float) config.getDouble("corona_fuel_cap_margin");
         } catch (Exception e) {
             throw new RuntimeException("Failed to load legacy settings", e);
         }
@@ -245,44 +653,62 @@ public class ModPlugin extends BaseModPlugin {
         } catch (Throwable t) {
             // Non-fatal
         }
+        // No debug startup floating text (feature verified in-game)
         LOG.info("[Ramscoop] initialization complete");
     }
-    
+
     /**
      * Public method for reloading settings - can be called by Ramscoop periodically
      * This method will retry LunaLib loading if it wasn't ready before
      */
     public static void reloadSettings() {
-        // Always try to reload if LunaLib is enabled but we haven't successfully used it yet
-        if (Global.getSettings().getModManager().isModEnabled("lunalib") && !lunaLibReady) {
-            System.out.println("Ramscoop: LunaLib is enabled but not ready, attempting to load settings...");
-            LOG.info("[Ramscoop] LunaLib is enabled but not ready, attempting to load settings...");
-            loadSettings();
-        } else if (!settingsLoaded) {
-            // If no settings loaded yet, try to load them
+        // If LunaLib is present, try to refresh LunaLib-backed settings every time
+        // this method is called. This allows runtime toggles (from the LunaLib UI)
+        // to be applied to the player's fleet memory without requiring a reload.
+        try {
+            if (Global.getSettings().getModManager().isModEnabled("lunalib")) {
+                LOG.info("[Ramscoop] Reloading LunaLib settings (runtime refresh)");
+                try {
+                    // Load only the LunaLib-driven values (less heavy than full load)
+                    loadLunaLibSettings();
+                    lunaLibReady = true;
+                    settingsLoaded = true;
+                    LOG.info("[Ramscoop] LunaLib settings reloaded successfully");
+                } catch (Throwable t) {
+                    // Don't throw - we'll retry later. Keep existing values and log.
+                    LOG.warn("[Ramscoop] Failed to reload LunaLib settings: " + t.getMessage());
+                }
+                return;
+            }
+        } catch (Throwable ignored) {
+            // Defensive: if mod manager isn't available for some reason, fall back
+        }
+
+        // If LunaLib isn't enabled or wasn't available, fall back to attempting a
+        // full settings load when nothing has been loaded yet.
+        if (!settingsLoaded) {
             System.out.println("Ramscoop: No settings loaded yet, attempting to load...");
             LOG.info("[Ramscoop] No settings loaded yet, attempting to load...");
             loadSettings();
         } else {
-            System.out.println("Ramscoop: Settings already loaded, LunaLib ready: " + lunaLibReady);
             LOG.info("[Ramscoop] Settings already loaded, LunaLib ready: " + lunaLibReady);
         }
     }
-    
+
     /**
      * Check if settings have been successfully loaded
      */
     public static boolean areSettingsLoaded() {
         return settingsLoaded;
     }
-    
+
     /**
      * Check if LunaLib is ready and we're using it
      */
     public static boolean isUsingLunaLib() {
         return lunaLibReady;
     }
-    
+
     /**
      * Log comprehensive settings status for debugging
      */
