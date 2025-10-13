@@ -6,8 +6,6 @@
 ### Changed
 - Reworked Notification UI: grouped Nebula and Corona notification settings and removed legacy color preset radios in favor of LunaLib HSV color pickers.
 - Default notification colors changed to light gray (#D3D3D3).
-### Removed
-- Removed the delayed "blue" secondary floating-text effect (cosmetic) and its scheduling code.
 
 ## [0.6.3] - 2025-10-09
 ### Fixed

@@ -14,9 +14,6 @@
 - Removed legacy color preset radio controls; LunaLib color pickers (hex + HSV sliders) are now the single source of color configuration.
 - Default notification colors set to light gray (#D3D3D3).
 
-### Removed
-- Removed delayed "blue" secondary floating-text effect and its scheduling code (cosmetic only).
-
 ## Files Modified
 - `data/config/LunaSettings.csv` — reorganised notification section, added per-event toggles, default color updated
 - `src/ramscoop/ModPlugin.java` — added LunaLib reads for new toggles, default colors updated, debug logging updated

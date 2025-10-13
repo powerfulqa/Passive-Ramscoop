@@ -90,7 +90,6 @@ For modders and advanced users, manual configuration is available through `setti
 - UI rework: color presets removed in favor of HSV color pickers; saved HSV values are now respected correctly.
 - Default notification colours changed to light grey (#D3D3D3) to reduce visual noise; Java default falls back to Color.LIGHT_GRAY.
 - Notifications are now gated by the master "Scoop" toggle at runtime — turning the master toggle off stops all ramscoop notifications immediately.
-- Removed delayed blue floating-text cosmetic effect to simplify behavior and avoid confusion.
 
 ## TriOS compatibility (quick notes)
 This project supports packaging for TriOS. See `docs/TRIOS_COMPATIBILITY.md` for a short checklist and validation steps you can run before creating a TriOS release.

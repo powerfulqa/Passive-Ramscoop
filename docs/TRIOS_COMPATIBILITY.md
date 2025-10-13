@@ -33,8 +33,3 @@ Notes & tips
 - TriOS expects plain text and exact path names. Double-check file case, especially on case-sensitive hosts.
 - `Ramscoop.version` is specifically used by TriOS: keep it machine-friendly (plain JSON with numeric fields) and bump the `patch` field when publishing bugfixes.
 - If you automate releases (CI), ensure your workflow uploads `jars/Ramscoop.jar` and `changelog.txt` and updates `mod_info.json` `directDownloadURL` to point at the uploaded asset.
-
-If you want, I can:
-- Update `mod_info.json`, `version.json`, and `Ramscoop.version` to the chosen new version (0.7.0) and commit those changes.
-- Create the git tag `v0.7.0` and push it (if you confirm).
-- Prepare a draft GitHub Release body using `changelog.txt` and the release jar path.
