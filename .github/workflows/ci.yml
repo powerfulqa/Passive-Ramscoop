@@ -42,9 +42,14 @@ jobs:
           exit 1
         fi
         
-        # Check that JAR exists
+        # Build JAR in CI using project build script (PowerShell)
+        echo "Building Ramscoop JAR using build.ps1..."
+        pwsh -NoProfile -NonInteractive -Command "Set-Location \"${{ github.workspace }}\"; ./build.ps1"
+
+        # Check that JAR exists now
         if [ ! -f "jars/Ramscoop.jar" ]; then
-          echo "Warning: Ramscoop.jar is missing, but will be skipped as we can't build it in CI"
+          echo "Error: Ramscoop.jar is missing after attempting to build"
+          exit 1
         fi
         
     - name: Generate and validate changelog.txt
