@@ -54,17 +54,29 @@ if (-not $javaHome) {
 # Show the Java Home being used
 Write-Host "Using Java Home: $javaHome" -ForegroundColor Cyan
 
+# Detect platform to support both Windows and Linux runners
+try {
+    $isWindows = [System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform([System.Runtime.InteropServices.OSPlatform]::Windows)
+} catch {
+    # Fallback for older PowerShell versions
+    $isWindows = $env:OS -eq 'Windows_NT'
+}
+
+$exeExt = if ($isWindows) { '.exe' } else { '' }
+$pathSep = if ($isWindows) { '\\' } else { '/' }
+$cpSep = if ($isWindows) { ';' } else { ':' }
+
 # Set up Java tools paths
-$javac = "$javaHome\bin\javac.exe"
+$javac = "$javaHome${pathSep}bin${pathSep}javac$exeExt"
 if (-not (Test-Path $javac)) {
-    Write-Host "ERROR: Cannot find javac.exe at $javac" -ForegroundColor Red
+    Write-Host "ERROR: Cannot find javac at $javac" -ForegroundColor Red
     exit 1
 }
 Write-Host "Using Java compiler: $javac" -ForegroundColor Cyan
 
-$jar = "$javaHome\bin\jar.exe"
+$jar = "$javaHome${pathSep}bin${pathSep}jar$exeExt"
 if (-not (Test-Path $jar)) {
-    Write-Host "ERROR: Cannot find jar.exe at $jar" -ForegroundColor Red
+    Write-Host "ERROR: Cannot find jar utility at $jar" -ForegroundColor Red
     exit 1
 }
 Write-Host "Using JAR utility: $jar" -ForegroundColor Cyan
@@ -98,12 +110,12 @@ if (Test-Path $lunaLibJarDir) {
     Write-Host "WARNING: LunaLib not found at $lunaLibJarDir; build will proceed without LunaLib API on classpath" -ForegroundColor Yellow
 }
 
-# Build the classpath string
-$CLASSPATH_STR = $CLASSPATH -join ";"
+# Build the classpath string (use platform-appropriate separator)
+$CLASSPATH_STR = $CLASSPATH -join $cpSep
 
 # Compile Java files
 Write-Host "Compiling Java files..." -ForegroundColor Cyan
-& $javac --release 8 -cp $CLASSPATH_STR -d "$SRC_DIR" "$SRC_DIR\ramscoop\*.java"
+& $javac --release 8 -cp $CLASSPATH_STR -d "$SRC_DIR" "$SRC_DIR/ramscoop/*.java"
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Compilation failed!" -ForegroundColor Red
     exit $LASTEXITCODE
@@ -121,7 +133,7 @@ New-Item -ItemType Directory -Path $tempDir -Force
 New-Item -ItemType Directory -Path "$tempDir\ramscoop" -Force
 
 # Copy compiled classes to the correct package structure
-Copy-Item "$SRC_DIR\ramscoop\*.class" "$tempDir\ramscoop\"
+Copy-Item "$SRC_DIR/ramscoop/*.class" "$tempDir/ramscoop/"
 
 # Create JAR from the temporary directory
 Push-Location $tempDir
