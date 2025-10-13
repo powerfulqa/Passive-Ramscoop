@@ -88,55 +88,7 @@ public class ModPlugin extends BaseModPlugin {
 
     @Override
     public void onApplicationLoad() {
-        // Attempt an early migration of legacy hex/string color values into
-        // LunaLib's Color format so the in-game color picker can render safely.
-        try {
-            if (!Global.getSettings().getModManager().isModEnabled("lunalib")) return;
-        } catch (Throwable t) {
-            return; // Mod manager not available yet
-        }
-
-        try {
-            // Keys we manage
-            String[] keys = new String[] {
-                    "ramscoop_color_nebula_active",
-                    "ramscoop_color_nebula_inactive",
-                    "ramscoop_color_corona_active",
-                    "ramscoop_color_corona_inactive"
-            };
-
-            for (String key : keys) {
-                try {
-                    // If LunaSettings already has a Color, nothing to do
-                    Color existing = null;
-                    try {
-                        existing = LunaSettings.getColor(MOD_ID, key);
-                    } catch (Throwable ignored) {
-                    }
-                    if (existing != null) continue;
-
-                    // Try reading a hex/string fallback and convert it to Color
-                    String hex = null;
-                    try {
-                        hex = LunaSettings.getString(MOD_ID, key);
-                    } catch (Throwable ignored) {
-                    }
-                    if (hex == null) continue;
-
-                    Color parsed = parseHexColor(hex, null);
-                    if (parsed == null) continue;
-
-                    // LunaSettings.setColor isn't available in the public API we compile against
-                    // so we can't write the Color back. We log the migration suggestion instead.
-                    LOG.info("[Ramscoop] Would migrate LunaLib color setting '" + key + "' from hex to Color format if API allowed.");
-                } catch (Throwable inner) {
-                    // Continue migrating other keys even if one fails
-                }
-            }
-        } catch (Throwable t) {
-            // Don't let migration break startup
-            LOG.warn("[Ramscoop] Color migration failed: " + t.getMessage());
-        }
+        // No legacy color migration needed - only using new Color keys
     }
 
     // Simple readiness: treat LunaLib as ready if the mod is enabled; API calls
@@ -467,52 +419,18 @@ public class ModPlugin extends BaseModPlugin {
                 } catch (Throwable t) {
                 }
 
-                // If any of the above are null (LunaLib didn't provide a Color), try reading hex strings (fallback)
+                // If any of the above are null (LunaLib didn't provide a Color), use defaults
                 if (nebulaActive == null) {
-                    try {
-                        // Fallback to old key (string / legacy storage)
-                        String hex = LunaSettings.getString(MOD_ID, "ramscoop_color_nebula_active");
-                        nebulaActive = parseHexColor(hex, color_nebula_active);
-                        // If parsed, write to the v2 key so new Color UI reads a consistent value
-                        if (nebulaActive != null) {
-                            LOG.info("[Ramscoop] Parsed nebula_active hex; keeping for runtime. Recommend clearing LunaLib saved value to enable picker.");
-                        }
-                    } catch (Throwable t) {
-                        nebulaActive = color_nebula_active; // keep existing default
-                    }
+                    nebulaActive = color_nebula_active; // use default
                 }
                 if (nebulaInactive == null) {
-                    try {
-                        String hex = LunaSettings.getString(MOD_ID, "ramscoop_color_nebula_inactive");
-                        nebulaInactive = parseHexColor(hex, color_nebula_inactive);
-                        if (nebulaInactive != null) {
-                            LOG.info("[Ramscoop] Parsed nebula_inactive hex; keeping for runtime. Recommend clearing LunaLib saved value to enable picker.");
-                        }
-                    } catch (Throwable t) {
-                        nebulaInactive = color_nebula_inactive;
-                    }
+                    nebulaInactive = color_nebula_inactive; // use default
                 }
                 if (coronaActive == null) {
-                    try {
-                        String hex = LunaSettings.getString(MOD_ID, "ramscoop_color_corona_active");
-                        coronaActive = parseHexColor(hex, color_corona_active);
-                        if (coronaActive != null) {
-                            LOG.info("[Ramscoop] Parsed corona_active hex; keeping for runtime. Recommend clearing LunaLib saved value to enable picker.");
-                        }
-                    } catch (Throwable t) {
-                        coronaActive = color_corona_active;
-                    }
+                    coronaActive = color_corona_active; // use default
                 }
                 if (coronaInactive == null) {
-                    try {
-                        String hex = LunaSettings.getString(MOD_ID, "ramscoop_color_corona_inactive");
-                        coronaInactive = parseHexColor(hex, color_corona_inactive);
-                        if (coronaInactive != null) {
-                            LOG.info("[Ramscoop] Parsed corona_inactive hex; keeping for runtime. Recommend clearing LunaLib saved value to enable picker.");
-                        }
-                    } catch (Throwable t) {
-                        coronaInactive = color_corona_inactive;
-                    }
+                    coronaInactive = color_corona_inactive; // use default
                 }
 
                 // Allow user-selected presets (radio buttons). If the preset is not Custom,

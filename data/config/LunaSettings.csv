@@ -45,14 +45,8 @@ ramscoop_floating_text_scale,Floating Text Duration (seconds),Double,0.7,,"How l
 notifications_nebula_header,Nebula Notifications,Header,Nebula Notifications,,,,,Notifications
 ramscoop_notify_nebula_entry,Show Nebula Entry Notification,Boolean,true,,"Show a floating-text notification when entering a nebula.",,,Notifications
 ramscoop_color_nebula_active_v2,Nebula Entry Color selection,Color,#D3D3D3,,"Select a color from the sliders or enter hex code if known. This changes the text color when entering a nebula.",,,Notifications
-ramscoop_color_nebula_active,Nebula Entry Color (Legacy),String,#D3D3D3,,"Legacy compatibility key - use 'ramscoop_color_nebula_active_v2' instead. This key is maintained for saves that have old settings; but new configurations should use the _v2 version above.",,,Notifications
 ramscoop_notify_nebula_exit,Show Nebula Exit Notification,Boolean,true,,"Show a floating-text notification when exiting a nebula.",,,Notifications
 ramscoop_color_nebula_inactive_v2,Nebula Exit Color selection,Color,#D3D3D3,,"Select a color from the sliders or enter hex code if known. This changes the text color when exiting a nebula.",,,Notifications
-ramscoop_color_nebula_inactive,Nebula Exit Color (Legacy),String,#D3D3D3,,"Legacy compatibility key - use 'ramscoop_color_nebula_inactive_v2' instead. This key is maintained for saves that have old settings; but new configurations should use the _v2 version above.",,,Notifications
 notifications_corona_header,Corona Notifications,Header,Corona Notifications,,,,,Notifications
 ramscoop_notify_corona_entry,Show Corona Entry Notification,Boolean,true,,"Show a floating-text notification when entering a corona.",,,Notifications
-ramscoop_color_corona_active_v2,Corona Entry Color selection,Color,#D3D3D3,,"Select a color from the sliders or enter hex code if known. This changes the text color when entering a corona.",,,Notifications
-ramscoop_color_corona_active,Corona Entry Color (Legacy),String,#D3D3D3,,"Legacy compatibility key - use 'ramscoop_color_corona_active_v2' instead. This key is maintained for saves that have old settings; but new configurations should use the _v2 version above.",,,Notifications
 ramscoop_notify_corona_exit,Show Corona Exit Notification,Boolean,true,,"Show a floating-text notification when exiting a corona.",,,Notifications
-ramscoop_color_corona_inactive_v2,Corona Exit Color selection,Color,#D3D3D3,,"Select a color from the sliders or enter hex code if known. This changes the text color when exiting a corona.",,,Notifications
-ramscoop_color_corona_inactive,Corona Exit Color (Legacy),String,#D3D3D3,,"Legacy compatibility key - use 'ramscoop_color_corona_inactive_v2' instead. This key is maintained for saves that have old settings; but new configurations should use the _v2 version above.",,,Notifications
