@@ -32,13 +32,15 @@ dev/
 /.idea/
 /.vscode/
 
-# Java build outputs
+# Java build outputs (keep compiled classes ignored, but allow committing jars/ directory)
 *.class
-*.jar
 temp_jar/
 temp_classes/
 test_install/
 tmp_*
+
+# allow committed jars like jars/Ramscoop.jar
+!jars/
 
 # avoid committing compiled classes in src
 src/**/*.class
