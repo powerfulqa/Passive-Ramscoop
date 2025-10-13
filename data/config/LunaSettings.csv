@@ -51,4 +51,4 @@ notifications_corona_header,Corona Notifications,Header,Corona Notifications,,,,
 ramscoop_notify_corona_entry,Show Corona Entry Notification,Boolean,true,,"Show a floating-text notification when entering a corona.",,,Notifications
 ramscoop_color_corona_active_v2,Corona Entry Color selection,Color,#D3D3D3,,"Select a color from the sliders or enter hex code if known. This changes the text color when entering a corona.",,,Notifications
 ramscoop_notify_corona_exit,Show Corona Exit Notification,Boolean,true,,"Show a floating-text notification when exiting a corona.",,,Notifications
-ramscoop_color_corona_inactive_v2,Corona Exit Color selection,Color,#D3D3D3,,"Select a color from the sliders or enter hex code if known. This changes the text color when exiting a corona",,,Notifications
+ramscoop_color_corona_inactive_v2,Corona Exit Color selection,Color,#D3D3D3,,"Select a color from the sliders or enter hex code if known. This changes the text color when exiting a corona.",,,Notifications
