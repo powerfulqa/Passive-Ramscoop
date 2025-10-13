@@ -56,15 +56,15 @@ Write-Host "Using Java Home: $javaHome" -ForegroundColor Cyan
 
 # Detect platform to support both Windows and Linux runners
 try {
-    $isWindows = [System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform([System.Runtime.InteropServices.OSPlatform]::Windows)
+    $platformIsWindows = [System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform([System.Runtime.InteropServices.OSPlatform]::Windows)
 } catch {
     # Fallback for older PowerShell versions
-    $isWindows = $env:OS -eq 'Windows_NT'
+    $platformIsWindows = $env:OS -eq 'Windows_NT'
 }
 
-$exeExt = if ($isWindows) { '.exe' } else { '' }
-$pathSep = if ($isWindows) { '\\' } else { '/' }
-$cpSep = if ($isWindows) { ';' } else { ':' }
+$exeExt = if ($platformIsWindows) { '.exe' } else { '' }
+$pathSep = if ($platformIsWindows) { '\\' } else { '/' }
+$cpSep = if ($platformIsWindows) { ';' } else { ':' }
 
 # Set up Java tools paths
 $javac = "$javaHome${pathSep}bin${pathSep}javac$exeExt"
@@ -82,29 +82,37 @@ if (-not (Test-Path $jar)) {
 Write-Host "Using JAR utility: $jar" -ForegroundColor Cyan
 
 # Set up classpath with all necessary libraries from Starsector
-$CLASSPATH = @(
-    "$SS_DIR\starsector-core\starfarer.api.jar",
-    "$SS_DIR\starsector-core\starfarer_obf.jar",
-    "$SS_DIR\starsector-core\janino.jar",
-    "$SS_DIR\starsector-core\commons-compiler.jar",
-    "$SS_DIR\starsector-core\commons-compiler-jdk.jar",
-    "$SS_DIR\starsector-core\fs.common_obf.jar",
-    "$SS_DIR\starsector-core\fs.sound_obf.jar",
-    "$SS_DIR\starsector-core\lwjgl.jar",
-    "$SS_DIR\starsector-core\lwjgl_util.jar",
-    "$SS_DIR\starsector-core\json.jar",
-    "$SS_DIR\starsector-core\log4j-1.2.9.jar"
-)
+# Build the classpath array; only add Starsector jars if the Starsector directory exists
+$CLASSPATH = @()
+if (Test-Path $SS_DIR) {
+    $CLASSPATH += "$SS_DIR${pathSep}starsector-core${pathSep}starfarer.api.jar"
+    $CLASSPATH += "$SS_DIR${pathSep}starsector-core${pathSep}starfarer_obf.jar"
+    $CLASSPATH += "$SS_DIR${pathSep}starsector-core${pathSep}janino.jar"
+    $CLASSPATH += "$SS_DIR${pathSep}starsector-core${pathSep}commons-compiler.jar"
+    $CLASSPATH += "$SS_DIR${pathSep}starsector-core${pathSep}commons-compiler-jdk.jar"
+    $CLASSPATH += "$SS_DIR${pathSep}starsector-core${pathSep}fs.common_obf.jar"
+    $CLASSPATH += "$SS_DIR${pathSep}starsector-core${pathSep}fs.sound_obf.jar"
+    $CLASSPATH += "$SS_DIR${pathSep}starsector-core${pathSep}lwjgl.jar"
+    $CLASSPATH += "$SS_DIR${pathSep}starsector-core${pathSep}lwjgl_util.jar"
+    $CLASSPATH += "$SS_DIR${pathSep}starsector-core${pathSep}json.jar"
+    $CLASSPATH += "$SS_DIR${pathSep}starsector-core${pathSep}log4j-1.2.9.jar"
+} else {
+    Write-Host "WARNING: Starsector directory $SS_DIR not found; proceeding without Starsector jars on classpath" -ForegroundColor Yellow
+}
 
 # Add LunaLib to classpath for direct API access (discover jar dynamically)
 $lunaLibJarDir = Join-Path $SS_DIR 'mods\03_LunaLib-2.0.4\jars'
 if (Test-Path $lunaLibJarDir) {
-    $lunaJars = Get-ChildItem -Path $lunaLibJarDir -Filter *.jar -File -ErrorAction SilentlyContinue
-    foreach ($j in $lunaJars) { $CLASSPATH += $j.FullName }
-    if ($lunaJars.Count -gt 0) {
-        Write-Host ("Including LunaLib jars: " + ($lunaJars | ForEach-Object { $_.Name } | Sort-Object | Join-String ", ")) -ForegroundColor Cyan
+    if (Test-Path $lunaLibJarDir) {
+        $lunaJars = Get-ChildItem -Path $lunaLibJarDir -Filter *.jar -File -ErrorAction SilentlyContinue
+        foreach ($j in $lunaJars) { $CLASSPATH += $j.FullName }
+        if ($lunaJars.Count -gt 0) {
+            Write-Host ("Including LunaLib jars: " + ($lunaJars | ForEach-Object { $_.Name } | Sort-Object | Join-String ", ")) -ForegroundColor Cyan
+        } else {
+            Write-Host "WARNING: No LunaLib jars found in $lunaLibJarDir" -ForegroundColor Yellow
+        }
     } else {
-        Write-Host "WARNING: No LunaLib jars found in $lunaLibJarDir" -ForegroundColor Yellow
+        Write-Host "WARNING: LunaLib not found at $lunaLibJarDir; build will proceed without LunaLib API on classpath" -ForegroundColor Yellow
     }
 } else {
     Write-Host "WARNING: LunaLib not found at $lunaLibJarDir; build will proceed without LunaLib API on classpath" -ForegroundColor Yellow
@@ -115,7 +123,13 @@ $CLASSPATH_STR = $CLASSPATH -join $cpSep
 
 # Compile Java files
 Write-Host "Compiling Java files..." -ForegroundColor Cyan
-& $javac --release 8 -cp $CLASSPATH_STR -d "$SRC_DIR" "$SRC_DIR/ramscoop/*.java"
+# Expand Java source files to a list so javac receives individual paths (wildcards behave differently on linux pwsh)
+$javaFiles = Get-ChildItem -Path "$SRC_DIR/ramscoop" -Filter *.java -File | ForEach-Object { $_.FullName }
+if ($javaFiles.Count -eq 0) {
+    Write-Host "ERROR: No Java source files found in $SRC_DIR/ramscoop" -ForegroundColor Red
+    exit 1
+}
+& $javac --release 8 -cp $CLASSPATH_STR -d "$SRC_DIR" $javaFiles
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Compilation failed!" -ForegroundColor Red
     exit $LASTEXITCODE
