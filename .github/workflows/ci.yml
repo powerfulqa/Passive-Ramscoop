@@ -19,25 +19,6 @@ jobs:
         distribution: 'temurin'
         java-version: '17'
 
-    - name: Download Starsector core jars (optional)
-      env:
-        STARSECTOR_CORE_URL_SECRET: ${{ secrets.STARSECTOR_CORE_URL }}
-      run: |
-        # Prefer environment variable, then secrets
-        if [ -n "$STARSECTOR_CORE_URL" ]; then
-          URL="$STARSECTOR_CORE_URL"
-        elif [ -n "$STARSECTOR_CORE_URL_SECRET" ]; then
-          URL="$STARSECTOR_CORE_URL_SECRET"
-        else
-          echo "No STARSECTOR_CORE_URL provided (set env.STARSECTOR_CORE_URL or secrets.STARSECTOR_CORE_URL). Skipping Starsector core download. If your build requires Starsector API jars, provide a download URL via repository secrets."
-          exit 0
-        fi
-        echo "Downloading Starsector core from $URL"
-        curl -L -o starsector-core.zip "$URL"
-        unzip starsector-core.zip -d starsector_core
-        # Set STARSECTOR_DIR so build.ps1 picks up the extracted core
-        echo "STARSECTOR_DIR=$PWD/starsector_core" >> $GITHUB_ENV
-    
     - name: Validate Java files
       run: |
         # Check that Java source files exist and have content
