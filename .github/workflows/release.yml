@@ -55,17 +55,18 @@ jobs:
           echo "SEMVER=$SEMVER" >> $GITHUB_ENV
 
       - name: Auto-fix version files from tag
-        shell: pwsh
+        # This step contains bash-style logic (if ! git ...); run it under bash so the syntax is interpreted correctly
+        shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          pwsh -NoProfile -File .github/scripts/check-versions.ps1 -Fix -Version $env:SEMVER
+          pwsh -NoProfile -File .github/scripts/check-versions.ps1 -Fix -Version $SEMVER
           # If files changed, commit and push them so packaging uses the updated files
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add mod_info.json version.json Ramscoop.version || true
           if ! git diff --cached --quiet; then
-            git commit -m "ci(release): auto-bump versions to $env:SEMVER [ci skip]"
+            git commit -m "ci(release): auto-bump versions to $SEMVER [ci skip]"
             git push origin HEAD:main
           else
             echo "No version file changes required"
