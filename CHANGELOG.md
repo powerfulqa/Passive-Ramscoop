@@ -1,5 +1,11 @@
 # Changelog 
 
+## [0.7.3] - 2025-10-14
+### Changed
+- Enabled visual feedback by default (ramscoop_enable_visual_feedback now defaults to true)
+- Added ramscoop_supply_per_crew setting for crew-based supply generation
+- Improved build.bat script for better path detection and classpath handling
+
 ## [0.7.2] - 2025-10-14
 ### Added
 - CSV validation script and CI integration (.github/scripts/validate-luna-csv.py) to prevent malformed LunaSettings.csv and to block legacy UI keys from being reintroduced via PRs.
