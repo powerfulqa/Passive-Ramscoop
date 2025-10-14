@@ -35,22 +35,22 @@
 	#extra = calculate using crew over your fleet minimum, put those slackers to good use
 	#all = use all crew for supply gen, just because you fly a ship doesn't mean you can slack off
 	#nocrew = don't use crew to calculate supply gen
-	"crew_usage":extra,
+    "crew_usage":"extra",
 
 	########
 	#For 'extra' or 'all' crew setting,
 	#each crew generates this amount per day, decimal or int
 	#will generate up to set limits
-	"supply_per_crew":.1,
+	"ramscoop_supply_per_crew":0.1,
 	
 	########
 	#For 'none' crew setting,
 	#pick either 'percent' for a percentage of max cargo per day or
 	#'flat' for a flat value of supplies per day
 	#will generate up to set limits
-	"no_crew_gen":percent,
+	"no_crew_gen":"percent",
 	#put the value you want for the percent or flat rate here, decimal or int
-	"no_crew_rate":.1
+    "no_crew_rate":0.1
 ,
 	########
 	#Corona settings (fallback if LunaLib missing)

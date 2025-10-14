@@ -1,5 +1,14 @@
 Changelog 
 
+Version 0.7.2 (2025-10-14)
+Added
+- CSV validator script (.github/scripts/validate-luna-csv.py) and CI integration to prevent malformed LunaSettings.csv and to flag legacy UI keys.
+- Separate LunaLib controls for No-Crew Generation: `nebula_no_crew_rate_percent` (0–100 slider) and `nebula_no_crew_rate_flat` (flat units/day).
+
+Changed
+- Removed legacy `nebula_*` UI entries from LunaLib to keep the settings menu clean; JSON fallback preserved for older saves where needed.
+- Updated code to read and interpret the new no-crew keys properly (percent -> fraction conversion).
+
 Version 0.7.1 (2025-10-13)
 Changed
 - Removed legacy color string keys from LunaLib settings - cleaner UI with only Color picker entries

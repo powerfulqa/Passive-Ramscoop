@@ -39,6 +39,9 @@
    - Added DEBUG_MODE = false
    - Conditionalized 6 logging statements
 
+## Follow-up note
+Some UI/CSV changes were further refined in the subsequent 0.7.2 release (2025-10-14): the No-Crew generation control was split into separate percent and flat fields and a CSV validator + CI check was added to prevent malformed LunaSettings.csv files from being merged.
+
 3. `data/config/LunaSettings.csv`
    - Improved 20+ descriptions
    - Escaped 5 `%` characters as `%%`

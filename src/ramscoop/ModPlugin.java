@@ -45,7 +45,11 @@ public class ModPlugin extends BaseModPlugin {
     public static boolean scoop_toggle_default_on = true;
     public static String crew_usage = DEFAULT_CREW_USAGE;
     public static String no_crew_gen = DEFAULT_NO_CREW_GEN;
-    public static float no_crew_rate = DEFAULT_NO_CREW_RATE;
+    // New: explicit percent (0..1) and flat (units/day) values for no-crew
+    // generation
+    public static float no_crew_rate = DEFAULT_NO_CREW_RATE; // kept for compatibility (fraction)
+    public static float no_crew_rate_percent = DEFAULT_NO_CREW_RATE; // stored as fraction (0.1 = 10%)
+    public static float no_crew_rate_flat = 10.0f; // units/day
     // Corona settings
     public static boolean corona_enable_fuel = true;
     public static float corona_fuel_per_day = DEFAULT_CORONA_FUEL_PER_DAY;
@@ -140,38 +144,54 @@ public class ModPlugin extends BaseModPlugin {
         LOG.info("[Ramscoop] Settings load complete");
     }
 
-    private static void setColorsFromSelections(Color nebulaActive, Color nebulaInactive, Color coronaActive, Color coronaInactive) {
+    private static void setColorsFromSelections(Color nebulaActive, Color nebulaInactive, Color coronaActive,
+            Color coronaInactive) {
         // Toggle uses nebula colors
         color_toggle_active = nebulaActive;
         color_toggle_active_secondary = nebulaActive;
         color_toggle_inactive = nebulaInactive;
-        
+
         // Nebula colors
         color_nebula_active = nebulaActive;
         color_nebula_inactive = nebulaInactive;
-        
+
         // Corona colors
         color_corona_active = coronaActive;
         color_corona_inactive = coronaInactive;
     }
 
     private static Color parseColor(String colorName) {
-        if (colorName == null) return Color.CYAN; // default
+        if (colorName == null)
+            return Color.CYAN; // default
         switch (colorName.toLowerCase()) {
-            case "black": return Color.BLACK;
-            case "blue": return Color.BLUE;
-            case "cyan": return Color.CYAN;
-            case "dark gray": return Color.DARK_GRAY;
-            case "gray": return Color.GRAY;
-            case "green": return Color.GREEN;
-            case "light gray": return Color.LIGHT_GRAY;
-            case "magenta": return Color.MAGENTA;
-            case "orange": return Color.ORANGE;
-            case "pink": return Color.PINK;
-            case "red": return Color.RED;
-            case "white": return Color.WHITE;
-            case "yellow": return Color.YELLOW;
-            default: return Color.CYAN; // fallback
+            case "black":
+                return Color.BLACK;
+            case "blue":
+                return Color.BLUE;
+            case "cyan":
+                return Color.CYAN;
+            case "dark gray":
+                return Color.DARK_GRAY;
+            case "gray":
+                return Color.GRAY;
+            case "green":
+                return Color.GREEN;
+            case "light gray":
+                return Color.LIGHT_GRAY;
+            case "magenta":
+                return Color.MAGENTA;
+            case "orange":
+                return Color.ORANGE;
+            case "pink":
+                return Color.PINK;
+            case "red":
+                return Color.RED;
+            case "white":
+                return Color.WHITE;
+            case "yellow":
+                return Color.YELLOW;
+            default:
+                return Color.CYAN; // fallback
         }
     }
 
@@ -179,18 +199,24 @@ public class ModPlugin extends BaseModPlugin {
      * Compare two colors for equality (including alpha).
      */
     private static boolean colorsEqual(Color a, Color b) {
-        if (a == null && b == null) return true;
-        if (a == null || b == null) return false;
-        return a.getRed() == b.getRed() && a.getGreen() == b.getGreen() && a.getBlue() == b.getBlue() && a.getAlpha() == b.getAlpha();
+        if (a == null && b == null)
+            return true;
+        if (a == null || b == null)
+            return false;
+        return a.getRed() == b.getRed() && a.getGreen() == b.getGreen() && a.getBlue() == b.getBlue()
+                && a.getAlpha() == b.getAlpha();
     }
 
     /**
-     * Parse a hex color string like "#RRGGBB" or "RRGGBB" (also handles 8-digit ARGB/RRGGBBAA)
+     * Parse a hex color string like "#RRGGBB" or "RRGGBB" (also handles 8-digit
+     * ARGB/RRGGBBAA)
      */
     private static Color parseHexColor(String hexColor, Color fallback) {
-        if (hexColor == null) return fallback;
+        if (hexColor == null)
+            return fallback;
         String s = hexColor.trim();
-        if (s.startsWith("#")) s = s.substring(1);
+        if (s.startsWith("#"))
+            s = s.substring(1);
         try {
             if (s.length() == 6) {
                 int r = Integer.parseInt(s.substring(0, 2), 16);
@@ -211,10 +237,12 @@ public class ModPlugin extends BaseModPlugin {
     }
 
     /**
-     * Compute an "inactive" / desaturated variant of a color by blending with a light gray.
+     * Compute an "inactive" / desaturated variant of a color by blending with a
+     * light gray.
      */
     private static Color makeInactive(Color c) {
-        if (c == null) return Color.LIGHT_GRAY;
+        if (c == null)
+            return Color.LIGHT_GRAY;
         int r = (c.getRed() + 192) / 2;
         int g = (c.getGreen() + 192) / 2;
         int b = (c.getBlue() + 192) / 2;
@@ -223,8 +251,10 @@ public class ModPlugin extends BaseModPlugin {
     }
 
     /**
-     * Targeted debug: log raw LunaLib stored values for a key both as Color and as String
-     * so we can detect whether the saved value is a Color object or a legacy hex string.
+     * Targeted debug: log raw LunaLib stored values for a key both as Color and as
+     * String
+     * so we can detect whether the saved value is a Color object or a legacy hex
+     * string.
      */
     private static void logRawLunaValue(String key) {
         try {
@@ -238,7 +268,8 @@ public class ModPlugin extends BaseModPlugin {
                     LOG.info(String.format("[Ramscoop] LunaLib stored (Color) for '%s' -> null", key));
                 }
             } catch (Throwable t) {
-                LOG.info(String.format("[Ramscoop] LunaLib getColor('%s') threw: %s", key, t.getClass().getSimpleName()));
+                LOG.info(String.format("[Ramscoop] LunaLib getColor('%s') threw: %s", key,
+                        t.getClass().getSimpleName()));
             }
 
             // Try reading as String (legacy hex storage)
@@ -250,7 +281,8 @@ public class ModPlugin extends BaseModPlugin {
                     LOG.info(String.format("[Ramscoop] LunaLib stored (String) for '%s' -> null", key));
                 }
             } catch (Throwable t) {
-                LOG.info(String.format("[Ramscoop] LunaLib getString('%s') threw: %s", key, t.getClass().getSimpleName()));
+                LOG.info(String.format("[Ramscoop] LunaLib getString('%s') threw: %s", key,
+                        t.getClass().getSimpleName()));
             }
         } catch (Throwable t) {
             LOG.warn("[Ramscoop] Failed to inspect LunaLib value for key '" + key + "': " + t.getMessage());
@@ -311,11 +343,27 @@ public class ModPlugin extends BaseModPlugin {
                 } catch (Throwable ignored) {
                 }
             }
+            // Read percent (0..100) and flat values separately. Percent is converted to
+            // fraction.
             try {
-                no_crew_rate = LunaSettings.getDouble(MOD_ID, "nebula_no_crew_rate").floatValue();
+                double p = LunaSettings.getDouble(MOD_ID, "nebula_no_crew_rate_percent");
+                no_crew_rate_percent = (float) (p / 100.0);
+                no_crew_rate = no_crew_rate_percent; // keep compatibility field in sync
             } catch (Throwable e3) {
                 try {
-                    no_crew_rate = LunaSettings.getDouble(MOD_ID, "ramscoop_no_crew_rate").floatValue();
+                    double p = LunaSettings.getDouble(MOD_ID, "ramscoop_no_crew_rate_percent");
+                    no_crew_rate_percent = (float) (p / 100.0);
+                    no_crew_rate = no_crew_rate_percent;
+                } catch (Throwable ignored) {
+                }
+            }
+            try {
+                double f = LunaSettings.getDouble(MOD_ID, "nebula_no_crew_rate_flat");
+                no_crew_rate_flat = (float) f;
+            } catch (Throwable e4) {
+                try {
+                    double f = LunaSettings.getDouble(MOD_ID, "ramscoop_no_crew_rate_flat");
+                    no_crew_rate_flat = (float) f;
                 } catch (Throwable ignored) {
                 }
             }
@@ -382,14 +430,15 @@ public class ModPlugin extends BaseModPlugin {
                 floating_text_duration = LunaSettings.getDouble(MOD_ID, "ramscoop_floating_text_scale").floatValue();
             } catch (Throwable ignored) {
             }
-                try {
-                    // First, log raw stored LunaLib values for inspection (helps diagnose HSV picker issues)
-                    logRawLunaValue("ramscoop_color_nebula_active_v2");
-                    logRawLunaValue("ramscoop_color_nebula_inactive_v2");
-                    logRawLunaValue("ramscoop_color_corona_active_v2");
-                    logRawLunaValue("ramscoop_color_corona_inactive_v2");
+            try {
+                // First, log raw stored LunaLib values for inspection (helps diagnose HSV
+                // picker issues)
+                logRawLunaValue("ramscoop_color_nebula_active_v2");
+                logRawLunaValue("ramscoop_color_nebula_inactive_v2");
+                logRawLunaValue("ramscoop_color_corona_active_v2");
+                logRawLunaValue("ramscoop_color_corona_inactive_v2");
 
-                    // First try LunaLib's Color API (preferred - provides the HSV picker UI)
+                // First try LunaLib's Color API (preferred - provides the HSV picker UI)
                 Color nebulaActive = null;
                 Color nebulaInactive = null;
                 Color coronaActive = null;
@@ -443,11 +492,16 @@ public class ModPlugin extends BaseModPlugin {
 
                 // Debug: log resolved colors so we can see what colors are actually being used
                 try {
-                    LOG.info(String.format("[Ramscoop] Resolved colors - nebulaActive: #%02X%02X%02X alpha=%d, nebulaInactive: #%02X%02X%02X alpha=%d, coronaActive: #%02X%02X%02X alpha=%d, coronaInactive: #%02X%02X%02X alpha=%d",
-                            color_nebula_active.getRed(), color_nebula_active.getGreen(), color_nebula_active.getBlue(), color_nebula_active.getAlpha(),
-                            color_nebula_inactive.getRed(), color_nebula_inactive.getGreen(), color_nebula_inactive.getBlue(), color_nebula_inactive.getAlpha(),
-                            color_corona_active.getRed(), color_corona_active.getGreen(), color_corona_active.getBlue(), color_corona_active.getAlpha(),
-                            color_corona_inactive.getRed(), color_corona_inactive.getGreen(), color_corona_inactive.getBlue(), color_corona_inactive.getAlpha()));
+                    LOG.info(String.format(
+                            "[Ramscoop] Resolved colors - nebulaActive: #%02X%02X%02X alpha=%d, nebulaInactive: #%02X%02X%02X alpha=%d, coronaActive: #%02X%02X%02X alpha=%d, coronaInactive: #%02X%02X%02X alpha=%d",
+                            color_nebula_active.getRed(), color_nebula_active.getGreen(), color_nebula_active.getBlue(),
+                            color_nebula_active.getAlpha(),
+                            color_nebula_inactive.getRed(), color_nebula_inactive.getGreen(),
+                            color_nebula_inactive.getBlue(), color_nebula_inactive.getAlpha(),
+                            color_corona_active.getRed(), color_corona_active.getGreen(), color_corona_active.getBlue(),
+                            color_corona_active.getAlpha(),
+                            color_corona_inactive.getRed(), color_corona_inactive.getGreen(),
+                            color_corona_inactive.getBlue(), color_corona_inactive.getAlpha()));
                 } catch (Throwable ignored) {
                 }
             } catch (Throwable t) {
@@ -468,12 +522,12 @@ public class ModPlugin extends BaseModPlugin {
                             ", percent_supply_limit=" + percent_supply_limit +
                             ", hard_supply_limit=" + hard_supply_limit +
                             ", crew_usage=" + crew_usage +
-                                ", no_crew_gen=" + no_crew_gen +
-                                ", no_crew_rate=" + no_crew_rate +
-                                ", notify_nebula_entry=" + notify_nebula_entry +
-                                ", notify_nebula_exit=" + notify_nebula_exit +
-                                ", notify_corona_entry=" + notify_corona_entry +
-                                ", notify_corona_exit=" + notify_corona_exit);
+                            ", no_crew_gen=" + no_crew_gen +
+                            ", no_crew_rate=" + no_crew_rate +
+                            ", notify_nebula_entry=" + notify_nebula_entry +
+                            ", notify_nebula_exit=" + notify_nebula_exit +
+                            ", notify_corona_entry=" + notify_corona_entry +
+                            ", notify_corona_exit=" + notify_corona_exit);
         } catch (Exception e) {
             LOG.warn("[Ramscoop] Failed to load LunaLib settings: " + e.getMessage(), e);
             throw new RuntimeException("Failed to load LunaLib settings", e);
@@ -501,7 +555,8 @@ public class ModPlugin extends BaseModPlugin {
             percent_supply_limit = (float) config.getDouble("percent_supply_limit");
             hard_supply_limit = (float) config.getDouble("hard_supply_limit");
 
-            supplies_per_crew = (float) config.getDouble("supply_per_crew");
+            // Legacy 'supply_per_crew' removed: new key is 'ramscoop_supply_per_crew'
+            // (LunaLib)
             // Accept new nebula_* keys or legacy names
             if (config.has("nebula_crew_usage"))
                 crew_usage = config.get("nebula_crew_usage").toString();

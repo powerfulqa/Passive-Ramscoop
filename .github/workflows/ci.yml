@@ -126,3 +126,6 @@ jobs:
       shell: pwsh
       run: |
         pwsh -NoProfile -File .github/scripts/check-versions.ps1
+    - name: Validate LunaSettings CSVs
+      run: |
+        python3 .github/scripts/validate-luna-csv.py

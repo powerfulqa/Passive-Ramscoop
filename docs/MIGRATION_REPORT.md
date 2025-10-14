@@ -3,6 +3,13 @@
 ## Overview
 This report documents the migration and enhancement of the Ramscoop mod from Starsector 0.95a to Starsector 0.98a-RC8, the addition of LunaLib support in version 0.4.0, and configuration/UI refinements in 0.5.0>.
 
+## Version 0.7.2 - 2025-10-14 (UI & Validator)
+
+### Summary
+- Added a CSV validator and CI integration to prevent malformed `LunaSettings.csv` files and to flag legacy UI keys that clutter the LunaLib settings menu.
+- Cleaned LunaLib UI by removing legacy `nebula_*` entries and exposing two dedicated no-crew controls: `nebula_no_crew_rate_percent` and `nebula_no_crew_rate_flat`.
+- Code updated to read the new keys and convert percent values to fractions as needed.
+
 ## Version 0.6.0 - Corona Time
 
 ### Summary

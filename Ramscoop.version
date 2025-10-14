@@ -3,13 +3,13 @@
     "modVersion": {
         "major": 0,
         "minor": 7,
-        "patch": 1
+        "patch": 2
     },
     "modName": "Ramscoop",
     "modThreadId": null,
     
     # Link towards a direct download, fetched from the online version file
-    "directDownloadURL": "https://github.com/powerfulqa/Passive-Ramscoop/releases/download/v0.7.1/Ramscoop-v0.7.1.zip",
+    "directDownloadURL": "https://github.com/powerfulqa/Passive-Ramscoop/releases/download/v0.7.2/Ramscoop-v0.7.2.zip",
     
     # Link towards a directly accessible text file, which can be used to display a changelog ingame, is fetched from the online version file.
     # The new line will highlight any line that begins with "Version"

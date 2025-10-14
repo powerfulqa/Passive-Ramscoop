@@ -91,7 +91,12 @@ public class Ramscoop implements EveryFrameScript {
             if (config.has("fuel_per_day")) {
                 fuel_per_day = (float) config.getDouble("fuel_per_day");
             }
-            supplies_per_crew = (float) config.getDouble("supply_per_crew");
+            // Read new JSON key used by the updated UI/schema. Do NOT fall back to
+            // the legacy 'supply_per_crew' key so the legacy menu entry can be
+            // removed cleanly from the CSV/UI without the code depending on it.
+            if (config.has("ramscoop_supply_per_crew")) {
+                supplies_per_crew = (float) config.getDouble("ramscoop_supply_per_crew");
+            }
             percent_supply_limit = (float) config.getDouble("percent_supply_limit");
             hard_supply_limit = (float) config.getDouble("hard_supply_limit");
             crew_usage = config.get("crew_usage").toString();
@@ -414,12 +419,14 @@ public class Ramscoop implements EveryFrameScript {
                         case "nocrew":
                             switch (no_crew_gen) {
                                 case "percent":
-                                    suppliesperdayd = Math
-                                            .floor((double) (fleet.getCargo().getMaxCapacity() * no_crew_rate));
+                                    // Use percent slider (0..100) converted to fraction in ModPlugin
+                                    suppliesperdayd = Math.floor((double) (fleet.getCargo().getMaxCapacity()
+                                            * ModPlugin.no_crew_rate_percent));
                                     suppliesperday = (float) suppliesperdayd;
                                     break;
                                 case "flat":
-                                    suppliesperday = no_crew_rate;
+                                    // Use flat units/day from ModPlugin
+                                    suppliesperday = ModPlugin.no_crew_rate_flat;
                                     break;
                             }
                             break;
