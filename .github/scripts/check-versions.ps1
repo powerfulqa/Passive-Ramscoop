@@ -15,8 +15,14 @@ function Write-JsonPreserve($obj, $path) {
     Set-Content -LiteralPath $path -Value $json -Encoding UTF8
 }
 
-$repo = Resolve-Path (Join-Path (Split-Path $MyInvocation.MyCommand.Definition -Parent) '..') | Select-Object -ExpandProperty Path
-Set-Location $repo
+# Determine repo root reliably whether running locally or in GitHub Actions.
+# Script lives at .github/scripts/check-versions.ps1, so repo root is two levels up.
+$scriptDir = $PSScriptRoot
+if (-not $scriptDir) {
+    $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Definition
+}
+$repoRoot = Resolve-Path (Join-Path $scriptDir '..\..') | Select-Object -ExpandProperty Path
+Set-Location $repoRoot
 
 $paths = @{
     mod_info = "mod_info.json"
