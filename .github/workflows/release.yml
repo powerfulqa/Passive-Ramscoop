@@ -54,13 +54,18 @@ jobs:
           SEMVER=${VERSION#v}
           echo "SEMVER=$SEMVER" >> $GITHUB_ENV
 
-      - name: Auto-fix version files from tag
-        # This step contains bash-style logic (if ! git ...); run it under bash so the syntax is interpreted correctly
+      - name: Auto-fix version files from tag (PowerShell)
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pwsh -NoProfile -File .github/scripts/check-versions.ps1 -Fix -Version $env:SEMVER
+
+      - name: Commit version file changes (bash)
         shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          pwsh -NoProfile -File .github/scripts/check-versions.ps1 -Fix -Version $SEMVER
           # If files changed, commit and push them so packaging uses the updated files
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
