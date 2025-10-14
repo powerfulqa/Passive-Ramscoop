@@ -2,7 +2,7 @@ Changelog
 
 Version 0.7.2 (2025-10-14)
 Added
-- CSV validator script (.github/scripts/validate-luna-csv.py) and CI integration to prevent malformed LunaSettings.csv and to flag legacy UI keys.
+- CSV validator script and CI integration to prevent malformed LunaSettings.csv and to flag legacy UI keys.
 - Separate LunaLib controls for No-Crew Generation: `nebula_no_crew_rate_percent` (0–100 slider) and `nebula_no_crew_rate_flat` (flat units/day).
 
 Changed
