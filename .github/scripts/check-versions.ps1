@@ -3,11 +3,6 @@ param(
     [string]$Version
 )
 
-param(
-    [switch]$Fix,
-    [string]$Version
-)
-
 function Read-JsonAllowHashComments($path) {
     if (-not (Test-Path $path)) { throw "Missing file: $path" }
     $raw = Get-Content $path -Raw
