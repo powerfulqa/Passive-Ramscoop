@@ -47,6 +47,30 @@ jobs:
         run: |
           pwsh -NoProfile -File .github/scripts/check-versions.ps1
 
+      - name: Determine semver from tag
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}     # e.g. v0.7.1
+          # Strip leading 'v' if present to make semantic version e.g. 0.7.1
+          SEMVER=${VERSION#v}
+          echo "SEMVER=$SEMVER" >> $GITHUB_ENV
+
+      - name: Auto-fix version files from tag
+        shell: pwsh
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          pwsh -NoProfile -File .github/scripts/check-versions.ps1 -Fix -Version $env:SEMVER
+          # If files changed, commit and push them so packaging uses the updated files
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add mod_info.json version.json Ramscoop.version || true
+          if ! git diff --cached --quiet; then
+            git commit -m "ci(release): auto-bump versions to $env:SEMVER [ci skip]"
+            git push origin HEAD:main
+          else
+            echo "No version file changes required"
+          fi
+
       - name: Update version files for release
         run: |
           # Extract version from tag
