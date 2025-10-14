@@ -29,6 +29,10 @@ Validation steps (quick)
 5. Tag & release:
    - Create git tag `vMAJOR.MINOR.PATCH` and push tags: `git tag v0.7.0; git push --tags`.
 
+## Automation notes
+- CI now runs a version consistency check on PRs and pushes. If the three canonical version files differ, CI fails and the PR should be updated.
+- The release workflow auto-extracts the tag and runs the checker in `-Fix` mode to update the files to the tag's version and commit them to `main` so TriOS sees consistent metadata.
+
 Notes & tips
 - TriOS expects plain text and exact path names. Double-check file case, especially on case-sensitive hosts.
 - `Ramscoop.version` is specifically used by TriOS: keep it machine-friendly (plain JSON with numeric fields) and bump the `patch` field when publishing bugfixes.

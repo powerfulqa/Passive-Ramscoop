@@ -164,3 +164,7 @@ Two build scripts are provided for flexibility:
 - Consider adding visual feedback when resources are being generated
 - Potential integration with other settings management mods
 - Enhanced error reporting for invalid LunaLib configurations
+
+## Tooling updates
+- Added a CI version consistency checker (.github/scripts/check-versions.ps1) to ensure `mod_info.json`, `version.json`, and `Ramscoop.version` match. This prevents TriOS/auto-updaters from missing releases due to mismatched metadata.
+- Release workflow now auto-applies the release tag's semantic version to the three canonical files before packaging (it will commit the updated files back to `main`).

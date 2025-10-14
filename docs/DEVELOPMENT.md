@@ -1,256 +1,90 @@
+# Development Guide for Passive-Ramscoop
 
-# Development Guide for Passive-Ramscoop1. **Set Up Environment:**
-   - JDK 8-21 (build script ## Resource Generation Logic
+This document describes how to build and contribute to Passive Ramscoop, plus developer notes about the runtime architecture and common pitfalls.
 
-### A## Resource Generation Logic
+## Requirements
+- JDK 11 or later installed (JDK 17 recommended). The build compiles with `--release 8` for Starsector compatibility but a modern JDK makes tooling easier.
+- PowerShell to run `build.ps1` (Windows) or PowerShell Core on other platforms
+- Starsector 0.98a-RC8 installation for local compilation against the game jars (optional if you use the committed `jars/Ramscoop.jar` in CI)
+- LunaLib installed in your local Starsector `mods/` folder if you want to compile against LunaLib API locally
 
-### Architecture Overview
-- **`ModPlugin.java`** - Mod entry point and settings orchestration
-  - `onApplicationLoad()`: Called once on game start
-  - `onGameLoad()`: Called when loading a save - loads settings here
-  - Settings priority: LunaLib (if available) → settings.json → hardcoded defaults
-  - Exposes public static fields that `Ramscoop.java` reads at runtime
-
-- **`Ramscoop.java`** - EveryFrameScript implementation for runtime logic
-  - `advance(amount)`: Called every frame with delta time
-  - Reads settings from public static fields in ModPlugin
-  - Uses `IntervalUtil(0.09f, 0.11f)` to throttle expensive operations (~10 times/second)
-  - Adds fuel/supplies via `MutableFleetStatsAPI.getDynamic().getMod("nebula_stat_mod")`
-
-### Settings Loading Chain
-```
-LunaSettings.csv (UI config defined in data/config/LunaSettings.csv)
-    ↓
-ModPlugin.loadLunaLibSettings() (runtime loading via reflection)
-    ↓ (fallback if LunaLib not ready)
-ModPlugin.loadLegacySettings() (data/config/settings.json)
-    ↓
-public static fields (Ramscoop reads these)
-```
-
-**CRITICAL**: CSV `fieldID` column must EXACTLY match `LunaSettings.get*("fieldID")` calls (case-sensitive).
-
-### Terrain Detection
-- **Nebula**: Checks for "nebula_stat_mod" in fleet stats
-- **Corona**: 
-  - Primary: Checks terrain plugin for `CoronaBurstTerrainPlugin` instance
-  - Fallback: Measures distance to nearest star using `Misc.getNearestStarOrBlackHole()`
-
-### Performance Considerations
-- Uses `IntervalUtil` to avoid per-frame overhead (~0.1 second intervals)
-- Early exit if interval hasn't elapsed
-- Conditional logging controlled by `DEBUG_MODE` flags (set to `false` for production)
-
-## Common Development Pitfalls
-
-### 1. LunaLib CSV Percent Sign Escaping
-**Problem**: Game crashes with `MissingFormatArgumentException` when opening LunaLib settings menu
-
-**Root Cause**: LunaLib uses `String.format()` to render CSV `tooltip` and `description` fields. Any `%` character is interpreted as a format specifier.
-
-**Solution**: Escape all literal `%` characters as `%%` in `LunaSettings.csv`:
-- ❌ Wrong: `"20% of max fuel"`
-- ✅ Correct: `"20%% of max fuel"`
-
-**Validation**: Always test by opening LunaLib settings menu in-game after modifying CSV descriptions.
-
-### 2. CSV Key Mismatches
-**Problem**: LunaLib throws "Value X not found in JSONObject"
-
-**Solution**: 
-- Check CSV `fieldID` column matches `LunaSettings.get*("X")` calls exactly (case-sensitive)
-- LunaLib only saves settings after user interaction - always provide defaults in CSV
-
-### 3. TriOS Version Not Updating
-**Problem**: TriOS shows old version number after release
-
-**Solution**:
-- Increment `patch` field in `Ramscoop.version`, not just `mod_info.json`
-- Update `directDownloadURL` to point to new release version
-- URL paths are case-sensitive (use `changelog.txt`, not `CHANGELOG.md`)
-- Wait 1-5 minutes for GitHub CDN to update raw files
-
-### 4. Build Failures
-**Common causes**:
-- LunaLib jar doesn't exist in `mods/03_LunaLib-*/jars/`
-- JAVA_HOME points to JRE instead of JDK
-- Incorrect Starsector installation path in build script
-
-### 5. Runtime NPEs
-**Solution**:
-- Always null-check `LunaSettingsAPI.isReady()` before reading settings
-- All Ramscoop fields read from ModPlugin must have defaults
-- Use try-catch blocks for optional LunaLib settings
-
-### 6. Debug Logging in Production
-**Problem**: Excessive debug logging bloats log files (100+ entries per session)
-
-**Solution**: 
-- Use `DEBUG_MODE` flags (set to `false` for releases)
-- Conditionalize all debug logging: `if (DEBUG_MODE) { LOG.info(...); }`
-
-## Contributinge Overview
-- **`ModPlugin.java`** - Mod entry point and settings orchestration
-  - `onApplicationLoad()`: Called once on game start
-  - `onGameLoad()`: Called when loading a save - loads settings here
-  - Settings priority: LunaLib (if available) → settings.json → hardcoded defaults
-  - Exposes public static fields that `Ramscoop.java` reads at runtime
-
-- **`Ramscoop.java`** - EveryFrameScript implementation for runtime logic
-  - `advance(amount)`: Called every frame with delta time
-  - Reads settings from public static fields in ModPlugin
-  - Uses `IntervalUtil(0.09f, 0.11f)` to throttle expensive operations (~10 times/second)
-  - Adds fuel/supplies via `MutableFleetStatsAPI.getDynamic().getMod("nebula_stat_mod")`
-
-### Settings Loading Chain
-```
-LunaSettings.csv (UI config defined in data/config/LunaSettings.csv)
-    ↓
-ModPlugin.loadLunaLibSettings() (runtime loading via reflection)
-    ↓ (fallback if LunaLib not ready)
-ModPlugin.loadLegacySettings() (data/config/settings.json)
-    ↓
-public static fields (Ramscoop reads these)
-```
-
-**CRITICAL**: CSV `fieldID` column must EXACTLY match `LunaSettings.get*("fieldID")` calls (case-sensitive).
-
-### Terrain Detection
-- **Nebula**: Checks for "nebula_stat_mod" in fleet stats
-- **Corona**: 
-  - Primary: Checks terrain plugin for `CoronaBurstTerrainPlugin` instance
-  - Fallback: Measures distance to nearest star using `Misc.getNearestStarOrBlackHole()`
-
-### Performance Considerations
-- Uses `IntervalUtil` to avoid per-frame overhead (~0.1 second intervals)
-- Early exit if interval hasn't elapsed
-- Conditional logging controlled by `DEBUG_MODE` flags (set to `false` for production)release 8` for Java 8 compatibility)
-   - Starsector 0.98a-RC8 installation
-   - Starsector API JAR files (11 JARs in your Starsector installation directory)
-   - LunaLib mod installed in `mods/03_LunaLib-*/jars/` (required for compilation)
-   - An IDE of your choice (IntelliJ IDEA, Eclipse, VS Code, etc.)
-
-2. **Build Process:**
-   - Edit Java source files in the `src/ramscoop/` directory
-   - Run `build.ps1` (PowerShell - recommended) or `build.bat` (batch) to compile
-   - The build script:
-     - Auto-discovers LunaLib jars from `mods/03_LunaLib-*/jars/`
-     - Compiles with `--release 8` for Java 8 compatibility
-     - Includes 11 Starsector core JARs + LunaLib in classpath
-     - Packages to `jars/Ramscoop.jar` with correct `ramscoop/` package structure
-   - Launch Starsector to test your changesis document provides information for developers wishing to work on the Passive-Ramscoop mod.
-
-## Project Structure
-
-```
-Passive-Ramscoop/
-├── .github/            # GitHub Actions workflows and instructions
-│   ├── copilot-instructions.md
-│   └── prompts/
-│       └── StarSector.prompt.md
-├── data/               # Mod data files
-│   └── config/
-│       ├── LunaSettings.csv    # LunaLib settings UI configuration
-│       └── settings.json       # Fallback/legacy settings
-├── docs/               # Documentation files
-│   ├── DEVELOPMENT.md          # Developer documentation (this file)
-│   ├── MIGRATION_REPORT.md     # Technical migration details
-│   ├── NEXUS_DESCRIPTION.md    # Nexus Mods description
-│   └── RELEASE_v0.6.3_SUMMARY.md
-├── jars/               # Compiled mod JAR files
-│   └── Ramscoop.jar
-├── src/                # Source code
-│   └── ramscoop/
-│       ├── ModPlugin.java      # Mod entry point, settings orchestration
-│       └── Ramscoop.java       # Runtime fuel/supply generation logic
-├── build.bat           # Windows batch build script
-├── build.ps1           # PowerShell build script (recommended)
-├── CHANGELOG.md        # Version history (Markdown for GitHub)
-├── changelog.txt       # Version history (plain text for TriOS)
-├── LICENSE.txt         # Licence information
-├── LunaLib.version     # LunaLib version file
-├── mod_info.json       # Mod metadata
-├── Ramscoop.version    # Version file for TriOS mod manager
-├── README.md           # User documentation
-└── version.json        # Additional version metadata
-```
-
-## Development Workflow
-
-1. **Set Up Environment:**
-   - JDK 8 or later (compatible with Starsector’s Java version)
-   - Starsector API JAR files (found in your Starsector installation)
-   - An IDE of your choice (IntelliJ IDEA, Eclipse, VS Code, etc.)
-
-2. **Build Process:**
-   - Edit Java source files in the `src` directory
-   - Run `build.bat` (Windows) or `build.ps1` (PowerShell) to compile
-   - The built JAR will be placed in the `jars` directory
-   - Launch Starsector to test your changes
-
-### Building dev helper locally
-**Note:** The `dev/` folder and TestModPlugin are no longer part of the current project structure. This section is kept for historical reference only.
-
-If you want to compile the development-only helper (`dev/src/ramscoop/TestModPlugin.java`) locally for debugging, ensure the Starsector API JAR is on your classpath and run the following from PowerShell:
+## Quick start
+1. Clone the repository and open it in your IDE of choice.
+2. Ensure `JAVA_HOME` points to a JDK installation.
+3. Build the mod:
 
 ```powershell
-$API = "C:\Program Files (x86)\Fractal Softworks\Starsector\starfarer.api.jar"
-javac -classpath "$API" -d out dev\src\ramscoop\TestModPlugin.java
-jar cf jars\TestModHelper.jar -C out .
+pwsh .\build.ps1
 ```
 
-Notes:
-- The `dev/` folder is intentionally ignored and not included in release builds.
-- The helper requires the Starsector API JAR to compile; adjust `$API` if your installation path differs.
+The output JAR is placed in `jars/Ramscoop.jar`.
 
-3. **Source Control:**
-   - The repository contains both source code and compiled assets
-   - Build scripts and artefacts should be excluded from git where appropriate
+## Project layout (short)
+- `src/ramscoop/` — Java sources (`ModPlugin.java`, `Ramscoop.java`) 
+- `data/config/LunaSettings.csv` — LunaLib UI configuration
+- `settings.json` — legacy fallback config
+- `Ramscoop.version`, `mod_info.json`, `version.json` — release/version metadata
+- `.github/scripts/check-versions.ps1` — version consistency checker used by CI
 
-4. **Creating Releases:**
-   - Update version numbers in 3 places:
-     - `mod_info.json` (version field)
-     - `Ramscoop.version` (modVersion.patch field + directDownloadURL)
-     - Both changelogs: `CHANGELOG.md` and `changelog.txt`
-   - Commit changes: `git add . && git commit -m "Release vX.Y.Z: Description"`
-   - Create and push a version tag: `git tag vX.Y.Z && git push && git push --tags`
-   - GitHub Actions will automatically:
-     - Build the mod with Java 8 compatibility
-     - Create a GitHub release with the tag
-     - Attach `Ramscoop-vX.Y.Z.zip` to the release
-     - TriOS mod manager will auto-update from `directDownloadURL`
+## Architecture overview
+- `ModPlugin.java` — mod entry point and settings orchestration
+  - Loads settings with priority: LunaLib (if available) → `settings.json` → hardcoded defaults
+  - Exposes public static fields consumed by runtime logic
+- `Ramscoop.java` — runtime `EveryFrameScript` implementation
+  - `advance(float amount)` called frequently; expensive work is throttled with an `IntervalUtil`
+  - Applies fuel / supplies to the player fleet via dynamic stats modifications
 
-## Resource Generation Logic
+## Key developer notes & pitfalls
+- LunaLib CSV percent signs: LunaLib renders CSV tooltips with `String.format()`; escape literal percent signs as `%%` in `LunaSettings.csv`.
+- CSV keys must exactly match the code's `LunaSettings.get*(MOD_ID, "fieldID")` calls (case-sensitive).
+- Use `DEBUG_MODE` guarded logging; leave `DEBUG_MODE = false` for release builds.
+- The code attempts to read new LunaLib Color values first (the `_v2` keys). Legacy string hex values are no longer exposed in the CSV UI to avoid menu clutter.
 
-- `ModPlugin` initialises the mod and registers the `Ramscoop` instance
-- `Ramscoop` implements the `EveryFrameScript` interface to run every frame
-- When the player fleet is in a nebula, resources are gradually accumulated:
-  - Nebula detection is done by checking for "nebula_stat_mod" in fleet stats
-- Settings in `settings.json` control generation rates and limits
-- The mod uses the game’s settings loading mechanism with the mod ID: `Global.getSettings().loadJSON("settings.json", "m561_ramscoop")`
+## Build / compile notes
+- The `build.ps1` script attempts to discover a Starsector install and LunaLib jars; if not found it will still compile but you may miss LunaLib API access locally. CI relies on a committed `jars/Ramscoop.jar`, so the CI job does not require a local Starsector installation.
+- If you need to compile against a Starsector core locally, set `SS_DIR` at the top of `build.ps1` or install Starsector into a standard path.
+
+## Versioning & release automation (important)
+We added an automated consistency check and release helper to avoid TriOS failures caused by mismatched version metadata.
+
+- `.github/scripts/check-versions.ps1` compares the versions in `mod_info.json`, `version.json`, and `Ramscoop.version` and exits non-zero if they differ.
+- CI (`.github/workflows/ci.yml`) runs the check on PRs and pushes and will fail the job if versions are inconsistent.
+- The release workflow (`.github/workflows/release.yml`) extracts the release tag (e.g., `v0.7.2` → `0.7.2`), runs the checker in `-Fix` mode to update those three files to the tag version, and commits/pushes the updated files back to `main` so packaging uses the correct metadata.
+
+Notes and caveats:
+- The `-Fix` mode rewrites `Ramscoop.version` as JSON and will remove any comment lines. If you rely on comments in that file, suggest leaving them out or ask for a conservative in-place patcher (we can add one).
+- If you prefer the release workflow to create a PR instead of committing to `main` directly, we can change that behavior.
+
+## How to run the version checker locally
+- Check only:
+
+```powershell
+pwsh .github/scripts/check-versions.ps1
+```
+
+- Auto-fix locally (this will rewrite files):
+
+```powershell
+pwsh .github/scripts/check-versions.ps1 -Fix -Version 0.7.2
+```
+
+After running `-Fix`, review the changed files and commit them.
+
+## Testing checklist (developer)
+- Build with `pwsh .\build.ps1` and confirm `jars/Ramscoop.jar` exists
+- Run the game with LunaLib enabled and open the settings to ensure all entries show correctly
+- Verify runtime behavior by entering a nebula/corona and observing fuel/supplies generation
+- Run `pwsh .github/scripts/check-versions.ps1` to ensure version metadata is consistent before tagging a release
+
+## Release process (maintainer)
+1. Tag the release with `git tag vMAJOR.MINOR.PATCH` and push the tag
+2. The release workflow will run, auto-fix version files to the tag (if necessary), commit them, and package the release assets
+3. Verify the created GitHub release and that `Ramscoop-<tag>.zip` contains the expected files
+4. TriOS and other automated updaters will read `Ramscoop.version` and `mod_info.json` to detect the new release
 
 ## Contributing
+- Fork, create a branch, make changes, open a PR
+- Ensure `pwsh .github/scripts/check-versions.ps1` passes on your branch before requesting review
+- Keep runtime `DEBUG_MODE` off for PRs unless debugging a specific issue
 
-If you wish to contribute to this project:
-
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Submit a pull request
-
-Please ensure you test your changes thoroughly before submitting.
-
-## Licence
-
-This project is licenced under the Creative Commons Attribution-NonCommercial 4.0 International Licence (CC BY-NC 4.0) – see the [LICENSE.txt](LICENSE.txt) file for details.
-
-This licence allows:
-- Free use and modification of the mod for personal use
-- Sharing the mod with others for non-commercial purposes
-- Creating and sharing derivative works (provided they are also non-commercial)
-
-This licence prohibits:
-- Using the mod for commercial purposes
-- Selling the mod or any derivative works based on it
-
-Any modifications or distributions must give appropriate credit to the original authors.
+---
