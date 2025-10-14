@@ -83,12 +83,12 @@ For modders and advanced users, manual configuration is available through `setti
 - LunaLib 2.0.4+ (required)
 - LunaLib Version Checker supported
 - No known mod conflicts
-- Current version: 0.6.3
+- Current version: 0.7.1
 
 ## What's new (0.7.0)
 - Per-event notification toggles: you can now enable/disable floating notifications separately for nebula entry/exit and corona entry/exit via the LunaLib settings UI.
 - UI rework: color presets removed in favor of HSV color pickers; saved HSV values are now respected correctly.
-- Default notification colours changed to light grey (#D3D3D3) to reduce visual noise; Java default falls back to Color.LIGHT_GRAY.
+- Default notification colours changed to light gray (#D3D3D3) to reduce visual noise; Java default falls back to Color.LIGHT_GRAY.
 - Notifications are now gated by the master "Scoop" toggle at runtime — turning the master toggle off stops all ramscoop notifications immediately.
 
 ## TriOS compatibility (quick notes)
@@ -99,9 +99,12 @@ This mod includes build scripts for development:
 - `build.ps1` – PowerShell build script
 - `build.bat` – Windows batch build script
 
-See [CHANGELOG.md](CHANGELOG.md) for version history and [docs/MIGRATION_REPORT.md](docs/MIGRATION_REPORT.md) for technical migration details.
+New: CI and release checks
+- A PowerShell helper lives at `.github/scripts/check-versions.ps1`. It validates that `mod_info.json`, `version.json`, and `Ramscoop.version` all match.
+- CI (PRs/pushes) runs the checker and will fail if versions differ. This prevents mismatched releases from being merged.
+- Release workflow automatically extracts the release tag, runs the checker in fix mode and will commit updated version files back to `main` so packaging uses the correct version.
 
-Build note: the PowerShell script compiles against the Starsector API and LunaLib. If your LunaLib folder name differs from `03_LunaLib`, update the LunaLib path in `build.ps1` accordingly.
+Build note: the PowerShell script compiles against the Starsector API and LunaLib. The `build.ps1` script dynamically discovers LunaLib jars under your Starsector `mods` folder (if present) and will include them in the classpath. Ensure `JAVA_HOME` points to a JDK installation (the script will also attempt common install paths).
 
 ## Credits & History
 🎖️ **Original Creator**: Meridias561 - Created the original Passive Ramscoop mod  
