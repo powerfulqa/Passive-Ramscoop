@@ -4,24 +4,23 @@ setlocal enabledelayedexpansion
 :: Configuration
 :: Try to detect Starsector installation. Prefer Program Files (x86), fall back to G:\Starsector
 set "SS_DIR="
-set "PF86="
-for /f "usebackq tokens=*" %%I in ("%ProgramFiles(x86)%") do set "PF86=%%~I"
-if defined PF86 (
-    set "DEFAULT_SS_DIR=%PF86%\Fractal Softworks\Starsector"
-) else (
-    set "DEFAULT_SS_DIR=C:\Program Files (x86)\Fractal Softworks\Starsector"
-)
+:: Read ProgramFiles(x86) directly — avoid for/failure when the value contains spaces
+set "PF86=%ProgramFiles(x86)%"
+if defined PF86 set "DEFAULT_SS_DIR=%PF86%\Fractal Softworks\Starsector"
+if not defined PF86 set "DEFAULT_SS_DIR=C:\Program Files (x86)\Fractal Softworks\Starsector"
 if exist "%DEFAULT_SS_DIR%" (
-    set "SS_DIR=%DEFAULT_SS_DIR%"
-    echo Using Starsector directory: %SS_DIR%
-) else if exist "G:\Starsector" (
-    set "SS_DIR=G:\Starsector"
-    echo Using Starsector directory: %SS_DIR%
+    set "SS_DIR=!DEFAULT_SS_DIR!"
+    echo Using Starsector directory: !SS_DIR!
 ) else (
-    rem Neither path found; default to DEFAULT_SS_DIR and warn
-    set "SS_DIR=%DEFAULT_SS_DIR%"
-    echo WARNING: Could not find Starsector installation in %DEFAULT_SS_DIR% or G:\Starsector
-    echo Please edit build.bat and set SS_DIR to your Starsector installation path.
+    if exist "G:\Starsector" (
+        set "SS_DIR=G:\Starsector"
+        echo Using Starsector directory: !SS_DIR!
+    ) else (
+        rem Neither path found; default to DEFAULT_SS_DIR and warn
+        set "SS_DIR=!DEFAULT_SS_DIR!"
+        echo WARNING: Could not find Starsector installation in !DEFAULT_SS_DIR! or G:\Starsector
+        echo Please edit build.bat and set SS_DIR to your Starsector installation path.
+    )
 )
 set MOD_NAME=Passive-Ramscoop
 set MOD_ID=m561_ramscoop
@@ -46,6 +45,9 @@ set CLASSPATH=%CLASSPATH%;"%SS_DIR%\starsector-core\lwjgl_util.jar"
 set CLASSPATH=%CLASSPATH%;"%SS_DIR%\starsector-core\json.jar"
 set CLASSPATH=%CLASSPATH%;"%SS_DIR%\starsector-core\log4j-1.2.9.jar"
 
+:: Include any prebuilt classes (for example the lunalib stubs under build\classes)
+set CLASSPATH=%CLASSPATH%;"%cd%\build\classes"
+
 :: Compile Java files
 echo Compiling Java files...
 javac --release 8 -cp %CLASSPATH% -d "%OUT_CLASSES%" %SRC_DIR%\ramscoop\*.java
@@ -67,9 +69,10 @@ for /f "tokens=*" %%i in ('where java') do (
 
 :: Use jar from Java installation or fall back to jar command if in PATH
 cd "%OUT_CLASSES%"
-if exist "%JAVA_BIN%jar.exe" (
-    echo Using jar from: %JAVA_BIN%jar.exe
-    "%JAVA_BIN%jar.exe" cf "%OUT_DIR%\Ramscoop.jar" ramscoop\*.class
+set "JAR_EXE=%JAVA_BIN%jar.exe"
+if exist "%JAR_EXE%" (
+    echo Using jar from: "%JAR_EXE%"
+    "%JAR_EXE%" cf "%OUT_DIR%\Ramscoop.jar" ramscoop\*.class
 ) else (
     echo Attempting to use system jar command...
     jar cf "%OUT_DIR%\Ramscoop.jar" ramscoop\*.class

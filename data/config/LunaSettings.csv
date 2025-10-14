@@ -19,6 +19,7 @@ nebula_fuel_cap_margin,Nebula Fuel Cap Margin (units),Double,0,,"Buffer zone bel
 nebula_supply_header,Nebula Supply Generation,Header,Nebula Supply Generation,,,,,Nebula
 ramscoop_percent_supply_limit,Supply Generation Limit,Double,0.20,,"Maximum supplies that can be generated, expressed as a fraction of your [total cargo capacity]. For example, 0.20 means supplies will stop generating when you reach 20%% of [cargo capacity] filled with supplies.",0.1,1.0,Nebula
 ramscoop_hard_supply_limit,Hard Supply Limit,Double,0,,"Absolute maximum number of supply units that can be generated in nebulae, regardless of cargo capacity. Useful for capping large cargo fleets. Set to 0 to disable this hard limit and rely only on the percentage limit.",0,10000,Nebula
+ramscoop_supply_per_crew,Supplies Per Crew (units/day),Double,0.10,,"Amount of supplies generated per crew member per day when crew-based generation is used (applies when Crew Usage is 'extra' or 'all'). Use fractional values for small rates (e.g., 0.1).",0.0,100.0,Nebula
 nebula_crew_header,Crew Usage,Header,Crew Usage,,,,,Nebula
 nebula_crew_usage,Crew Usage Mode,Radio,extra,"extra, all, nocrew","Controls which crew members contribute to supply generation: [extra] = only crew above minimum required; [all] = all crew members; [nocrew] = ignore crew count and use fixed generation rate instead.",,,Nebula
 nebula_nocrew_header,No-Crew Generation,Header,No-Crew Generation,,,,,Nebula
@@ -39,7 +40,7 @@ corona_hard_fuel_limit,Corona Fuel Hard Cap (absolute units),Double,0,,"Absolute
 corona_fuel_cap_margin,Corona Fuel Cap Margin (units),Double,0,,"Buffer zone below the fuel cap for coronas. Only used if 'Reuse Nebula Caps' is disabled. Stops generation when you're this many fuel units below the cap to leave room for other fuel sources.",0,1000,Corona
 ,,,,,,,,
 notification_header,Notification Settings,Header,Notification Settings,,,,,Notifications
-ramscoop_enable_visual_feedback,Master Toggle for Visual Feedback,Boolean,false,,"Main ON/OFF switch for all the visual indicators when ramscoop is active (e.g., floating text on fleet).",,,Notifications
+ramscoop_enable_visual_feedback,Master Toggle for Visual Feedback,Boolean,true,,"Main ON/OFF switch for all the visual indicators when ramscoop is active (e.g., floating text on fleet).",,,Notifications
 ramscoop_floating_text_scale,Floating Text Duration (seconds),Double,0.7,,"How long (in seconds) the floating text remains visible after Ramscoop toggles.",0.1,3.0,Notifications
 notifications_nebula_header,Nebula Notifications,Header,Nebula Notifications,,,,,Notifications
 ramscoop_notify_nebula_entry,Show Nebula Entry Notification,Boolean,true,,"Show a floating-text notification when entering a nebula.",,,Notifications
