@@ -42,6 +42,11 @@ jobs:
           echo "Generated changelog.txt:"
           cat changelog.txt
 
+      - name: Run version consistency check
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -File .github/scripts/check-versions.ps1
+
       - name: Update version files for release
         run: |
           # Extract version from tag

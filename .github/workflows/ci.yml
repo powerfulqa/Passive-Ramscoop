@@ -122,3 +122,7 @@ jobs:
         fi
         
         echo "Package validation successful"
+    - name: Run version consistency check
+      shell: pwsh
+      run: |
+        pwsh -NoProfile -File .github/scripts/check-versions.ps1
