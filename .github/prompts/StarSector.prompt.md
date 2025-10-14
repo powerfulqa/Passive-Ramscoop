@@ -172,6 +172,34 @@ Context: Fix ensured LunaLib settings are applied on game load/runtime and overr
   - `"dependencies": [{ "id": "lunalib" }]`
 - Keep `"jars": ["jars/YourMod.jar"]` and `"modPlugin": "your.package.ModPlugin"` accurate.
 
+### CI / Release Automation (new guidance)
+- A repository-level version consistency checker exists at `.github/scripts/check-versions.ps1`.
+  - It validates that `mod_info.json`, `version.json`, and `Ramscoop.version` all agree on a semantic version (MAJOR.MINOR.PATCH).
+  - CI (`.github/workflows/ci.yml`) runs this check on PRs and pushes; future agents must ensure these files are kept in sync or the PR will fail.
+  - The release workflow (`.github/workflows/release.yml`) extracts the release tag (e.g. `v0.7.2`), derives the semantic version (`0.7.2`), runs the checker in `-Fix` mode to update the three canonical files to the tag version, and commits the changes back to `main` before packaging. This ensures TriOS and other updaters see consistent metadata.
+  - Important: `-Fix` rewrites `Ramscoop.version` as JSON and will remove comment lines. If preserving comments is required, prefer making a focused in-place patcher for numeric fields instead of full rewrite.
+
+### LunaLib / Settings notes (updates)
+- Legacy string color keys were removed; CSV now only contains `_v2` Color entries with LunaLib's Color type. Future agents should:
+  - Prefer reading Color values via `LunaSettings.getColor(MOD_ID, "ramscoop_color_*_v2")`.
+  - Avoid adding duplicate legacy String keys (`ramscoop_color_*`) to the CSV — this creates UI clutter and can confuse users.
+  - If migrating old saves, provide a clear migration path (parsing old hex strings and writing to `_v2` keys) or document that legacy saves may need manual reset.
+
+### How to run the version checker locally (for agents)
+- Check only (no changes):
+
+```powershell
+pwsh .github/scripts/check-versions.ps1
+```
+
+- Auto-fix locally (rewrites files):
+
+```powershell
+pwsh .github/scripts/check-versions.ps1 -Fix -Version 0.7.2
+```
+
+- When implementing changes to version files, run the checker before opening a PR to avoid CI failures.
+
 ### Troubleshooting checklist
 - If settings aren’t respected:
   - Confirm launcher shows the mod and LunaLib enabled.

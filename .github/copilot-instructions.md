@@ -57,6 +57,12 @@ public static fields (Ramscoop reads these)
 - **URLs**: `directDownloadURL` and `changelogURL` must match actual file paths
 - **CHANGELOG.md**: Markdown format for GitHub (maintained separately)
 
+## CI and Release Automation (Important updates)
+- A version consistency checker now exists at `.github/scripts/check-versions.ps1`. It validates that `mod_info.json`, `version.json`, and `Ramscoop.version` all report the same semantic version.
+- The CI workflow runs this checker on PRs/pushes and will fail the job if the versions differ.
+- The release workflow extracts the release tag (e.g. `v0.7.2`), strips the leading `v` to produce a semantic version (`0.7.2`), runs the checker in `-Fix` mode to update the three canonical files to that version, and commits the changes back to `main` so packaging uses the correct metadata.
+- Note: `-Fix` rewrites `Ramscoop.version` as JSON and will remove comment lines; update the script to do in-place numeric edits if comment preservation is required.
+
 ## Code Patterns
 
 ### LunaLib Integration (with fallback)
