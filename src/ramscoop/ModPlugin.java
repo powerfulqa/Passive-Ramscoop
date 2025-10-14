@@ -55,7 +55,7 @@ public class ModPlugin extends BaseModPlugin {
     public static float corona_fuel_per_day = DEFAULT_CORONA_FUEL_PER_DAY;
     public static boolean corona_caps_reuse = true;
     // Visual feedback
-    public static boolean enable_visual_feedback = false;
+    public static boolean enable_visual_feedback = true;
     public static float floating_text_duration = 0.7f;
     // Per-event notification toggles
     public static boolean notify_nebula_entry = true;
@@ -613,7 +613,9 @@ public class ModPlugin extends BaseModPlugin {
                 ", hard_supply_limit=" + hard_supply_limit +
                 ", crew_usage=" + crew_usage +
                 ", no_crew_gen=" + no_crew_gen +
-                ", no_crew_rate=" + no_crew_rate);
+                ", no_crew_rate=" + no_crew_rate +
+                ", enable_visual_feedback=" + enable_visual_feedback +
+                ", notify_nebula_entry=" + notify_nebula_entry);
         // Start the runtime script
         Global.getSector().addTransientScript(new Ramscoop());
         // Initialize runtime toggle state in player fleet memory
