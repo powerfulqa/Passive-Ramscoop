@@ -77,6 +77,18 @@ jobs:
             echo "No version file changes required"
           fi
 
+      - name: Run Pre-Release Validations
+        run: |
+          javac -cp "src" src/test/java/ramscoop/*.java
+          java -cp "src:src/test/java" ramscoop.LunaSettingsKeyAuditTest
+          java -cp "src:src/test/java" ramscoop.LunaSettingsCsvValidationTest
+          java -cp "src:src/test/java" ramscoop.VersionConsistencyTest
+          java -cp "src:src/test/java" ramscoop.AssetIntegrityTest
+      - name: Run Build Validation Test
+        shell: pwsh
+        run: |
+          pwsh -NoProfile -File .github/tools/build-validation-test.ps1
+
       - name: Update version files for release
         run: |
           # Extract version from tag

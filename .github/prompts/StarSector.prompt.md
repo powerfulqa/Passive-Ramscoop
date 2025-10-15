@@ -185,6 +185,38 @@ Context: Fix ensured LunaLib settings are applied on game load/runtime and overr
   - Avoid adding duplicate legacy String keys (`ramscoop_color_*`) to the CSV — this creates UI clutter and can confuse users.
   - If migrating old saves, provide a clear migration path (parsing old hex strings and writing to `_v2` keys) or document that legacy saves may need manual reset.
 
+### Additional lessons & safeguards (learned during 0.7.3 work)
+
+These are small, pragmatic rules to prevent repeat fix/rebuild loops and platform-specific failures:
+
+- PowerShell compatibility: avoid using PowerShell 7+ only cmdlets (for example `Join-String`) in `build.ps1`. If you need to use newer cmdlets, gate them with a runtime check and provide a fallback implementation that works on Windows PowerShell 5.1. This prevents silent build script failures when users run `powershell` instead of `pwsh`.
+
+- Build artifact policy: never commit built artifacts (JARs, compiled .class files) to version control. Keep `jars/` and `build/classes/` entries out of commits and add or update `.gitignore` guidance in the repo README. The build script should produce the jar and the release workflow should package it, but local commits should not include the JAR unless explicitly intended for distribution.
+
+- JDK detection and warnings: build scripts should detect a JDK and validate compatibility with `--release 8`. If a newer JDK is used (for example JDK 17/21), emit a clear, non-fatal warning explaining that `--release 8` is being used and that some compiler warnings are expected. Prefer an explicit, helpful error when no suitable JDK is found.
+
+- LunaLib readiness & fallback: LunaLib may initialize after the mod plugin. Always implement a deterministic fallback: seed settings from `settings.json`, register a retry of LunaLib reads on a short delay (or on `onNewGame/onGameLoad` again), and log a single snapshot once the final resolved values are known. This prevents repeating reloads that generate noisy logs and unclear state.
+
+- Mandatory restart step in docs: after rebuilding `jars/Ramscoop.jar` instruct users to fully exit Starsector and restart the launcher to ensure the new classes are loaded. Partial reloads or reloading scripts in-game may not use the rebuilt jar if the launcher keeps an older copy in memory.
+
+- LunaSettings key audit (automation): include a small audit command in the repo to ensure every `LunaSettings.get*` key exists in the CSV. Example (grep-style):
+
+  - Unix-like (git bash / WSL):
+    grep -oP "LunaSettings.get\w+\(\s*\"[^\"]+\",\s*\"([^\"]+)\"" -R src/ | sed -E "s/.*\\\"([^\\\"]+)\\\"\).*/\1/" | sort -u > /tmp/keys_from_code.txt
+    cut -d',' -f1 data/config/LunaSettings.csv | sed -E 's/^\s+|\s+$//g' | sort -u > /tmp/keys_from_csv.txt
+    comm -23 /tmp/keys_from_code.txt /tmp/keys_from_csv.txt
+
+  - Windows PowerShell (approx):
+    Select-String -Path src\\**\\*.java -Pattern 'LunaSettings.get.*\(".*",\s*"([^\"]+)"' -AllMatches | % { $_.Matches } | % { $_.Groups[1].Value } | Sort-Object -Unique
+
+- Clear LunaLib save after schema changes: when adding new keys to `data/config/LunaSettings.csv`, document removing `saves/common/LunaSettings/m561_ramscoop.json` (or instruct users to open LunaLib UI) so defaults are re-seeded. Add this as a line in `DEVELOPMENT.md` and the release notes where applicable.
+
+- Floating-text & verification checklist: when adding or changing visual feedback logic, add a one-line runtime log (e.g., "[Ramscoop] Visual feedback: showing 'Ramscoop:Active' color=#..." ) so that smoke tests can verify the UI action occurred by scanning `starsector.log`. Include this check in the repo's smoke-test checklist.
+
+- Avoid assumptions about reflection: continue the rule to prefer direct API calls to LunaLib. If reflection is used anywhere, document a clear fallback path and log the failure in a way that surfaces in `starsector.log` as an INFO/WARN message (not silently swallowed).
+
+These small additions reduce friction and prevent the common loop: edit -> build -> restart game -> still-old-behavior -> repeat. Add them to the prompt so future agents follow them by default.
+
 ### How to run the version checker locally (for agents)
 - Check only (no changes):
 
