@@ -16,7 +16,7 @@ This directory contains regression tests for the Passive Ramscoop mod to prevent
 
 ### PowerShell Tests (`.github/tools/`)
 
-- **build-validation-test.ps1**: Validates that build.ps1 runs successfully and produces expected JAR outputs.
+- **build-validation-test.ps1**: Validates that build.ps1 runs successfully and produces expected JAR outputs. In CI environments, validates existing JAR structure instead of rebuilding.
 
 - **runtime-log-test.ps1**: Scans starsector.log for expected runtime logs to verify in-game behavior.
 
