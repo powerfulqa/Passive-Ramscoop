@@ -3,7 +3,7 @@
 This document describes how to build and contribute to Passive Ramscoop, plus developer notes about the runtime architecture and common pitfalls.
 
 ## Requirements
-- JDK 11 or later installed (JDK 17 recommended). The build compiles with `--release 8` for Starsector compatibility but a modern JDK makes tooling easier.
+- JDK 11 or later installed (JDK 17 recommended). NOTE: the build scripts compile with `--release 8` so the produced bytecode is compatible with Java 8 (required by Starsector). Using JDK 11+ is recommended for development tooling, but the build intentionally targets Java 8 compatibility.
 - PowerShell to run `build.ps1` (Windows) or PowerShell Core on other platforms
 - Starsector 0.98a-RC8 installation for local compilation against the game jars (optional if you use the committed `jars/Ramscoop.jar` in CI)
 - LunaLib installed in your local Starsector `mods/` folder if you want to compile against LunaLib API locally
@@ -43,6 +43,9 @@ The output JAR is placed in `jars/Ramscoop.jar`.
 ## Build / compile notes
 - The `build.ps1` script attempts to discover a Starsector install and LunaLib jars; if not found it will still compile but you may miss LunaLib API access locally. CI relies on a committed `jars/Ramscoop.jar`, so the CI job does not require a local Starsector installation.
 - If you need to compile against a Starsector core locally, set `SS_DIR` at the top of `build.ps1` or install Starsector into a standard path.
+
+Note on PowerShell compatibility
+- The `build.ps1` script is compatible with both Windows PowerShell 5.1 and PowerShell 7+ (`pwsh`). Older versions of PowerShell may lack some modern cmdlets (for example `Join-String`), so the script prefers cross-version constructs where possible. If you run into odd errors in PowerShell 5.1, try the script with `pwsh` or update your PowerShell to a newer release.
 
 ## Versioning & release automation (important)
 We added an automated consistency check and release helper to avoid TriOS failures caused by mismatched version metadata.

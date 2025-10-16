@@ -110,7 +110,9 @@ if ($lunaLibJarDir -and (Test-Path $lunaLibJarDir)) {
     $lunaJars = Get-ChildItem -Path $lunaLibJarDir -Filter *.jar -File -ErrorAction SilentlyContinue
     foreach ($j in $lunaJars) { $CLASSPATH += $j.FullName }
     if ($lunaJars.Count -gt 0) {
-        Write-Host ("Including LunaLib jars: " + ($lunaJars | ForEach-Object { $_.Name } | Sort-Object | Join-String ", ")) -ForegroundColor Cyan
+        # Join-String is only available in PowerShell 7+. Use -join for compatibility with Windows PowerShell 5.1.
+        $names = ($lunaJars | ForEach-Object { $_.Name } | Sort-Object) -join ', '
+        Write-Host ("Including LunaLib jars: " + $names) -ForegroundColor Cyan
     } else {
         Write-Host "WARNING: No LunaLib jars found in $lunaLibJarDir" -ForegroundColor Yellow
     }

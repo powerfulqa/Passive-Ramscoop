@@ -31,7 +31,7 @@ public class Ramscoop implements EveryFrameScript {
     private static final float SETTINGS_CHECK_INTERVAL = 10f; // Check settings every 10 seconds
     private static final float INTERVAL_MIN = 0.09f; // Minimum interval between generation ticks
     private static final float INTERVAL_MAX = 0.11f; // Maximum interval between generation ticks
-    private static final float DEFAULT_FUEL_PER_DAY = 0.1f;
+    private static final float DEFAULT_FUEL_PER_DAY = 0.04f;
     private static final float DEFAULT_SUPPLIES_PER_CREW = 0.1f;
     private static final float DEFAULT_PERCENT_SUPPLY_LIMIT = 0.35f;
     private static final float DEFAULT_HARD_SUPPLY_LIMIT = 0.0f;

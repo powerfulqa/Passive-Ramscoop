@@ -13,7 +13,7 @@ public class ModPlugin extends BaseModPlugin {
     public static final String MOD_ID = "m561_ramscoop";
 
     // Default constant values (fallbacks if LunaLib/settings.json not available)
-    private static final float DEFAULT_FUEL_PER_DAY = 0.1f;
+    private static final float DEFAULT_FUEL_PER_DAY = 0.04f;
     private static final float DEFAULT_SUPPLIES_PER_CREW = 0.1f;
     private static final float DEFAULT_PERCENT_SUPPLY_LIMIT = 0.35f;
     private static final float DEFAULT_HARD_SUPPLY_LIMIT = 0.0f;

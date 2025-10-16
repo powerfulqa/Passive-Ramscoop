@@ -47,7 +47,7 @@ The mod works great with default settings! Once installed, you'll automatically 
 - **Limits**: Fuel stops at 20% of your tank capacity, supplies at 20% of cargo space
 
 ### Customising Your Experience
-Press **F2** in-game to open the settings menu and find "Ramscoop Configuration":
+Press **F2** in-game to open the settings menu and find "Ramscoop Configuration" (requires LunaLib to be installed and enabled):
 
 **🎮 General Tab**
 - Master on/off switch for the entire mod
@@ -83,7 +83,11 @@ For modders and advanced users, manual configuration is available through `setti
 - LunaLib 2.0.4+ (required)
 - LunaLib Version Checker supported
 - No known mod conflicts
-- Current version: 0.7.2
+ - Current version: 0.7.3
+
+## Note for contributors editing `LunaSettings.csv`
+
+When editing `data/config/LunaSettings.csv` be careful with literal percent signs (%) in any `tooltip` or `description` fields — LunaLib renders CSV tooltips using `String.format()` and unescaped `%` characters will cause a runtime formatting exception. Escape literal percent signs as `%%`.
 
 ## What's new (0.7.0)
 - Per-event notification toggles: you can now enable/disable floating notifications separately for nebula entry/exit and corona entry/exit via the LunaLib settings UI.
