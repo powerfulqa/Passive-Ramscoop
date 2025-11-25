@@ -1,7 +1,7 @@
 # Copilot Instructions for Passive Ramscoop
 
 ## Project Overview
-Starsector 0.98a-RC8 mod that passively generates fuel/supplies from nebulae and star coronas. Built with Java 8, LunaLib 2.0.4 integration, TriOS mod manager support.
+Starsector 0.98a-RC8 mod that passively generates fuel/supplies from nebulae and star coronas. Built with Java 8, LunaLib 2.0.4 integration, TriOS mod manager support. Current version: **0.7.3**.
 
 ## Architecture
 
@@ -47,7 +47,7 @@ public static fields (Ramscoop reads these)
    - `Ramscoop.version` (modVersion.patch field)
    - Both changelogs (CHANGELOG.md + changelog.txt)
 2. Commit changes
-3. Tag: `git tag v0.6.X` (semantic versioning with `v` prefix)
+3. Tag: `git tag v0.7.X` (semantic versioning with `v` prefix)
 4. Push: `git push && git push --tags`
 5. GitHub Actions auto-builds and creates release
 

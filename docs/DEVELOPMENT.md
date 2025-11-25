@@ -44,6 +44,16 @@ The output JAR is placed in `jars/Ramscoop.jar`.
 - The `build.ps1` script attempts to discover a Starsector install and LunaLib jars; if not found it will still compile but you may miss LunaLib API access locally. CI relies on a committed `jars/Ramscoop.jar`, so the CI job does not require a local Starsector installation.
 - If you need to compile against a Starsector core locally, set `SS_DIR` at the top of `build.ps1` or install Starsector into a standard path.
 
+### Build Artifact Policy
+- **Never commit built artifacts** (JARs, compiled `.class` files) to version control during feature development.
+- Keep `jars/` and `build/classes/` entries out of commits.
+- The build script produces the jar locally for testing, and the release workflow will package it for distribution.
+- *Exception:* If the CI workflow specifically requires a pre-built JAR in the repo (as noted above), ensure it is only updated during release preparation.
+
+### Mandatory Restart
+- **Restart the game after building:** After running `build.ps1` or `build.bat`, you must fully exit Starsector and restart the launcher/game.
+- **Why?** The Starsector class loader does not hot-reload JARs. Reloading a save or using "Reload Scripts" (if available via other mods) will often keep the old version of the JAR in memory, leading to confusing debugging sessions where changes don't appear to take effect.
+
 Note on PowerShell compatibility
 - The `build.ps1` script is compatible with both Windows PowerShell 5.1 and PowerShell 7+ (`pwsh`). Older versions of PowerShell may lack some modern cmdlets (for example `Join-String`), so the script prefers cross-version constructs where possible. If you run into odd errors in PowerShell 5.1, try the script with `pwsh` or update your PowerShell to a newer release.
 

@@ -3,6 +3,18 @@
 ## Overview
 This report documents the migration and enhancement of the Ramscoop mod from Starsector 0.95a to Starsector 0.98a-RC8, the addition of LunaLib support in version 0.4.0, and configuration/UI refinements in 0.5.0>.
 
+## Version 0.7.3 - 2025-10-14 (Refinements)
+
+### Summary
+- **Visual Feedback Default:** Changed `ramscoop_enable_visual_feedback` default to `true` to improve new user experience.
+- **Supply Configuration:** Added `ramscoop_supply_per_crew` to LunaLib settings, allowing configuration of supply generation per crew member (previously hardcoded/legacy).
+- **Build Script:** Improved `build.bat` robustness for path detection.
+
+### Files Modified
+- `data/config/LunaSettings.csv` – Added `ramscoop_supply_per_crew`; updated visual feedback default.
+- `src/ramscoop/ModPlugin.java` – Updated to read new supply setting; changed default visual feedback boolean.
+- `build.bat` – Enhanced Starsector directory detection logic.
+
 ## Version 0.7.2 - 2025-10-14 (UI & Validator)
 
 ### Summary
