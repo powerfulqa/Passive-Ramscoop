@@ -3,10 +3,13 @@
 ## Downloads
 [![GitHub total downloads](https://img.shields.io/github/downloads/powerfulqa/Passive-Ramscoop/total?label=GitHub%20total%20downloads)](https://github.com/powerfulqa/Passive-Ramscoop/releases)
 [![Latest release downloads](https://img.shields.io/github/downloads/powerfulqa/Passive-Ramscoop/latest/total?label=Latest%20release%20downloads)](https://github.com/powerfulqa/Passive-Ramscoop/releases/latest)
+[![Nexus Unique DLs](https://img.shields.io/badge/Nexus%20Unique%20DLs-300%2B-2ea44f)](https://www.nexusmods.com/starsector/mods/147)
+[![Nexus Total DLs](https://img.shields.io/badge/Nexus%20Total%20DLs-300%2B-1f6feb)](https://www.nexusmods.com/starsector/mods/147)
+[![Nexus Views](https://img.shields.io/badge/Nexus%20Views-1800%2B-6f42c1)](https://www.nexusmods.com/starsector/mods/147)
 
 **Get the mod:**
 - **GitHub:** [Latest Release](https://github.com/powerfulqa/Passive-Ramscoop/releases) - Direct downloads tracked in badges above
-- **NexusMods:** [Passive Ramscoop](https://www.nexusmods.com/starsector/mods/147) - Visit the page to see download stats
+- **NexusMods:** [Passive Ramscoop](https://www.nexusmods.com/starsector/mods/147) - Generic stats shown above
 
 ## What This Mod Does
 Ever wished your fleet could collect fuel and supplies whilst travelling through nebulae and near stars? The Passive Ramscoop mod makes this dream a reality! Your ships will automatically gather resources as you explore, reducing the need for constant supply runs.
