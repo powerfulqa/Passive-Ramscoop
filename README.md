@@ -1,5 +1,15 @@
 # Passive Ramscoop - Automated Resource Collection for Starsector
 
+## Downloads
+[![GitHub total downloads](https://img.shields.io/github/downloads/powerfulqa/Passive-Ramscoop/total?label=GitHub%20total%20downloads)](https://github.com/powerfulqa/Passive-Ramscoop/releases)
+[![Latest release downloads](https://img.shields.io/github/downloads/powerfulqa/Passive-Ramscoop/latest/total?label=Latest%20release%20downloads)](https://github.com/powerfulqa/Passive-Ramscoop/releases/latest)
+
+**Get the mod:**
+- **GitHub:** [Latest Release](https://github.com/powerfulqa/Passive-Ramscoop/releases) - Direct downloads tracked above
+- **NexusMods:** [Passive Ramscoop](https://www.nexusmods.com/starsector/mods/147) - Alternative source with addon manager support
+
+Compare the GitHub badge counts above with NexusMods download stats to track direct GitHub vs. NexusMods adoption.
+
 ## What This Mod Does
 Ever wished your fleet could collect fuel and supplies whilst travelling through nebulae and near stars? The Passive Ramscoop mod makes this dream a reality! Your ships will automatically gather resources as you explore, reducing the need for constant supply runs.
 
