@@ -1,0 +1,127 @@
+name: Update NexusMods Download Stats
+
+on:
+  schedule:
+    # Run daily at 00:00 UTC
+    - cron: '0 0 * * *'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  update-stats:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests beautifulsoup4
+      
+      - name: Fetch NexusMods download count
+        id: scrape
+        run: |
+          import requests
+          from bs4 import BeautifulSoup
+          import json
+          import os
+          
+          # Fetch the NexusMods mod page
+          url = 'https://www.nexusmods.com/starsector/mods/147'
+          headers = {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+          }
+          
+          try:
+              response = requests.get(url, headers=headers, timeout=10)
+              response.raise_for_status()
+              
+              soup = BeautifulSoup(response.content, 'html.parser')
+              
+              # Look for download count in the mod page
+              # NexusMods typically shows this in specific elements
+              download_count = None
+              
+              # Try to find download count in various possible locations
+              # Look for "downloads" text followed by a number
+              for text in soup.find_all(string=True):
+                  if 'downloads' in text.lower():
+                      # Extract number from surrounding text
+                      try:
+                          parent = text.parent
+                          if parent:
+                              full_text = parent.get_text()
+                              import re
+                              numbers = re.findall(r'[\d,]+', full_text)
+                              if numbers:
+                                  download_count = numbers[0].replace(',', '')
+                                  break
+                      except:
+                          continue
+              
+              # Fallback: Look in meta tags or common elements
+              if not download_count:
+                  meta_tag = soup.find('meta', {'name': 'description'})
+                  if meta_tag and meta_tag.get('content'):
+                      import re
+                      numbers = re.findall(r'[\d,]+', meta_tag['content'])
+                      if numbers:
+                          download_count = numbers[0].replace(',', '')
+              
+              if download_count:
+                  # Store the count in a JSON file
+                  stats = {
+                      'nexusmods_downloads': download_count,
+                      'last_updated': __import__('datetime').datetime.utcnow().isoformat(),
+                      'mod_url': url
+                  }
+                  
+                  os.makedirs('data', exist_ok=True)
+                  with open('data/nexusmods-stats.json', 'w') as f:
+                      json.dump(stats, f, indent=2)
+                  
+                  # Also create a shields.io badge endpoint file
+                  badge_data = {
+                      'schemaVersion': 1,
+                      'label': 'NexusMods',
+                      'message': f'{download_count} downloads',
+                      'color': 'informational'
+                  }
+                  
+                  with open('data/nexusmods-stats-badge.json', 'w') as f:
+                      json.dump(badge_data, f, indent=2)
+                  
+                  print(f"::set-output name=download_count::{download_count}")
+                  print(f"Successfully fetched download count: {download_count}")
+              else:
+                  print("Warning: Could not find download count, using cached value")
+                  
+          except Exception as e:
+              print(f"Error fetching NexusMods stats: {e}")
+              # Continue with cached value if available
+        
+        shell: python
+      
+      - name: Commit stats if changed
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          
+          # Check if files changed
+          if git diff --quiet data/nexusmods-stats.json data/nexusmods-stats-badge.json 2>/dev/null; then
+            echo "No changes to commit"
+          else
+            git add data/nexusmods-stats.json data/nexusmods-stats-badge.json
+            git commit -m "Update NexusMods download stats" || echo "No changes to commit"
+            git push || echo "No changes to push"
+          fi
+        
+        continue-on-error: true
