@@ -182,7 +182,7 @@ Context: Fix ensured LunaLib settings are applied on game load/runtime and overr
 ### LunaLib / Settings notes (updates)
 - Legacy string color keys were removed; CSV now only contains `_v2` Color entries with LunaLib's Color type. Future agents should:
   - Prefer reading Color values via `LunaSettings.getColor(MOD_ID, "ramscoop_color_*_v2")`.
-  - Avoid adding duplicate legacy String keys (`ramscoop_color_*`) to the CSV — this creates UI clutter and can confuse users.
+  - Avoid adding duplicate legacy String keys (`ramscoop_color_*`) to the CSV. This creates UI clutter and can confuse users.
   - If migrating old saves, provide a clear migration path (parsing old hex strings and writing to `_v2` keys) or document that legacy saves may need manual reset.
 
 ### Additional lessons & safeguards (learned during 0.7.3 work)

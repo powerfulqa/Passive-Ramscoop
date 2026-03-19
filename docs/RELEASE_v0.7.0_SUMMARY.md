@@ -15,11 +15,11 @@
 - Default notification colors set to light gray (#D3D3D3).
 
 ## Files Modified
-- `data/config/LunaSettings.csv` — reorganised notification section, added per-event toggles, default color updated
-- `src/ramscoop/ModPlugin.java` — added LunaLib reads for new toggles, default colors updated, debug logging updated
-- `src/ramscoop/Ramscoop.java` — notifications gated by runtime scoop toggle, removed blue-text scheduling
-- `Ramscoop.version`, `version.json`, `mod_info.json` — version bumped to 0.7.0
-- `CHANGELOG.md`, `changelog.txt` — added v0.7.0 entries
+- `data/config/LunaSettings.csv`: reorganised notification section, added per-event toggles, default colour updated
+- `src/ramscoop/ModPlugin.java`: added LunaLib reads for new toggles, default colours updated, debug logging updated
+- `src/ramscoop/Ramscoop.java`: notifications gated by runtime scoop toggle, removed blue-text scheduling
+- `Ramscoop.version`, `version.json`, `mod_info.json`: version bumped to 0.7.0
+- `CHANGELOG.md`, `changelog.txt`: added v0.7.0 entries
 
 ## Testing
 - Rebuilt JAR with the project's `build.ps1` script and verified compilation

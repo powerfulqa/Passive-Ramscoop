@@ -20,17 +20,17 @@ pwsh .\build.ps1
 The output JAR is placed in `jars/Ramscoop.jar`.
 
 ## Project layout (short)
-- `src/ramscoop/` — Java sources (`ModPlugin.java`, `Ramscoop.java`) 
-- `data/config/LunaSettings.csv` — LunaLib UI configuration
-- `settings.json` — legacy fallback config
-- `Ramscoop.version`, `mod_info.json`, `version.json` — release/version metadata
-- `.github/scripts/check-versions.ps1` — version consistency checker used by CI
+- `src/ramscoop/`: Java sources (`ModPlugin.java`, `Ramscoop.java`) 
+- `data/config/LunaSettings.csv`: LunaLib UI configuration
+- `settings.json`: legacy fallback config
+- `Ramscoop.version`, `mod_info.json`, `version.json`: release/version metadata
+- `.github/scripts/check-versions.ps1`: version consistency checker used by CI
 
 ## Architecture overview
-- `ModPlugin.java` — mod entry point and settings orchestration
+- `ModPlugin.java`: mod entry point and settings orchestration
   - Loads settings with priority: LunaLib (if available) → `settings.json` → hardcoded defaults
   - Exposes public static fields consumed by runtime logic
-- `Ramscoop.java` — runtime `EveryFrameScript` implementation
+- `Ramscoop.java`: runtime `EveryFrameScript` implementation
   - `advance(float amount)` called frequently; expensive work is throttled with an `IntervalUtil`
   - Applies fuel / supplies to the player fleet via dynamic stats modifications
 

@@ -96,21 +96,21 @@ For modders and advanced users, manual configuration is available through `setti
 
 ## Note for contributors editing `LunaSettings.csv`
 
-When editing `data/config/LunaSettings.csv` be careful with literal percent signs (%) in any `tooltip` or `description` fields — LunaLib renders CSV tooltips using `String.format()` and unescaped `%` characters will cause a runtime formatting exception. Escape literal percent signs as `%%`.
+When editing `data/config/LunaSettings.csv`, be careful with literal percent signs (%) in any `tooltip` or `description` fields. LunaLib renders CSV tooltips using `String.format()`, and unescaped `%` characters will cause a runtime formatting exception. Escape literal percent signs as `%%`.
 
 ## What's new (0.7.0)
 - Per-event notification toggles: you can now enable/disable floating notifications separately for nebula entry/exit and corona entry/exit via the LunaLib settings UI.
-- UI rework: color presets removed in favor of HSV color pickers; saved HSV values are now respected correctly.
-- Default notification colours changed to light gray (#D3D3D3) to reduce visual noise; Java default falls back to Color.LIGHT_GRAY.
-- Notifications are now gated by the master "Scoop" toggle at runtime — turning the master toggle off stops all ramscoop notifications immediately.
+- UI rework: colour presets removed in favour of HSV colour pickers; saved HSV values are now respected correctly.
+- Default notification colours changed to light grey (#D3D3D3) to reduce visual noise; Java default falls back to Color.LIGHT_GRAY.
+- Notifications are now gated by the master "Scoop" toggle at runtime. Turning the master toggle off stops all ramscoop notifications immediately.
 
 ## What's new (0.7.2)
 
 - CSV validator & CI integration: added `.github/scripts/validate-luna-csv.py` and a CI step to block malformed `LunaSettings.csv` and to prevent reintroduction of legacy LunaLib UI keys.
 - UI cleanup: removed legacy `nebula_*` UI entries from the LunaLib settings menu to keep the UI clear and consistent.
 - No-Crew controls split: replaced the combined no-crew rate control with two dedicated LunaLib fields:
-	- `nebula_no_crew_rate_percent` — percent slider (0–100), converted to a fraction in code.
-	- `nebula_no_crew_rate_flat` — flat supply units per day.
+	- `nebula_no_crew_rate_percent`: percent slider (0–100), converted to a fraction in code.
+	- `nebula_no_crew_rate_flat`: flat supply units per day.
 - Updated code: `ModPlugin` and runtime logic updated to read the new keys and handle percent→fraction conversion.
 
 ## TriOS compatibility (quick notes)

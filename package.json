@@ -1,0 +1,31 @@
+{
+  "name": "passive-ramscoop",
+  "version": "0.7.3",
+  "description": "Configurable fuel and supply generation when traveling through nebulas and coronas",
+  "scripts": {
+    "test": "npm run compile-tests && npm run run-tests",
+    "compile-tests": "javac -d build/classes src/test/java/ramscoop/*.java",
+    "run-tests": "npm run test:asset && npm run test:csv-validation && npm run test:key-audit && npm run test:version",
+    "test:asset": "java -cp build/classes ramscoop.AssetIntegrityTest",
+    "test:csv-validation": "java -cp build/classes ramscoop.LunaSettingsCsvValidationTest",
+    "test:key-audit": "java -cp build/classes ramscoop.LunaSettingsKeyAuditTest",
+    "test:version": "java -cp build/classes ramscoop.VersionConsistencyTest",
+    "build": "powershell -ExecutionPolicy Bypass -File build.ps1",
+    "smoke-test": "powershell -ExecutionPolicy Bypass -File smoke-test.ps1"
+  },
+  "keywords": [
+    "starsector",
+    "mod",
+    "utility",
+    "fuel",
+    "supplies",
+    "nebula",
+    "lunalib"
+  ],
+  "author": "PowerfulQA, original by Meridias561",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/powerfulqa/Passive-Ramscoop"
+  }
+}

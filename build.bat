@@ -4,7 +4,7 @@ setlocal enabledelayedexpansion
 :: Configuration
 :: Try to detect Starsector installation. Prefer Program Files (x86), fall back to G:\Starsector
 set "SS_DIR="
-:: Read ProgramFiles(x86) directly — avoid for/failure when the value contains spaces
+:: Read ProgramFiles(x86) directly; avoid /for failure when the value contains spaces
 set "PF86=%ProgramFiles(x86)%"
 if defined PF86 set "DEFAULT_SS_DIR=%PF86%\Fractal Softworks\Starsector"
 if not defined PF86 set "DEFAULT_SS_DIR=C:\Program Files (x86)\Fractal Softworks\Starsector"
