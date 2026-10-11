@@ -45,7 +45,7 @@ This mod automatically generates fuel and supplies for your fleet when travellin
 1. **Download and install [LunaLib](https://fractalsoftworks.com/forum/index.php?topic=25658)** (required dependency)
 2. **Download this mod** and extract to your Starsector `mods` directory 
 3. **Enable both mods** in the Starsector launcher
-4. **Start playing!** - Settings can be accessed in-game by pressing F2
+4. **Start playing!** - Settings can be accessed in-game by pressing F3 (LunaLib default; Shift+F2 always works) or via Mod Settings on the main menu
 
 > **Note:** LunaLib is required for the in-game settings menu. Without it, the mod will use default settings from a configuration file.
 
@@ -58,7 +58,7 @@ The mod works great with default settings! Once installed, you'll automatically 
 - **Limits**: Fuel stops at 20% of your tank capacity, supplies at 20% of cargo space
 
 ### Customising Your Experience
-Press **F2** in-game to open the settings menu and find "Ramscoop Configuration" (requires LunaLib to be installed and enabled):
+Press **F3** (or **Shift+F2**) in-game to open the settings menu and find "Ramscoop Configuration" (requires LunaLib to be installed and enabled):
 
 **🎮 General Tab**
 - Master on/off switch for the entire mod
@@ -78,7 +78,7 @@ Press **F2** in-game to open the settings menu and find "Ramscoop Configuration"
 ### Troubleshooting
 **Not collecting resources?** 
 - Make sure you're in a nebula (purple/coloured space clouds) or near a star corona
-- Check that the mod is enabled in your F2 settings menu
+- Check that the mod is enabled in the LunaLib settings menu (F3 or Shift+F2)
 - Verify both this mod and LunaLib are enabled in the launcher
 
 **Want different rates?**

@@ -17,7 +17,7 @@ Ever wished your fleet could collect fuel and supplies whilst travelling through
 - No manual activation required - just fly through space!
 
 🎛️ **Fully Configurable**
-- Easy in-game settings menu (press F2) - no file editing required
+- Easy in-game settings menu (press F3, or Shift+F2) - no file editing required
 - Separate controls for nebula and corona environments
 - Adjustable generation rates, caps, and limits
 - Master on/off toggle for quick disable
@@ -47,7 +47,7 @@ Ever wished your fleet could collect fuel and supplies whilst travelling through
 1. Install LunaLib (required dependency)
 2. Download and install this mod
 3. Enable both in the Starsector launcher
-4. Start playing! Settings accessible by pressing F2 in-game
+4. Start playing! Settings accessible by pressing F3 (or Shift+F2) in-game
 
 ### Credits
 - **Original Creator**: Meridias561

@@ -155,7 +155,7 @@ Two build scripts are provided for flexibility:
 
 ### With LunaLib Installed:
 - [ ] Launch game with both Ramscoop and LunaLib enabled
-- [ ] Access settings via F2 during campaign
+- [ ] Access settings via F3 (or Shift+F2) during campaign
 - [ ] Verify all Ramscoop settings appear in LunaLib menu
 - [ ] Test settings changes are applied immediately
 - [ ] Enter nebula and verify resource generation works with LunaLib settings
