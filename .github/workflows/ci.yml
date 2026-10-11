@@ -2,141 +2,44 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: ['**']
   pull_request:
-    branches: [ main ]
+  workflow_call: # reused by release.yml
+
+permissions:
+  contents: read
 
 jobs:
   validate:
     runs-on: ubuntu-latest
-    
     steps:
-    - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # for the jar-age check below
+          persist-credentials: false
 
-    - name: Set up Java
-      uses: actions/setup-java@v3
-      with:
-        distribution: 'temurin'
-        java-version: '17'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
 
-    - name: Validate Java files
-      run: |
-        # Check that Java source files exist and have content
-        if [ ! -d "src/ramscoop" ]; then
-          echo "Error: Source directory missing"
-          exit 1
-        fi
-        
-        if [ ! -f "src/ramscoop/ModPlugin.java" ] || [ ! -f "src/ramscoop/Ramscoop.java" ]; then
-          echo "Error: Core Java source files missing"
-          exit 1
-        fi
-        
-    - name: Validate mod structure
-      run: |
-        # Check that essential mod files exist
-        for file in "mod_info.json" "settings.json" "README.md" "LICENSE.txt" "Ramscoop.version"; do
-          if [ ! -f "$file" ]; then
-            echo "Error: $file is missing"
-            exit 1
+      # Settings CSV format and keys vs ModPlugin, version files and download URLs.
+      - name: Repo check
+        run: |
+          javac -d build/test-classes src/test/java/ramscoop/RepoCheck.java
+          java -cp build/test-classes ramscoop.RepoCheck
+
+      # The game jars are not public, so CI cannot compile the mod. Instead check the
+      # committed jar has a class for every source file, built for Java 17 (class version 61).
+      - name: Committed jar matches sources
+        run: |
+          for src in src/ramscoop/*.java; do
+            cls="ramscoop/$(basename "$src" .java).class"
+            unzip -l jars/Ramscoop.jar "$cls" > /dev/null || { echo "::error::$cls missing from jars/Ramscoop.jar"; exit 1; }
+            major=$(unzip -p jars/Ramscoop.jar "$cls" | od -An -j6 -N2 -tu1 | awk '{print $1*256+$2}')
+            [ "$major" = 61 ] || { echo "::error::$cls is class version $major, expected 61 (Java 17)"; exit 1; }
+          done
+          # Warn if a source changed in a later commit than the jar.
+          if [ "$(git log -1 --format=%ct -- src/ramscoop)" -gt "$(git log -1 --format=%ct -- jars/Ramscoop.jar)" ]; then
+            echo "::warning::src/ramscoop was committed after jars/Ramscoop.jar; rebuild with build.sh or build.ps1"
           fi
-        done
-        
-        # Check that LunaSettings.csv exists
-        if [ ! -f "data/config/LunaSettings.csv" ]; then
-          echo "Error: data/config/LunaSettings.csv is missing"
-          exit 1
-        fi
-        
-        # Verify that a prebuilt JAR is committed in the repository
-        if [ ! -f "jars/Ramscoop.jar" ]; then
-          echo "Error: jars/Ramscoop.jar is missing. Please commit the prebuilt Ramscoop.jar to the repository.";
-          exit 1
-        fi
-
-        # Sanity-check the JAR: list contents and verify expected classes and MANIFEST
-        echo "Sanity-checking jars/Ramscoop.jar"
-        unzip -l jars/Ramscoop.jar | sed -n '1,120p'
-
-        # Verify required classes are present
-        if ! unzip -l jars/Ramscoop.jar | grep -q "ramscoop/ModPlugin.class"; then
-          echo "Error: ramscoop/ModPlugin.class missing from JAR"; exit 1
-        fi
-        if ! unzip -l jars/Ramscoop.jar | grep -q "ramscoop/Ramscoop.class"; then
-          echo "Error: ramscoop/Ramscoop.class missing from JAR"; exit 1
-        fi
-
-        # Show manifest if present and check for common version attributes
-        if unzip -p jars/Ramscoop.jar META-INF/MANIFEST.MF 2>/dev/null | tee manifest.txt; then
-          if grep -qi "version" manifest.txt; then
-            echo "Manifest contains version info:"; grep -i "version" manifest.txt || true
-          else
-            echo "Manifest present but no version entry found (this is informational)"
-          fi
-        else
-          echo "Warning: No MANIFEST.MF found in JAR (informational)"
-        fi
-        
-    - name: Generate and validate changelog.txt
-      run: |
-        # Test the changelog generation process
-        sed 's/^## Version /Version /g' CHANGELOG.md | \
-        sed 's/^# .*//g' | \
-        sed 's/^- /- /g' | \
-        sed '/^$/N;/^\n$/d' > test-changelog.txt
-        
-        echo "Generated test changelog.txt:"
-        cat test-changelog.txt
-        
-        # Verify it has content
-        if [ ! -s "test-changelog.txt" ]; then
-          echo "Error: Generated changelog is empty"
-          exit 1
-        fi
-        
-    - name: Package validation
-      run: |
-        # Create a mock release package to ensure the packaging process works
-        mkdir -p release
-        mkdir -p release/jars
-        touch release/jars/Ramscoop.jar
-        
-        # Generate changelog.txt for testing
-        sed 's/^## Version /Version /g' CHANGELOG.md | \
-        sed 's/^# .*//g' | \
-        sed 's/^- /- /g' | \
-        sed '/^$/N;/^\n$/d' > changelog.txt
-        
-        for file in "mod_info.json" "settings.json" "README.md" "LICENSE.txt" "changelog.txt"; do
-          cp "$file" release/
-        done
-        
-        cd release
-        zip -r "../Ramscoop-test.zip" ./*
-        cd ..
-        
-        # Verify the zip was created and has content
-        if [ ! -f "Ramscoop-test.zip" ]; then
-          echo "Error: Failed to create test package"
-          exit 1
-        fi
-        
-        echo "Package validation successful"
-    - name: Run version consistency check
-      shell: pwsh
-      run: |
-        pwsh -NoProfile -File .github/scripts/check-versions.ps1
-    - name: Validate LunaSettings CSVs
-      run: |
-        python3 .github/scripts/validate-luna-csv.py
-    - name: Run LunaLib Integration Tests
-      run: |
-        javac -cp "src" src/test/java/ramscoop/*.java
-        java -cp "src:src/test/java" ramscoop.LunaSettingsKeyAuditTest
-        java -cp "src:src/test/java" ramscoop.LunaSettingsCsvValidationTest
-        java -cp "src:src/test/java" ramscoop.VersionConsistencyTest
-        java -cp "src:src/test/java" ramscoop.AssetIntegrityTest
-    - name: Run Build Validation Test
-      shell: pwsh
-      run: |
-        pwsh -NoProfile -File .github/tools/build-validation-test.ps1
