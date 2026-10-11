@@ -4,6 +4,9 @@ on:
   push:
     tags: ['v*']
 
+permissions:
+  contents: read
+
 jobs:
   validate:
     uses: ./.github/workflows/ci.yml
@@ -15,6 +18,8 @@ jobs:
       contents: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - uses: actions/setup-java@v4
         with:
@@ -37,7 +42,7 @@ jobs:
           awk -v h="Version ${GITHUB_REF_NAME#v} " '/^Version /{p = index($0, h) == 1} p' changelog.txt > notes.txt
           cat notes.txt
 
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
         with:
           name: Ramscoop ${{ github.ref_name }}
           files: Ramscoop-${{ github.ref_name }}.zip
