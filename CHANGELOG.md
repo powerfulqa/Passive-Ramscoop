@@ -1,5 +1,19 @@
 # Changelog 
 
+## [Unreleased]
+### Fixed
+- LunaLib settings are no longer polled and re-applied in the background; they reload when you save in the LunaLib menu. This stops ~12 log lines per minute and the master toggle being reset.
+- Corona detection no longer counts anywhere within 1000 units of a star as a corona; only real corona terrain counts.
+- Small fuel tanks now generate fuel (rates were rounded down to whole units, e.g. 20 max fuel at 4%/day gave 0).
+- "Enable Fuel (Nebula)" and "Reuse Nebula Caps for Corona" settings now take effect.
+- A missing LunaLib value no longer aborts loading all later settings.
+
+### Changed
+- Corona overlapping a nebula now gives nebula supplies plus corona-rate fuel (previously no supplies).
+- Removed the unused `settings.json` fallback (LunaLib is a required dependency).
+- The master toggle is no longer stored in save files.
+- Compiled for Java 17 (Starsector 0.98 runtime). Added `build.sh` for Linux/macOS.
+
 ## [0.7.3] - 2025-10-14
 ### Changed
 - Enabled visual feedback by default (ramscoop_enable_visual_feedback now defaults to true)

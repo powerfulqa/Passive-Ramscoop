@@ -83,7 +83,7 @@ Simple System.out.println() logging for errors.
 Null checks before game state access.
 
 Mod Structure
-Root: mod_info.json, settings.json, README.md, LICENSE.txt, version.json.
+Root: mod_info.json, README.md, LICENSE.txt, version.json.
 
 Source: src/ ; jars in jars/.
 
@@ -94,7 +94,7 @@ Provide .ps1 + .bat scripts.
 
 Scripts detect JDK or give clear error.
 
---release 8 for javac.
+--release 17 for javac (Starsector 0.98 ships Java 17).
 
 Classpath: starfarer.api.jar, starfarer_obf.jar, janino.jar, commons-compiler.jar, json.jar.
 
@@ -146,13 +146,14 @@ Context: Fix ensured LunaLib settings are applied on game load/runtime and overr
 - Keep `ramscoop.ModPlugin` (or mod plugin) as the single source of truth for runtime settings.
   - Load settings in `onGameLoad(boolean newGame)`.
   - Then add the `EveryFrameScript` via `Global.getSector().addTransientScript(new Ramscoop())`.
-- Provide a minimal fallback: if LunaLib is enabled but not yet ready, load baseline values from `settings.json` (with `Global.getSettings().loadJSON("settings.json", modId)`) and retry later.
+- Reload on change with `LunaSettingsListener`, registered once in `onApplicationLoad` (guard with `LunaSettings.hasSettingsListenerOfClass`). Never poll LunaLib from an EveryFrameScript.
+- LunaLib getters return boxed nulls; default every read instead of auto-unboxing.
 - Add an absolute guard in runtime logic to never generate when a feature is disabled (e.g., skip supplies generation when `enable_supplies == false`).
 - Convert 0–100% LunaLib sliders to 0–1 fractions in code; document the mapping in `README.md`.
-- Load both Nebula and Corona cap keys from LunaLib and from `settings.json` as fallback (`nebula_percent_fuel_limit`, `nebula_hard_fuel_limit`, `nebula_fuel_cap_margin`, and their `corona_*` counterparts); convert 0–100% sliders to fractions.
-- Seed from `settings.json` first to provide defaults for missing LunaLib keys, then apply LunaLib values; sync runtime toggles (e.g., `$ramscoop_enabled`) to fleet memory immediately so UI changes take effect.
+- Load both Nebula and Corona cap keys from LunaLib (`nebula_percent_fuel_limit`, `nebula_hard_fuel_limit`, `nebula_fuel_cap_margin`, and their `corona_*` counterparts); convert 0–100% sliders to fractions.
+- Keep runtime toggles in static fields, not fleet memory (memory is written into the save).
 - Prefer per-context caps over a single global set: keep Nebula and Corona caps independent to avoid UX confusion.
-- Corona detection: check terrain plugins (containsEntity/containsPoint) and fall back to star distance (planet.isStar() + radius+buffer).
+- Corona detection: match `Terrain.CORONA`, `CORONA_JET`, `CORONA_AKA_MAINYU` and call `plugin.containsEntity(fleet)` directly. No reflection, no star-distance fallback (it grants corona rates outside the corona).
 - Keep logging minimal and useful:
   - One snapshot line on game load with the final resolved values.
   - Optional rare traces for meaningful adds or disabled paths.
@@ -193,9 +194,9 @@ These are small, pragmatic rules to prevent repeat fix/rebuild loops and platfor
 
 - Build artifact policy: never commit built artifacts (JARs, compiled .class files) to version control. Keep `jars/` and `build/classes/` entries out of commits and add or update `.gitignore` guidance in the repo README. The build script should produce the jar and the release workflow should package it, but local commits should not include the JAR unless explicitly intended for distribution.
 
-- JDK detection and warnings: build scripts should detect a JDK and validate compatibility with `--release 8`. If a newer JDK is used (for example JDK 17/21), emit a clear, non-fatal warning explaining that `--release 8` is being used and that some compiler warnings are expected. Prefer an explicit, helpful error when no suitable JDK is found.
+- JDK detection: build scripts need JDK 17+ and compile with `--release 17`. Prefer an explicit, helpful error when no suitable JDK is found.
 
-- LunaLib readiness & fallback: LunaLib may initialize after the mod plugin. Always implement a deterministic fallback: seed settings from `settings.json`, register a retry of LunaLib reads on a short delay (or on `onNewGame/onGameLoad` again), and log a single snapshot once the final resolved values are known. This prevents repeating reloads that generate noisy logs and unclear state.
+- LunaLib settings: read in `onGameLoad` and in `settingsChanged`; log one snapshot line per load. No retry timers.
 
 - Mandatory restart step in docs: after rebuilding `jars/Ramscoop.jar` instruct users to fully exit Starsector and restart the launcher to ensure the new classes are loaded. Partial reloads or reloading scripts in-game may not use the rebuilt jar if the launcher keeps an older copy in memory.
 

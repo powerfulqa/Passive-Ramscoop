@@ -131,7 +131,7 @@ if ($javaFiles.Count -eq 0) {
     Write-Host "ERROR: No Java source files found in $SRC_DIR/ramscoop" -ForegroundColor Red
     exit 1
 }
-& $javac --release 8 -cp $CLASSPATH_STR -d "$SRC_DIR" $javaFiles
+& $javac --release 17 -cp $CLASSPATH_STR -d "$SRC_DIR" $javaFiles
 if ($LASTEXITCODE -ne 0) {
     Write-Host "Compilation failed!" -ForegroundColor Red
     exit $LASTEXITCODE

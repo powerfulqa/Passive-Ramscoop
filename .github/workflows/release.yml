@@ -12,12 +12,12 @@ jobs:
       contents: write # Required for creating releases
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Validate release files
         run: |
           # Check that essential mod files exist
-          for file in "mod_info.json" "settings.json" "README.md" "LICENSE.txt"; do
+          for file in "mod_info.json" "README.md" "LICENSE.txt"; do
             if [ ! -f "$file" ]; then
               echo "Error: $file is missing"
               exit 1
@@ -109,7 +109,6 @@ jobs:
           cp -r jars release/Ramscoop/
           cp -r data release/Ramscoop/ 2>/dev/null || :
           cp mod_info.json release/Ramscoop/
-          cp settings.json release/Ramscoop/
           cp README.md release/Ramscoop/
           cp LICENSE.txt release/Ramscoop/
           cp changelog.txt release/Ramscoop/ 2>/dev/null || :

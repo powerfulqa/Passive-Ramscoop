@@ -73,7 +73,7 @@ Press **F2** in-game to open the settings menu and find "Ramscoop Configuration"
 **☀️ Corona Tab**
 - Separate fuel generation settings for star coronas
 - Independent fuel caps and rates
-- (No supply generation in coronas - too dangerous!)
+- Corona generates fuel only. If a corona overlaps a nebula, you get nebula supplies plus corona-rate fuel
 
 ### Troubleshooting
 **Not collecting resources?** 
@@ -85,9 +85,6 @@ Press **F2** in-game to open the settings menu and find "Ramscoop Configuration"
 - All generation rates can be adjusted from 0% to 100% per day
 - Set any rate to 0% to disable that type of resource collection
 - Fuel and supply generation can be controlled independently
-
-**Advanced Configuration**
-For modders and advanced users, manual configuration is available through `settings.json`. See the technical documentation section below for details.
 
 ## Compatibility
 - Starsector 0.98a-RC8
@@ -141,21 +138,11 @@ Build note: the PowerShell script compiles against the Starsector API and LunaLi
 
 ## Technical Documentation
 
-### Manual Configuration (settings.json)
-For advanced users and modders. LunaLib settings take priority when available.
-
-#### Key Settings:
-- `scoop_toggle_default_on`: Master toggle default state
-- `enable_fuel`/`enable_supplies`: Enable/disable resource types
-- `fuel_per_day`: Daily fuel generation rate (fraction of max capacity)
-- Nebula/Corona fuel: Independent rate and cap settings
-- `percent_supply_limit`: Supply generation limit (fraction of cargo space)
-- `crew_usage`: Crew usage mode (`extra`, `all`, or `nocrew`)
-
 ### Development
 Build scripts available for developers:
 - `build.ps1` – PowerShell build script  
 - `build.bat` – Windows batch build script
+- `build.sh` – Linux/macOS build script
 
 See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for detailed development information.
 

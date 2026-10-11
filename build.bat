@@ -50,7 +50,7 @@ set CLASSPATH=%CLASSPATH%;"%cd%\build\classes"
 
 :: Compile Java files
 echo Compiling Java files...
-javac --release 8 -cp %CLASSPATH% -d "%OUT_CLASSES%" %SRC_DIR%\ramscoop\*.java
+javac --release 17 -cp %CLASSPATH% -d "%OUT_CLASSES%" %SRC_DIR%\ramscoop\*.java
 if %ERRORLEVEL% NEQ 0 (
     echo Compilation failed!
     exit /b %ERRORLEVEL%

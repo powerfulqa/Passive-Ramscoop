@@ -37,7 +37,6 @@ public class AssetIntegrityTest {
             "README.md",
             "LICENSE.txt",
             "data/config/LunaSettings.csv",
-            "settings.json",
             "src/ramscoop/ModPlugin.java",
             "src/ramscoop/Ramscoop.java",
             "build.ps1",

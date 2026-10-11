@@ -1,29 +1,29 @@
 # Copilot Instructions for Passive Ramscoop
 
 ## Project Overview
-Starsector 0.98a-RC8 mod that passively generates fuel/supplies from nebulae and star coronas. Built with Java 8, LunaLib 2.0.4 integration, TriOS mod manager support. Current version: **0.7.3**.
+Starsector 0.98a-RC8 mod that passively generates fuel/supplies from nebulae and star coronas. Built for Java 17 (the game's runtime), LunaLib 2.0.4 integration, TriOS mod manager support. Current version: **0.7.3**.
 
 ## Architecture
 
 ### Two-Class Design
 1. **ModPlugin.java** - Mod entry point, settings orchestration
-   - `onApplicationLoad()`: Called once on game start
-   - `onGameLoad()`: Called when loading a save - loads settings here
-   - Settings priority: LunaLib (if available) → settings.json → hardcoded defaults
+   - `onApplicationLoad()`: registers itself once as a `LunaSettingsListener`
+   - `onGameLoad()`: loads settings and adds the transient `Ramscoop` script
+   - `settingsChanged(modID)`: reloads settings when the player saves in the LunaLib menu
+   - LunaLib is a hard dependency; there is no settings.json fallback. LunaLib getters return null on missing keys, so every read goes through an `or(...)`/`pct(...)` default
    
 2. **Ramscoop.java** - EveryFrameScript implementation for runtime logic
    - `advance(amount)`: Called every frame with delta time
    - Reads settings from public static fields in ModPlugin
    - Uses `IntervalUtil(0.09f, 0.11f)` to throttle expensive operations
-   - Adds fuel/supplies via `MutableFleetStatsAPI.getDynamic().getMod("nebula_stat_mod")`
+   - Detects nebula (`NebulaTextureProvider`) and corona (`Terrain.CORONA*` types) with one `getTerrainCopy()` pass and `CampaignTerrainPlugin.containsEntity(fleet)`, no reflection
+   - Nebula: supplies + slow fuel. Corona: fast fuel, replacing nebula fuel when both apply
 
 ### Settings Architecture
 ```
 LunaSettings.csv (UI config) 
     ↓
-ModPlugin.loadLunaLibSettings() (runtime loading via reflection)
-    ↓ (fallback if LunaLib not ready)
-ModPlugin.loadLegacySettings() (settings.json)
+ModPlugin.loadSettings() (direct LunaSettings API, on game load + settingsChanged)
     ↓
 public static fields (Ramscoop reads these)
 ```
@@ -37,7 +37,8 @@ public static fields (Ramscoop reads these)
 .\build.ps1  # PowerShell script handles everything
 ```
 - Discovers LunaLib jars dynamically from `mods/03_LunaLib-*/jars/`
-- Compiles with `--release 8` for Java 8 compatibility
+- Compiles with `--release 17` (Starsector 0.98 runs on Java 17)
+- Linux: `./build.sh` (set `SS_DIR` / `LUNALIB_JAR` if not auto-found)
 - Packages to `jars/Ramscoop.jar` with correct `ramscoop/` package structure
 - Classpath includes 11 Starsector core JARs + LunaLib
 
@@ -137,7 +138,6 @@ CHANGELOG.md            # Markdown changelog for GitHub
 changelog.txt           # Plain text changelog for TriOS
 data/config/
   LunaSettings.csv      # Settings UI configuration
-  settings.json         # Fallback settings (legacy)
 src/ramscoop/
   ModPlugin.java        # Entry point, settings loading
   Ramscoop.java         # Runtime fuel/supply generation

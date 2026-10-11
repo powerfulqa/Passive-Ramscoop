@@ -11,10 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up Java
-      uses: actions/setup-java@v3
+      uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
         java-version: '17'
@@ -35,7 +35,7 @@ jobs:
     - name: Validate mod structure
       run: |
         # Check that essential mod files exist
-        for file in "mod_info.json" "settings.json" "README.md" "LICENSE.txt" "Ramscoop.version"; do
+        for file in "mod_info.json" "README.md" "LICENSE.txt" "Ramscoop.version"; do
           if [ ! -f "$file" ]; then
             echo "Error: $file is missing"
             exit 1
@@ -107,7 +107,7 @@ jobs:
         sed 's/^- /- /g' | \
         sed '/^$/N;/^\n$/d' > changelog.txt
         
-        for file in "mod_info.json" "settings.json" "README.md" "LICENSE.txt" "changelog.txt"; do
+        for file in "mod_info.json" "README.md" "LICENSE.txt" "changelog.txt"; do
           cp "$file" release/
         done
         

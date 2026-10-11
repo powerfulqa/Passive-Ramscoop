@@ -57,7 +57,7 @@ public class LunaSettingsKeyAuditTest {
         // Filter out header entries that aren't actual settings
         Set<String> actualCsvFieldIds = new HashSet<>();
         for (String fieldId : csvFieldIds) {
-            if (!fieldId.contains("_header") && !fieldId.equals("ramscoop_header") && !isKnownUnusedFieldId(fieldId)) {
+            if (!fieldId.contains("_header") && !fieldId.equals("ramscoop_header")) {
                 actualCsvFieldIds.add(fieldId);
             }
         }
@@ -109,10 +109,7 @@ public class LunaSettingsKeyAuditTest {
                         int endQuote = line.indexOf("\"", startQuote);
                         if (endQuote != -1) {
                             String fieldId = line.substring(startQuote, endQuote);
-                            // Skip known fallback fieldIDs that are no longer in CSV
-                            if (!isKnownFallbackFieldId(fieldId)) {
-                                fieldIds.add(fieldId);
-                            }
+                            fieldIds.add(fieldId);
                         }
                     }
                 }
@@ -121,20 +118,4 @@ public class LunaSettingsKeyAuditTest {
         return fieldIds;
     }
 
-    /**
-     * Check if a fieldID is a known fallback that's no longer in the CSV
-     */
-    private static boolean isKnownFallbackFieldId(String fieldId) {
-        return fieldId.equals("ramscoop_no_crew_rate_flat") ||
-               fieldId.equals("ramscoop_crew_usage") ||
-               fieldId.equals("ramscoop_no_crew_gen") ||
-               fieldId.equals("ramscoop_no_crew_rate_percent");
-    }
-
-    /**
-     * Check if a fieldID is known to be unused (CSV has it but code doesn't implement it)
-     */
-    private static boolean isKnownUnusedFieldId(String fieldId) {
-        return fieldId.equals("nebula_enable_fuel");
-    }
 }
