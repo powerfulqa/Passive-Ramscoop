@@ -1,6 +1,6 @@
 Changelog
 
-Version 0.8.0 (unreleased)
+Version 0.8.0 (2026-10-11)
 Added
 - Message log report on leaving a nebula or corona, e.g. "Ramscoop collected +12 fuel and +30 supplies". Toggle: Notifications > Report Gains in Message Log.
 - Opt-in corona supplies (Corona tab, off by default) with a rate as a percentage of the nebula supply rate.
