@@ -1,0 +1,6 @@
+{
+    "m561_ramscoop": {
+        # Icon in the LunaLib settings mod list; the vanilla fuel canister, so no image ships with the mod.
+        "iconPath":"graphics/icons/cargo/fuel.png",
+    }
+}

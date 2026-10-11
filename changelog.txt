@@ -1,4 +1,28 @@
-Changelog 
+Changelog
+
+Version 0.8.0 (unreleased)
+Added
+- Message log report on leaving a nebula or corona, e.g. "Ramscoop collected +12 fuel and +30 supplies". Toggle: Notifications > Report Gains in Message Log.
+- Opt-in corona supplies (Corona tab, off by default) with a rate as a percentage of the nebula supply rate.
+- Floating text when the master switch turns off, not only on.
+- Fuel canister icon for Ramscoop in the LunaLib settings list.
+- The gains report is also posted when the game saves, so totals are not lost on quit or reload.
+
+Changed
+- Settings menu: one header per tab, shorter descriptions with examples, clearer cap names.
+- Supply Cap is now 0-100 percent like every other percent slider (was a 0.1-1.0 fraction). It resets to the default of 20.
+- Default text colours: green nebula entry, orange corona entry, grey exits. Custom colours reset once.
+- Corona overlapping a nebula now gives nebula supplies plus corona-rate fuel (previously no supplies).
+- Removed the unused settings.json fallback (LunaLib is a required dependency).
+- The master toggle is no longer stored in save files.
+- Compiled for Java 17 (the Starsector 0.98 runtime).
+
+Fixed
+- LunaLib settings are no longer polled in the background; they reload when you save in the LunaLib menu. This stops ~12 log lines per minute and the master toggle being reset.
+- Corona detection no longer counts anywhere within 1000 units of a star; only real corona terrain counts.
+- Small fuel tanks now generate fuel (rates were rounded down to whole units, e.g. 20 max fuel at 4%/day gave 0).
+- "Enable Fuel (Nebula)" and "Reuse Nebula Caps for Corona" now take effect.
+- A missing LunaLib value no longer aborts loading all later settings.
 
 Version 0.7.3 (2025-10-14)
 Changed
@@ -137,3 +161,18 @@ Added
 Changed
 - Resource Generation: Now only occurs in nebula regions
 - Performance: Optimised for minimal frame impact
+
+Version 0.2c (2025-08-11)
+- Final release by original author, for Starsector 0.95a
+
+Version 0.2b (2021-04-06)
+- Updates and improvements by original author, for Starsector 0.95a
+
+Version 0.2a (2021-04-04)
+- Minor updates and fixes by original author, for Starsector 0.95a
+
+Version 0.2 (2021-04-03)
+- Second release by original author, for Starsector 0.95a
+
+Version 0.1 (2021-03-31)
+- Initial release by the original author: basic passive ramscoop, for Starsector 0.95a

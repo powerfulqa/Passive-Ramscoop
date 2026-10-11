@@ -1,169 +1,54 @@
-# PowerShell build script for Ramscoop mod
+# Windows build (also runs under pwsh elsewhere): compiles src/ramscoop against the game + LunaLib jars into jars/Ramscoop.jar.
+# Mirrors build.sh. Override paths with $env:SS_DIR (folder holding starfarer.api.jar) and $env:LUNALIB_JAR.
+# Needs a JDK 17+ (javac/jar/java) on PATH. -Install also copies the mod into the game as mods/Ramscoop.
+param([switch]$Install)
+$ErrorActionPreference = 'Stop'
+Set-Location $PSScriptRoot
 
-# Configuration
-# Default Starsector path; if it doesn't exist, prefer G:\Starsector (user environment)
-$SS_DIR = "C:\Program Files (x86)\Fractal Softworks\Starsector"
-if (-not (Test-Path $SS_DIR) -and (Test-Path "G:\Starsector")) {
-    $SS_DIR = "G:\Starsector"
-    Write-Host "Using Starsector directory: $SS_DIR" -ForegroundColor Cyan
+$ssDir = $env:SS_DIR
+if (-not $ssDir) {
+    $ssDir = @(
+        'C:\Program Files (x86)\Fractal Softworks\Starsector\starsector-core',
+        'C:\Program Files\Fractal Softworks\Starsector\starsector-core',
+        'G:\Starsector\starsector-core'
+    ) | Where-Object { Test-Path (Join-Path $_ starfarer.api.jar) } | Select-Object -First 1
 }
-$MOD_NAME = "Passive-Ramscoop"
-$MOD_ID = "m561_ramscoop"
-$SRC_DIR = "$PWD\src"
-$OUT_DIR = "$PWD\jars"
+if (-not $ssDir -or -not (Test-Path (Join-Path $ssDir starfarer.api.jar))) { throw 'starfarer.api.jar not found; set SS_DIR' }
 
-# Create directories if they don't exist
-if (-not (Test-Path -Path "$OUT_DIR")) {
-    New-Item -ItemType Directory -Path "$OUT_DIR" -Force
+$luna = $env:LUNALIB_JAR
+if (-not $luna) {
+    $luna = Get-ChildItem (Join-Path $ssDir mods), (Join-Path $ssDir ../mods), .. -Recurse -Depth 3 -Filter LunaLib.jar -ErrorAction SilentlyContinue |
+        Select-Object -First 1 -ExpandProperty FullName
 }
+if (-not $luna -or -not (Test-Path $luna)) { throw 'LunaLib.jar not found; set LUNALIB_JAR' }
 
-# Find Java Home directory
-$javaHome = $env:JAVA_HOME
-if (-not $javaHome) {
-    # Try to find Java home from registry if environment variable not set
-    try {
-        $javaHome = (Get-ItemProperty -Path 'HKLM:\SOFTWARE\JavaSoft\JDK' -ErrorAction SilentlyContinue).'JavaHome'
-    } catch {
-        # Continue even if registry key not found
-    }
+$sep = [IO.Path]::PathSeparator
+$cp = (@('starfarer.api.jar', 'log4j-1.2.9.jar', 'lwjgl_util.jar', 'json.jar') | ForEach-Object { Join-Path $ssDir $_ }) + $luna -join $sep
+$out = Join-Path build classes
+$test = Join-Path build test
+Remove-Item -Recurse -Force $out -ErrorAction SilentlyContinue
+New-Item -ItemType Directory -Force $out, jars | Out-Null
+
+javac --release 17 -nowarn -cp $cp -d $out (Get-ChildItem src/ramscoop/*.java).FullName
+if ($LASTEXITCODE) { exit $LASTEXITCODE }
+jar cf jars/Ramscoop.jar -C $out ramscoop
+if ($LASTEXITCODE) { exit $LASTEXITCODE }
+
+javac --release 17 -cp "$cp$sep$out" -d $test (Get-ChildItem src/test/game/ramscoop/*.java).FullName
+if ($LASTEXITCODE) { exit $LASTEXITCODE }
+java -cp "$cp$sep$out$sep$test" ramscoop.FuelMathCheck
+if ($LASTEXITCODE) { exit $LASTEXITCODE }
+
+Write-Host "Built jars/Ramscoop.jar (SS_DIR=$ssDir, LunaLib=$luna)"
+
+if ($Install) {
+    # mods/ sits beside starsector-core on Windows, next to starfarer.api.jar on Linux/macOS.
+    $mods = Join-Path $ssDir mods
+    if (-not (Test-Path $mods)) { $mods = Join-Path $ssDir ../mods }
+    $dest = Join-Path $mods Ramscoop
+    # Same file list as the release zip (.github/workflows/release.yml).
+    Remove-Item -Recurse -Force $dest -ErrorAction SilentlyContinue
+    New-Item -ItemType Directory -Force $dest | Out-Null
+    Copy-Item -Recurse jars, data, mod_info.json, Ramscoop.version, changelog.txt, README.md, LICENSE.txt $dest
+    Write-Host "Installed to $dest (restart Starsector to load it)"
 }
-
-if (-not $javaHome) {
-    # Try some common paths
-    $commonPaths = @(
-        "C:\Program Files\Java\jdk-24",
-        "C:\Program Files\Java\jdk-17",
-        "C:\Program Files\Java\jdk1.8.0_301",
-        "C:\Program Files\Eclipse Adoptium\jdk-17.0.1.12-hotspot"
-    )
-    
-    foreach ($path in $commonPaths) {
-        if (Test-Path "$path\bin\jar.exe") {
-            $javaHome = $path
-            Write-Host "Found Java at: $javaHome" -ForegroundColor Green
-            break
-        }
-    }
-}
-
-if (-not $javaHome) {
-    Write-Host "ERROR: Cannot find Java JDK. Please ensure Java JDK is installed and JAVA_HOME is set." -ForegroundColor Red
-    exit 1
-}
-
-# Show the Java Home being used
-Write-Host "Using Java Home: $javaHome" -ForegroundColor Cyan
-
-# Detect platform to support both Windows and Linux runners
-try {
-    $platformIsWindows = [System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform([System.Runtime.InteropServices.OSPlatform]::Windows)
-} catch {
-    # Fallback for older PowerShell versions
-    $platformIsWindows = $env:OS -eq 'Windows_NT'
-}
-
-$exeExt = if ($platformIsWindows) { '.exe' } else { '' }
-$pathSep = if ($platformIsWindows) { '\\' } else { '/' }
-$cpSep = if ($platformIsWindows) { ';' } else { ':' }
-
-# Set up Java tools paths
-$javac = "$javaHome${pathSep}bin${pathSep}javac$exeExt"
-if (-not (Test-Path $javac)) {
-    Write-Host "ERROR: Cannot find javac at $javac" -ForegroundColor Red
-    exit 1
-}
-Write-Host "Using Java compiler: $javac" -ForegroundColor Cyan
-
-$jar = "$javaHome${pathSep}bin${pathSep}jar$exeExt"
-if (-not (Test-Path $jar)) {
-    Write-Host "ERROR: Cannot find jar utility at $jar" -ForegroundColor Red
-    exit 1
-}
-Write-Host "Using JAR utility: $jar" -ForegroundColor Cyan
-
-# Set up classpath with all necessary libraries from Starsector
-# Build the classpath array; only add Starsector jars if the Starsector directory exists
-$CLASSPATH = @()
-if (Test-Path $SS_DIR) {
-    $CLASSPATH += "$SS_DIR${pathSep}starsector-core${pathSep}starfarer.api.jar"
-    $CLASSPATH += "$SS_DIR${pathSep}starsector-core${pathSep}starfarer_obf.jar"
-    $CLASSPATH += "$SS_DIR${pathSep}starsector-core${pathSep}janino.jar"
-    $CLASSPATH += "$SS_DIR${pathSep}starsector-core${pathSep}commons-compiler.jar"
-    $CLASSPATH += "$SS_DIR${pathSep}starsector-core${pathSep}commons-compiler-jdk.jar"
-    $CLASSPATH += "$SS_DIR${pathSep}starsector-core${pathSep}fs.common_obf.jar"
-    $CLASSPATH += "$SS_DIR${pathSep}starsector-core${pathSep}fs.sound_obf.jar"
-    $CLASSPATH += "$SS_DIR${pathSep}starsector-core${pathSep}lwjgl.jar"
-    $CLASSPATH += "$SS_DIR${pathSep}starsector-core${pathSep}lwjgl_util.jar"
-    $CLASSPATH += "$SS_DIR${pathSep}starsector-core${pathSep}json.jar"
-    $CLASSPATH += "$SS_DIR${pathSep}starsector-core${pathSep}log4j-1.2.9.jar"
-} else {
-    Write-Host "WARNING: Starsector directory $SS_DIR not found; proceeding without Starsector jars on classpath" -ForegroundColor Yellow
-}
-
-# Add LunaLib to classpath for direct API access (discover jar dynamically)
-$lunaLibDir = Get-ChildItem -Path (Join-Path $SS_DIR 'mods') -Directory -ErrorAction SilentlyContinue | Where-Object { $_.Name -like '*LunaLib*' } | Select-Object -First 1
-$lunaLibJarDir = $null
-if ($lunaLibDir) {
-    $lunaLibJarDir = Join-Path $lunaLibDir.FullName 'jars'
-}
-if ($lunaLibJarDir -and (Test-Path $lunaLibJarDir)) {
-    $lunaJars = Get-ChildItem -Path $lunaLibJarDir -Filter *.jar -File -ErrorAction SilentlyContinue
-    foreach ($j in $lunaJars) { $CLASSPATH += $j.FullName }
-    if ($lunaJars.Count -gt 0) {
-        # Join-String is only available in PowerShell 7+. Use -join for compatibility with Windows PowerShell 5.1.
-        $names = ($lunaJars | ForEach-Object { $_.Name } | Sort-Object) -join ', '
-        Write-Host ("Including LunaLib jars: " + $names) -ForegroundColor Cyan
-    } else {
-        Write-Host "WARNING: No LunaLib jars found in $lunaLibJarDir" -ForegroundColor Yellow
-    }
-} else {
-    Write-Host "WARNING: LunaLib not found in mods directory; build will proceed without LunaLib API on classpath" -ForegroundColor Yellow
-}
-
-# Build the classpath string (use platform-appropriate separator)
-$CLASSPATH_STR = $CLASSPATH -join $cpSep
-
-# Compile Java files
-Write-Host "Compiling Java files..." -ForegroundColor Cyan
-# Expand Java source files to a list so javac receives individual paths (wildcards behave differently on linux pwsh)
-$javaFiles = Get-ChildItem -Path "$SRC_DIR/ramscoop" -Filter *.java -File | ForEach-Object { $_.FullName }
-if ($javaFiles.Count -eq 0) {
-    Write-Host "ERROR: No Java source files found in $SRC_DIR/ramscoop" -ForegroundColor Red
-    exit 1
-}
-& $javac --release 17 -cp $CLASSPATH_STR -d "$SRC_DIR" $javaFiles
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "Compilation failed!" -ForegroundColor Red
-    exit $LASTEXITCODE
-}
-
-# Create JAR file
-Write-Host "Creating JAR file..." -ForegroundColor Cyan
-
-# Create a temporary directory with the correct package structure
-$tempDir = "$OUT_DIR\temp_jar"
-if (Test-Path $tempDir) {
-    Remove-Item -Recurse -Force $tempDir
-}
-New-Item -ItemType Directory -Path $tempDir -Force
-New-Item -ItemType Directory -Path "$tempDir\ramscoop" -Force
-
-# Copy compiled classes to the correct package structure
-Copy-Item "$SRC_DIR/ramscoop/*.class" "$tempDir/ramscoop/"
-
-# Create JAR from the temporary directory
-Push-Location $tempDir
-& $jar cf "$OUT_DIR\Ramscoop.jar" ramscoop\*.class
-if ($LASTEXITCODE -ne 0) {
-    Write-Host "JAR creation failed!" -ForegroundColor Red
-    Pop-Location
-    Remove-Item -Recurse -Force $tempDir
-    exit $LASTEXITCODE
-}
-Pop-Location
-
-# Clean up temporary directory
-Remove-Item -Recurse -Force $tempDir
-
-Write-Host "Build completed successfully!" -ForegroundColor Green
-Write-Host "JAR file created at: $OUT_DIR\Ramscoop.jar" -ForegroundColor Green

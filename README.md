@@ -3,16 +3,16 @@
 ## Downloads
 [![GitHub total downloads](https://img.shields.io/github/downloads/powerfulqa/Passive-Ramscoop/total?label=GitHub%20total%20downloads)](https://github.com/powerfulqa/Passive-Ramscoop/releases)
 [![Latest release downloads](https://img.shields.io/github/downloads/powerfulqa/Passive-Ramscoop/latest/total?label=Latest%20release%20downloads)](https://github.com/powerfulqa/Passive-Ramscoop/releases/latest)
-[![Nexus Unique DLs](https://img.shields.io/badge/Nexus%20Unique%20DLs-300%2B-2ea44f)](https://www.nexusmods.com/starsector/mods/147)
-[![Nexus Total DLs](https://img.shields.io/badge/Nexus%20Total%20DLs-300%2B-1f6feb)](https://www.nexusmods.com/starsector/mods/147)
-[![Nexus Views](https://img.shields.io/badge/Nexus%20Views-1800%2B-6f42c1)](https://www.nexusmods.com/starsector/mods/147)
+[![Nexus Mods](https://img.shields.io/badge/Nexus%20Mods-Passive%20Ramscoop-d98f40)](https://www.nexusmods.com/starsector/mods/147)
 
 **Get the mod:**
 - **GitHub:** [Latest Release](https://github.com/powerfulqa/Passive-Ramscoop/releases) - Direct downloads tracked in badges above
-- **NexusMods:** [Passive Ramscoop](https://www.nexusmods.com/starsector/mods/147) - Generic stats shown above
+- **NexusMods:** [Passive Ramscoop](https://www.nexusmods.com/starsector/mods/147)
 
 ## What This Mod Does
 Ever wished your fleet could collect fuel and supplies whilst travelling through nebulae and near stars? The Passive Ramscoop mod makes this dream a reality! Your ships will automatically gather resources as you explore, reducing the need for constant supply runs.
+
+It is balanced as a safety net: if you are very low on fuel, a nebula or star corona will always get you some. By default it only fills the fuel tank to 20%, but everything is configurable in the in-game settings menu to suit your preferred difficulty.
 
 **Perfect for players who want:**
 - Less micromanagement of fuel and supplies
@@ -20,14 +20,12 @@ Ever wished your fleet could collect fuel and supplies whilst travelling through
 - Realistic "ramscoop" technology like in science fiction
 - Configurable resource generation that fits your playstyle
 
-## Overview
-This mod automatically generates fuel and supplies for your fleet when travelling through nebulae and star coronas. The idea around balancing it was that its used to make sure you can always get some fuel if you are very low by entering a nebula or star corona. This only fills the fuel tank currently to 20% by default, but everything is fully configurable through an easy-to-use in-game settings menu, so you can adjust the rates to match your preferred difficulty level.
-
 ## Key Features
 ✨ **Automatic Resource Collection**
 - Fuel generation whilst travelling through nebulae and near star coronas
-- Supply generation in nebulae (with configurable crew usage options)
+- Supply generation in nebulae (with configurable crew usage options), optionally in coronas too
 - No manual activation required - just fly through space!
+- A message log entry when you leave, e.g. "Ramscoop collected +12 fuel and +30 supplies"
 
 🎛️ **Fully Configurable**
 - Easy in-game settings menu (no file editing required)
@@ -47,85 +45,38 @@ This mod automatically generates fuel and supplies for your fleet when travellin
 3. **Enable both mods** in the Starsector launcher
 4. **Start playing!** - Settings can be accessed in-game by pressing F3 (LunaLib default; Shift+F2 always works) or via Mod Settings on the main menu
 
-> **Note:** LunaLib is required for the in-game settings menu. Without it, the mod will use default settings from a configuration file.
-
 ## How to Use
 
 ### Quick Start - Default Settings
-The mod works great with default settings! Once installed, you'll automatically collect:
-- **Fuel**: 4% of your maximum fuel capacity per day whilst in nebulae or coronas
-- **Supplies**: Based on your crew size whilst in nebulae (extra crew members generate 0.1 supplies/day each)
-- **Limits**: Fuel stops at 20% of your tank capacity, supplies at 20% of cargo space
+The mod works with the default settings. Once installed, you will collect:
+- **Nebula fuel**: 4% of your maximum fuel capacity per day
+- **Corona fuel**: 25% of your maximum fuel capacity per day (a corona overlapping a nebula uses the corona rate)
+- **Supplies**: in nebulae, 0.1 supplies per day for each crew member above your fleet's minimum crew
+- **Limits**: fuel stops at 20% of your tank capacity, supplies at 20% of your cargo space
 
 ### Customising Your Experience
-Press **F3** (or **Shift+F2**) in-game to open the settings menu and find "Ramscoop Configuration" (requires LunaLib to be installed and enabled):
+Press **F3** (or **Shift+F2**) in-game and open **Ramscoop**:
 
-**🎮 General Tab**
-- Master on/off switch for the entire mod
-- Enable/disable fuel and supply generation separately
+**🎮 General** - master on/off switch, plus fuel and supply switches
 
-**🌌 Nebula Tab** 
-- Adjust fuel generation rate (0-100% per day)
-- Set fuel collection limits to prevent overfilling
-- Configure supply generation based on crew or cargo space
-- Choose how crew affects supply generation
+**🌌 Nebula** - fuel rate and caps, supply caps, and how crew affect supply generation
 
-**☀️ Corona Tab**
-- Separate fuel generation settings for star coronas
-- Independent fuel caps and rates
-- Corona generates fuel only. If a corona overlaps a nebula, you get nebula supplies plus corona-rate fuel
+**☀️ Corona** - fuel rate and caps (or reuse the Nebula caps), and opt-in corona supplies
+
+**💬 Notifications** - floating text on entry/exit with colours, and the message log report
 
 ### Troubleshooting
-**Not collecting resources?** 
-- Make sure you're in a nebula (purple/coloured space clouds) or near a star corona
-- Check that the mod is enabled in the LunaLib settings menu (F3 or Shift+F2)
+**Not collecting resources?**
+- Make sure you're in a nebula (coloured space clouds) or a star corona
+- Check you are below the caps: by default fuel stops at 20% of your tanks
+- Check Scoop Enabled in the settings menu (F3 or Shift+F2)
 - Verify both this mod and LunaLib are enabled in the launcher
-
-**Want different rates?**
-- All generation rates can be adjusted from 0% to 100% per day
-- Set any rate to 0% to disable that type of resource collection
-- Fuel and supply generation can be controlled independently
 
 ## Compatibility
 - Starsector 0.98a-RC8
 - LunaLib 2.0.4+ (required)
-- LunaLib Version Checker supported
+- Version Checker and TriOS supported
 - No known mod conflicts
- - Current version: 0.7.3
-
-## Note for contributors editing `LunaSettings.csv`
-
-When editing `data/config/LunaSettings.csv`, be careful with literal percent signs (%) in any `tooltip` or `description` fields. LunaLib renders CSV tooltips using `String.format()`, and unescaped `%` characters will cause a runtime formatting exception. Escape literal percent signs as `%%`.
-
-## What's new (0.7.0)
-- Per-event notification toggles: you can now enable/disable floating notifications separately for nebula entry/exit and corona entry/exit via the LunaLib settings UI.
-- UI rework: colour presets removed in favour of HSV colour pickers; saved HSV values are now respected correctly.
-- Default notification colours changed to light grey (#D3D3D3) to reduce visual noise; Java default falls back to Color.LIGHT_GRAY.
-- Notifications are now gated by the master "Scoop" toggle at runtime. Turning the master toggle off stops all ramscoop notifications immediately.
-
-## What's new (0.7.2)
-
-- CSV validator & CI integration: added `.github/scripts/validate-luna-csv.py` and a CI step to block malformed `LunaSettings.csv` and to prevent reintroduction of legacy LunaLib UI keys.
-- UI cleanup: removed legacy `nebula_*` UI entries from the LunaLib settings menu to keep the UI clear and consistent.
-- No-Crew controls split: replaced the combined no-crew rate control with two dedicated LunaLib fields:
-	- `nebula_no_crew_rate_percent`: percent slider (0–100), converted to a fraction in code.
-	- `nebula_no_crew_rate_flat`: flat supply units per day.
-- Updated code: `ModPlugin` and runtime logic updated to read the new keys and handle percent→fraction conversion.
-
-## TriOS compatibility (quick notes)
-This project supports packaging for TriOS. See `docs/TRIOS_COMPATIBILITY.md` for a short checklist and validation steps you can run before creating a TriOS release.
-
-## Development
-This mod includes build scripts for development:
-- `build.ps1` – PowerShell build script
-- `build.bat` – Windows batch build script
-
-New: CI and release checks
-- A PowerShell helper lives at `.github/scripts/check-versions.ps1`. It validates that `mod_info.json`, `version.json`, and `Ramscoop.version` all match.
-- CI (PRs/pushes) runs the checker and will fail if versions differ. This prevents mismatched releases from being merged.
-- Release workflow automatically extracts the release tag, runs the checker in fix mode and will commit updated version files back to `main` so packaging uses the correct version.
-
-Build note: the PowerShell script compiles against the Starsector API and LunaLib. The `build.ps1` script dynamically discovers LunaLib jars under your Starsector `mods` folder (if present) and will include them in the classpath. Ensure `JAVA_HOME` points to a JDK installation (the script will also attempt common install paths).
 
 ## Credits & History
 🎖️ **Original Creator**: Meridias561 - Created the original Passive Ramscoop mod  
@@ -136,18 +87,11 @@ Build note: the PowerShell script compiles against the Starsector API and LunaLi
 
 ---
 
-## Technical Documentation
-
-### Development
-Build scripts available for developers:
-- `build.ps1` – PowerShell build script  
-- `build.bat` – Windows batch build script
-- `build.sh` – Linux/macOS build script
-
-See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md) for detailed development information.
+## Development
+Build with `./build.sh` (Linux/macOS) or `build.ps1` (Windows). See [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md).
 
 ## Version History
-See [CHANGELOG.md](CHANGELOG.md) for complete version history and [docs/MIGRATION_REPORT.md](docs/MIGRATION_REPORT.md) for technical migration details.
+See [changelog.txt](changelog.txt).
 
 ## Licence
 Creative Commons Attribution-NonCommercial 4.0 International Licence (CC BY-NC 4.0) with additional restrictions.

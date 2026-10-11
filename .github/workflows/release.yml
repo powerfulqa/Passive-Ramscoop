@@ -1,141 +1,44 @@
-name: Release Package
+name: Release
 
 on:
   push:
-    tags:
-      - 'v*' # Trigger on any tag starting with 'v'
+    tags: ['v*']
 
 jobs:
-  build:
+  validate:
+    uses: ./.github/workflows/ci.yml
+
+  release:
+    needs: validate
     runs-on: ubuntu-latest
     permissions:
-      contents: write # Required for creating releases
+      contents: write
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Validate release files
-        run: |
-          # Check that essential mod files exist
-          for file in "mod_info.json" "README.md" "LICENSE.txt"; do
-            if [ ! -f "$file" ]; then
-              echo "Error: $file is missing"
-              exit 1
-            fi
-          done
-          
-          # Verify JAR exists
-          if [ ! -f "jars/Ramscoop.jar" ]; then
-            echo "Error: Ramscoop.jar is missing"
-            exit 1
-          fi
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
 
-      - name: Generate changelog.txt from CHANGELOG.md
+      # Tag, mod_info.json, Ramscoop.version, download URLs and a dated changelog.txt entry must all agree.
+      - name: Check tag matches version files
         run: |
-          # Convert CHANGELOG.md to plain text format for end users
-          # Remove markdown formatting and keep the content user-friendly
-          sed 's/^## Version /Version /g' CHANGELOG.md | \
-          sed 's/^# .*//g' | \
-          sed 's/^- /- /g' | \
-          sed '/^$/N;/^\n$/d' > changelog.txt
-          
-          echo "Generated changelog.txt:"
-          cat changelog.txt
+          javac -d build/test-classes src/test/java/ramscoop/RepoCheck.java
+          java -cp build/test-classes ramscoop.RepoCheck "$GITHUB_REF_NAME"
 
-      - name: Run version consistency check
-        shell: pwsh
+      - name: Package
         run: |
-          pwsh -NoProfile -File .github/scripts/check-versions.ps1
-
-      - name: Determine semver from tag
-        run: |
-          VERSION=${GITHUB_REF#refs/tags/}     # e.g. v0.7.1
-          # Strip leading 'v' if present to make semantic version e.g. 0.7.1
-          SEMVER=${VERSION#v}
-          echo "SEMVER=$SEMVER" >> $GITHUB_ENV
-
-      - name: Auto-fix version files from tag (PowerShell)
-        shell: pwsh
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          pwsh -NoProfile -File .github/scripts/check-versions.ps1 -Fix -Version $env:SEMVER
-
-      - name: Commit version file changes (bash)
-        shell: bash
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # If files changed, commit and push them so packaging uses the updated files
-          git config user.name "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add mod_info.json version.json Ramscoop.version || true
-          if ! git diff --cached --quiet; then
-            git commit -m "ci(release): auto-bump versions to $SEMVER [ci skip]"
-            git push origin HEAD:main
-          else
-            echo "No version file changes required"
-          fi
-
-      - name: Run Pre-Release Validations
-        run: |
-          javac -cp "src" src/test/java/ramscoop/*.java
-          java -cp "src:src/test/java" ramscoop.LunaSettingsKeyAuditTest
-          java -cp "src:src/test/java" ramscoop.LunaSettingsCsvValidationTest
-          java -cp "src:src/test/java" ramscoop.VersionConsistencyTest
-          java -cp "src:src/test/java" ramscoop.AssetIntegrityTest
-      - name: Run Build Validation Test
-        shell: pwsh
-        run: |
-          pwsh -NoProfile -File .github/tools/build-validation-test.ps1
-
-      - name: Update version files for release
-        run: |
-          # Extract version from tag
-          VERSION=${GITHUB_REF#refs/tags/}
-          
-          # Update the directDownloadURL in Ramscoop.version to point to this specific release
-          sed -i "s|\"directDownloadURL\": \".*\"|\"directDownloadURL\": \"https://github.com/powerfulqa/Passive-Ramscoop/releases/download/${VERSION}/Ramscoop-${VERSION}.zip\"|" Ramscoop.version
-          
-          echo "Updated Ramscoop.version:"
-          cat Ramscoop.version
-
-      - name: Create Release Package
-        run: |
-          # Create release directory with mod folder structure
           mkdir -p release/Ramscoop
-          
-          # Copy only the required files for users into the Ramscoop folder
-          cp -r jars release/Ramscoop/
-          cp -r data release/Ramscoop/ 2>/dev/null || :
-          cp mod_info.json release/Ramscoop/
-          cp README.md release/Ramscoop/
-          cp LICENSE.txt release/Ramscoop/
-          cp changelog.txt release/Ramscoop/ 2>/dev/null || :
-          cp Ramscoop.version release/Ramscoop/ 2>/dev/null || :
-          
-          # Determine version from tag
-          VERSION=${GITHUB_REF#refs/tags/}
-          
-          # Create the zip file with the Ramscoop folder inside
-          cd release
-          zip -r "../Ramscoop-${VERSION}.zip" Ramscoop/
-          cd ..
+          # Same file list as build.sh --install.
+          cp -r jars data mod_info.json Ramscoop.version changelog.txt README.md LICENSE.txt release/Ramscoop/
+          (cd release && zip -r "../Ramscoop-$GITHUB_REF_NAME.zip" Ramscoop)
+          # Release notes = this version's section of changelog.txt.
+          awk -v h="Version ${GITHUB_REF_NAME#v} " '/^Version /{p = index($0, h) == 1} p' changelog.txt > notes.txt
+          cat notes.txt
 
-      - name: Create GitHub Release
-        id: create_release
-        uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v2
         with:
           name: Ramscoop ${{ github.ref_name }}
-          draft: false
-          prerelease: false
           files: Ramscoop-${{ github.ref_name }}.zip
-          body: |
-            # Ramscoop ${{ github.ref_name }}
-            
-            See the [changelog](https://github.com/${{ github.repository }}/blob/${{ github.ref_name }}/CHANGELOG.md) for details.
-            
-            ## Installation
-            
-            Extract the zip file into your Starsector/mods directory.
-        # Token is automatically used from the GITHUB_TOKEN provided by Actions
+          body_path: notes.txt

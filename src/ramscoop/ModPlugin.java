@@ -21,7 +21,7 @@ public class ModPlugin extends BaseModPlugin implements LunaSettingsListener {
     public static final String MOD_ID = "m561_ramscoop";
 
     // Defaults mirror LunaSettings.csv and are only used if LunaLib returns null.
-    private static final Color DEFAULT_TEXT_COLOR = new Color(0xD3, 0xD3, 0xD3);
+    private static final Color EXIT_COLOR = new Color(0xA0, 0xA0, 0xA0);
 
     // General
     public static boolean scoop_enabled = true;
@@ -41,13 +41,15 @@ public class ModPlugin extends BaseModPlugin implements LunaSettingsListener {
     public static String no_crew_gen = "percent"; // percent | flat
     public static float no_crew_rate_percent = 0.10f; // fraction of cargo capacity per day
     public static float no_crew_rate_flat = 10f; // units per day
-    // Corona fuel (fractions of max fuel)
+    // Corona fuel (fractions of max fuel) and opt-in supplies
     public static boolean corona_enable_fuel = true;
     public static float corona_fuel_per_day = 0.25f;
     public static boolean corona_caps_reuse = true;
     public static float corona_percent_fuel_limit = 0.20f;
     public static float corona_hard_fuel_limit = 0f;
     public static float corona_fuel_cap_margin = 0f;
+    public static boolean corona_enable_supplies = false;
+    public static float corona_supply_rate = 1f; // multiplier on the nebula supply rate
     // Visual feedback
     public static boolean enable_visual_feedback = true;
     public static float floating_text_duration = 0.7f;
@@ -55,10 +57,11 @@ public class ModPlugin extends BaseModPlugin implements LunaSettingsListener {
     public static boolean notify_nebula_exit = true;
     public static boolean notify_corona_entry = true;
     public static boolean notify_corona_exit = true;
-    public static Color color_nebula_active = DEFAULT_TEXT_COLOR;
-    public static Color color_nebula_inactive = DEFAULT_TEXT_COLOR;
-    public static Color color_corona_active = DEFAULT_TEXT_COLOR;
-    public static Color color_corona_inactive = DEFAULT_TEXT_COLOR;
+    public static boolean report_gains = true;
+    public static Color color_nebula_active = new Color(0x7F, 0xD9, 0x7F);
+    public static Color color_nebula_inactive = EXIT_COLOR;
+    public static Color color_corona_active = new Color(0xFF, 0xA5, 0x40);
+    public static Color color_corona_inactive = EXIT_COLOR;
 
     @Override
     public void onApplicationLoad() {
@@ -69,15 +72,26 @@ public class ModPlugin extends BaseModPlugin implements LunaSettingsListener {
         }
     }
 
+    private Ramscoop script;
+
     @Override
     public void onGameLoad(boolean newGame) {
         loadSettings();
         // Transient: not written to the save, so re-adding on every load cannot stack.
-        Global.getSector().addTransientScript(new Ramscoop());
+        script = new Ramscoop();
+        Global.getSector().addTransientScript(script);
         // Versions <= 0.7.3 kept the toggle in fleet memory, which leaked into saves.
         CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
         if (fleet != null) {
             fleet.getMemoryWithoutUpdate().unset("$ramscoop_enabled");
+        }
+    }
+
+    @Override
+    public void beforeGameSave() {
+        // Gain totals are not saved, so post them now rather than lose them on quit/reload.
+        if (script != null) {
+            script.reportGains();
         }
     }
 
@@ -99,8 +113,7 @@ public class ModPlugin extends BaseModPlugin implements LunaSettingsListener {
         nebula_hard_fuel_limit = or(LunaSettings.getDouble(MOD_ID, "nebula_hard_fuel_limit"), nebula_hard_fuel_limit);
         nebula_fuel_cap_margin = or(LunaSettings.getDouble(MOD_ID, "nebula_fuel_cap_margin"), nebula_fuel_cap_margin);
 
-        // This slider is already a fraction (0.1..1.0) in the CSV.
-        percent_supply_limit = or(LunaSettings.getDouble(MOD_ID, "ramscoop_percent_supply_limit"), percent_supply_limit);
+        percent_supply_limit = pct(LunaSettings.getDouble(MOD_ID, "ramscoop_percent_supply_limit_v2"), percent_supply_limit);
         hard_supply_limit = or(LunaSettings.getDouble(MOD_ID, "ramscoop_hard_supply_limit"), hard_supply_limit);
         supplies_per_crew = or(LunaSettings.getDouble(MOD_ID, "ramscoop_supply_per_crew"), supplies_per_crew);
         crew_usage = or(LunaSettings.getString(MOD_ID, "nebula_crew_usage"), crew_usage);
@@ -114,6 +127,8 @@ public class ModPlugin extends BaseModPlugin implements LunaSettingsListener {
         corona_percent_fuel_limit = pct(LunaSettings.getDouble(MOD_ID, "corona_percent_fuel_limit"), corona_percent_fuel_limit);
         corona_hard_fuel_limit = or(LunaSettings.getDouble(MOD_ID, "corona_hard_fuel_limit"), corona_hard_fuel_limit);
         corona_fuel_cap_margin = or(LunaSettings.getDouble(MOD_ID, "corona_fuel_cap_margin"), corona_fuel_cap_margin);
+        corona_enable_supplies = or(LunaSettings.getBoolean(MOD_ID, "corona_enable_supplies"), corona_enable_supplies);
+        corona_supply_rate = pct(LunaSettings.getDouble(MOD_ID, "corona_supply_rate"), corona_supply_rate);
 
         enable_visual_feedback = or(LunaSettings.getBoolean(MOD_ID, "ramscoop_enable_visual_feedback"), enable_visual_feedback);
         floating_text_duration = or(LunaSettings.getDouble(MOD_ID, "ramscoop_floating_text_scale"), floating_text_duration);
@@ -121,16 +136,18 @@ public class ModPlugin extends BaseModPlugin implements LunaSettingsListener {
         notify_nebula_exit = or(LunaSettings.getBoolean(MOD_ID, "ramscoop_notify_nebula_exit"), notify_nebula_exit);
         notify_corona_entry = or(LunaSettings.getBoolean(MOD_ID, "ramscoop_notify_corona_entry"), notify_corona_entry);
         notify_corona_exit = or(LunaSettings.getBoolean(MOD_ID, "ramscoop_notify_corona_exit"), notify_corona_exit);
-        color_nebula_active = or(LunaSettings.getColor(MOD_ID, "ramscoop_color_nebula_active_v2"), color_nebula_active);
-        color_nebula_inactive = or(LunaSettings.getColor(MOD_ID, "ramscoop_color_nebula_inactive_v2"), color_nebula_inactive);
-        color_corona_active = or(LunaSettings.getColor(MOD_ID, "ramscoop_color_corona_active_v2"), color_corona_active);
-        color_corona_inactive = or(LunaSettings.getColor(MOD_ID, "ramscoop_color_corona_inactive_v2"), color_corona_inactive);
+        report_gains = or(LunaSettings.getBoolean(MOD_ID, "ramscoop_report_gains"), report_gains);
+        color_nebula_active = or(LunaSettings.getColor(MOD_ID, "ramscoop_color_nebula_active_v3"), color_nebula_active);
+        color_nebula_inactive = or(LunaSettings.getColor(MOD_ID, "ramscoop_color_nebula_inactive_v3"), color_nebula_inactive);
+        color_corona_active = or(LunaSettings.getColor(MOD_ID, "ramscoop_color_corona_active_v3"), color_corona_active);
+        color_corona_inactive = or(LunaSettings.getColor(MOD_ID, "ramscoop_color_corona_inactive_v3"), color_corona_inactive);
 
         LOG.info("[Ramscoop] Settings loaded: enabled=" + scoop_enabled
                 + " fuel=" + enable_fuel + " supplies=" + enable_supplies
                 + " nebulaFuel=" + nebula_enable_fuel + "@" + nebula_fuel_per_day
                 + " coronaFuel=" + corona_enable_fuel + "@" + corona_fuel_per_day
                 + " coronaCapsReuse=" + corona_caps_reuse
+                + " coronaSupplies=" + corona_enable_supplies + "@" + corona_supply_rate
                 + " crewUsage=" + crew_usage + " noCrewGen=" + no_crew_gen);
     }
 

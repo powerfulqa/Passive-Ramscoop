@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Linux/macOS build: compiles src/ramscoop against the game + LunaLib jars into jars/Ramscoop.jar.
 # Override paths with SS_DIR (folder holding starfarer.api.jar) and LUNALIB_JAR.
+# --install also copies the mod into the game as mods/Ramscoop (only the files the game uses).
 set -euo pipefail
 cd "$(dirname "$0")"
 
@@ -26,3 +27,13 @@ javac --release 17 -cp "$CP:$OUT" -d build/test src/test/game/ramscoop/*.java
 java -cp "$CP:$OUT:build/test" ramscoop.FuelMathCheck
 
 echo "Built jars/Ramscoop.jar (SS_DIR=$SS_DIR, LunaLib=$LUNALIB_JAR)"
+
+if [[ "${1:-}" == "--install" ]]; then
+    # mods/ sits next to starfarer.api.jar on Linux/macOS, one level up (beside starsector-core) on Windows.
+    MODS="$SS_DIR/mods"; [[ -d "$MODS" ]] || MODS="$SS_DIR/../mods"
+    DEST="$MODS/Ramscoop"
+    # Same file list as the release zip (.github/workflows/release.yml).
+    rm -rf "$DEST" && mkdir -p "$DEST"
+    cp -r jars data mod_info.json Ramscoop.version changelog.txt README.md LICENSE.txt "$DEST/"
+    echo "Installed to $DEST (restart Starsector to load it)"
+fi

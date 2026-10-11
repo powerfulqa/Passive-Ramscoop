@@ -1,46 +1,13 @@
-# Build output directories
+# Build output (jars/Ramscoop.jar is committed on purpose)
 build/
-bin/
 release/
+*.class
 
-# Auto-generated files (created by GitHub Actions)
-# changelog.txt - NOTE: Now tracked in repo for TriOS compatibility
-
-# Ignore all batch files by default
-*.bat
-
-# But track these specific build scripts that are essential for development
-!build.bat
-
-# Other build-related files
-!find_java.ps1
-# build.xml is tracked by default
-
-# IDE files
+# IDE
 .idea/
 .vscode/
 *.iml
 
 # Temporary files
-exclude.txt
 *.bak
 *.log
-
-# Project files
-dev/
-/.cache/
-/.idea/
-/.vscode/
-
-# Java build outputs (keep compiled classes ignored, but allow committing jars/ directory)
-*.class
-temp_jar/
-temp_classes/
-test_install/
-tmp_*
-
-# allow committed jars like jars/Ramscoop.jar
-!jars/
-
-# avoid committing compiled classes in src
-src/**/*.class

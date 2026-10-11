@@ -10,6 +10,7 @@ import com.fs.starfarer.api.campaign.LocationAPI;
 import com.fs.starfarer.api.impl.campaign.ids.Terrain;
 import com.fs.starfarer.api.impl.combat.BattleCreationPluginImpl.NebulaTextureProvider;
 import com.fs.starfarer.api.util.IntervalUtil;
+import com.fs.starfarer.api.util.Misc;
 import org.apache.log4j.Logger;
 
 import java.awt.Color;
@@ -17,7 +18,8 @@ import java.awt.Color;
 /**
  * Generates resources for the player fleet:
  * - nebula: supplies plus slow fuel
- * - star corona: fast fuel (takes over from nebula fuel when both apply)
+ * - star corona: fast fuel, plus opt-in supplies (each takes over from the nebula rate when both apply)
+ * What was collected is posted to the message log on leaving (and on save, see ModPlugin).
  */
 public class Ramscoop implements EveryFrameScript {
     private static final Logger LOG = Global.getLogger(Ramscoop.class);
@@ -30,6 +32,8 @@ public class Ramscoop implements EveryFrameScript {
     private Boolean lastEnabled = null;
     private Boolean lastInNebula = null;
     private Boolean lastInCorona = null;
+    private float fuelGained = 0f;
+    private float suppliesGained = 0f;
 
     @Override
     public void advance(float amount) {
@@ -59,11 +63,13 @@ public class Ramscoop implements EveryFrameScript {
         }
 
         boolean enabled = ModPlugin.scoop_enabled;
-        if (lastEnabled != null && lastEnabled != enabled && enabled) {
-            showText(fleet, "Ramscoop Active", ModPlugin.color_nebula_active);
+        if (lastEnabled != null && lastEnabled != enabled) {
+            showText(fleet, enabled ? "Ramscoop Active" : "Ramscoop Inactive",
+                    enabled ? ModPlugin.color_nebula_active : ModPlugin.color_nebula_inactive);
         }
         lastEnabled = enabled;
         if (!enabled) {
+            reportGains();
             lastInNebula = null;
             lastInCorona = null;
             return;
@@ -91,23 +97,32 @@ public class Ramscoop implements EveryFrameScript {
         lastInCorona = cue(fleet, lastInCorona, inCorona, ModPlugin.notify_corona_entry, ModPlugin.notify_corona_exit,
                 ModPlugin.color_corona_active, ModPlugin.color_corona_inactive);
 
+        if (!inNebula && !inCorona) {
+            reportGains();
+            return;
+        }
+
         CargoAPI cargo = fleet.getCargo();
         if (ModPlugin.enable_fuel) {
             if (inCorona && ModPlugin.corona_enable_fuel) {
                 if (ModPlugin.corona_caps_reuse) {
-                    addFuel(cargo, ModPlugin.corona_fuel_per_day, ModPlugin.nebula_percent_fuel_limit,
+                    fuelGained += addFuel(cargo, ModPlugin.corona_fuel_per_day, ModPlugin.nebula_percent_fuel_limit,
                             ModPlugin.nebula_hard_fuel_limit, ModPlugin.nebula_fuel_cap_margin, days);
                 } else {
-                    addFuel(cargo, ModPlugin.corona_fuel_per_day, ModPlugin.corona_percent_fuel_limit,
+                    fuelGained += addFuel(cargo, ModPlugin.corona_fuel_per_day, ModPlugin.corona_percent_fuel_limit,
                             ModPlugin.corona_hard_fuel_limit, ModPlugin.corona_fuel_cap_margin, days);
                 }
             } else if (inNebula && ModPlugin.nebula_enable_fuel) {
-                addFuel(cargo, ModPlugin.nebula_fuel_per_day, ModPlugin.nebula_percent_fuel_limit,
+                fuelGained += addFuel(cargo, ModPlugin.nebula_fuel_per_day, ModPlugin.nebula_percent_fuel_limit,
                         ModPlugin.nebula_hard_fuel_limit, ModPlugin.nebula_fuel_cap_margin, days);
             }
         }
-        if (inNebula && ModPlugin.enable_supplies) {
-            addSupplies(fleet, cargo, days);
+        if (ModPlugin.enable_supplies) {
+            if (inCorona && ModPlugin.corona_enable_supplies) {
+                suppliesGained += addSupplies(fleet, cargo, ModPlugin.corona_supply_rate, days);
+            } else if (inNebula) {
+                suppliesGained += addSupplies(fleet, cargo, 1f, days);
+            }
         }
     }
 
@@ -127,15 +142,17 @@ public class Ramscoop implements EveryFrameScript {
         return Math.max(0f, Math.min(maxFuel * ratePerDay * days, room));
     }
 
-    private static void addFuel(CargoAPI cargo, float ratePerDay, float pctCap, float hardCap, float margin,
+    private static float addFuel(CargoAPI cargo, float ratePerDay, float pctCap, float hardCap, float margin,
             float days) {
         float add = fuelToAdd(cargo.getMaxFuel(), cargo.getFuel(), ratePerDay, pctCap, hardCap, margin, days);
         if (add > 0f) {
             cargo.addFuel(add);
         }
+        return add;
     }
 
-    private static void addSupplies(CampaignFleetAPI fleet, CargoAPI cargo, float days) {
+    /** Adds supplies at the configured nebula rate times rateMult; returns the amount added. */
+    private static float addSupplies(CampaignFleetAPI fleet, CargoAPI cargo, float rateMult, float days) {
         float perDay;
         switch (ModPlugin.crew_usage) {
             case "nocrew":
@@ -155,10 +172,29 @@ public class Ramscoop implements EveryFrameScript {
         if (ModPlugin.hard_supply_limit > 0f) {
             cap = Math.min(cap, ModPlugin.hard_supply_limit);
         }
-        float add = Math.min(perDay * days, Math.min(cap - cargo.getSupplies(), cargo.getSpaceLeft()));
-        if (add > 0f) {
-            cargo.addSupplies(add);
+        float add = Math.min(perDay * rateMult * days, Math.min(cap - cargo.getSupplies(), cargo.getSpaceLeft()));
+        if (add <= 0f) {
+            return 0f;
         }
+        cargo.addSupplies(add);
+        return add;
+    }
+
+    /** Posts what was collected since the last report to the message log, then resets the totals. */
+    void reportGains() {
+        String fuel = gain(fuelGained, "fuel");
+        String supplies = gain(suppliesGained, "supplies");
+        fuelGained = 0f;
+        suppliesGained = 0f;
+        if (!ModPlugin.report_gains || (fuel == null && supplies == null)) {
+            return;
+        }
+        String both = fuel != null && supplies != null ? fuel + " and " + supplies : fuel != null ? fuel : supplies;
+        Global.getSector().getCampaignUI().addMessage("Ramscoop collected " + both, Misc.getPositiveHighlightColor());
+    }
+
+    private static String gain(float amount, String what) {
+        return amount >= 0.05f ? "+" + Misc.getRoundedValueMaxOneAfterDecimal(amount) + " " + what : null;
     }
 
     /** Shows an enter/exit cue when the state flips; returns the new state to remember. */
