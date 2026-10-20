@@ -1,6 +1,6 @@
 package ramscoop;
 
-/** Run by build.sh against the game jars: checks Ramscoop.fuelToAdd caps and rounding. */
+/** Run by build.sh against the game jars: checks Ramscoop.fuelToAdd caps and rounding, and the edge debounce. */
 public class FuelMathCheck {
     public static void main(String[] args) {
         // Small tank still generates (old Math.floor rounded 20 * 4% down to 0).
@@ -13,7 +13,24 @@ public class FuelMathCheck {
         check(Ramscoop.fuelToAdd(100f, 15f, 1f, 0.2f, 0f, 5f, 1f), 0f);
         // Above cap never removes fuel.
         check(Ramscoop.fuelToAdd(100f, 90f, 1f, 0.2f, 0f, 0f, 1f), 0f);
+        // Debounce: first reading is taken as is; a flip needs SETTLE_TICKS readings in a row.
+        Ramscoop.Settled s = new Ramscoop.Settled();
+        checkTrue(!s.update(true) && s.value);
+        for (int i = 1; i < Ramscoop.SETTLE_TICKS; i++) {
+            checkTrue(!s.update(false) && s.value);
+        }
+        checkTrue(!s.update(true) && s.value); // edge flicker resets the count
+        for (int i = 1; i < Ramscoop.SETTLE_TICKS; i++) {
+            s.update(false);
+        }
+        checkTrue(s.update(false) && !s.value);
         System.out.println("FuelMathCheck passed");
+    }
+
+    private static void checkTrue(boolean ok) {
+        if (!ok) {
+            throw new AssertionError("debounce check failed");
+        }
     }
 
     private static void check(float actual, float expected) {

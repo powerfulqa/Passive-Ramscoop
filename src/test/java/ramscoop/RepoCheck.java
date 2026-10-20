@@ -108,6 +108,18 @@ public class RepoCheck {
         if (!version.equals(fileVersion)) {
             errors.add("mod_info.json is " + version + " but Ramscoop.version is " + fileVersion);
         }
+        // Players may remove the mod from a save: keep it a utility mod and keep its classes out of saves.
+        if (!Pattern.compile("\"utility\"\\s*:\\s*\"?true").matcher(modInfo).find()) {
+            errors.add("mod_info.json must keep \"utility\":true so the mod can be removed from saves");
+        }
+        String code = read("src/ramscoop/ModPlugin.java") + read("src/ramscoop/Ramscoop.java");
+        // addListener(x) is saved; addListener(x, true) is transient and allowed.
+        for (String saved : Arrays.asList("\\.addScript\\(", "\\.addListener\\([^,()]*\\)", "getPersistentData",
+                "\\.getMemory(WithoutUpdate)?\\(\\)\\.set\\(")) {
+            if (Pattern.compile(saved).matcher(code).find()) {
+                errors.add("src/ramscoop matches " + saved + ", which writes to the save; use the transient variant");
+            }
+        }
         String zip = "/v" + version + "/Ramscoop-v" + version + ".zip\"";
         if (!modInfo.contains(zip) || !versionFile.contains(zip)) {
             errors.add("directDownloadURL in mod_info.json and Ramscoop.version must end in " + zip);

@@ -1,6 +1,7 @@
 fieldID,fieldName,fieldType,defaultValue,secondaryValue,fieldDescription,minValue,maxValue,tab
 ramscoop_toggle_header,General,Header,General,,,,,General
 ramscoop_toggle_default_on,Scoop Enabled,Boolean,true,,"[Master switch] for all Ramscoop fuel and supply generation.",,,General
+ramscoop_toggle_key,Toggle Key,Keycode,0,,"Key that flips the [master switch] on the campaign map, until the game is loaded or these settings are saved. Unbound by default.",,,General
 ramscoop_enable_fuel,Enable Fuel Generation,Boolean,true,,"Allows fuel generation in [nebulae] and [coronas]; the Nebula and Corona tabs can each turn their own fuel off.",,,General
 ramscoop_enable_supplies,Enable Supply Generation,Boolean,true,,"Allows supply generation in [nebulae], and in [coronas] if enabled on the Corona tab.",,,General
 # Settings keys ending in _v2/_v3 were renamed when their scale or default changed, so old saved values are not reused.

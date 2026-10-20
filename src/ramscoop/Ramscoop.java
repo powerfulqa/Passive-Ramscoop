@@ -3,35 +3,43 @@ package ramscoop;
 import com.fs.starfarer.api.EveryFrameScript;
 import com.fs.starfarer.api.Global;
 import com.fs.starfarer.api.campaign.CampaignFleetAPI;
+import com.fs.starfarer.api.campaign.CampaignUIAPI;
 import com.fs.starfarer.api.campaign.CampaignTerrainAPI;
 import com.fs.starfarer.api.campaign.CampaignTerrainPlugin;
 import com.fs.starfarer.api.campaign.CargoAPI;
 import com.fs.starfarer.api.campaign.LocationAPI;
+import com.fs.starfarer.api.campaign.listeners.CampaignInputListener;
 import com.fs.starfarer.api.impl.campaign.ids.Terrain;
 import com.fs.starfarer.api.impl.combat.BattleCreationPluginImpl.NebulaTextureProvider;
+import com.fs.starfarer.api.input.InputEventAPI;
 import com.fs.starfarer.api.util.IntervalUtil;
 import com.fs.starfarer.api.util.Misc;
 import org.apache.log4j.Logger;
 
 import java.awt.Color;
+import java.util.List;
 
 /**
  * Generates resources for the player fleet:
  * - nebula: supplies plus slow fuel
  * - star corona: fast fuel, plus opt-in supplies (each takes over from the nebula rate when both apply)
  * What was collected is posted to the message log on leaving (and on save, see ModPlugin).
+ * Also listens for the optional toggle key, which flips the master switch until the settings reload.
  */
-public class Ramscoop implements EveryFrameScript {
+public class Ramscoop implements EveryFrameScript, CampaignInputListener {
     private static final Logger LOG = Global.getLogger(Ramscoop.class);
 
     private final IntervalUtil interval = new IntervalUtil(0.09f, 0.11f);
     private float elapsedSinceTick = 0f;
     private boolean errorLogged = false;
 
+    // Ticks (~0.1s each) a nebula/corona change must last before it counts, so ragged nebula edges do not flicker.
+    static final int SETTLE_TICKS = 5;
+
     // null = unknown, so the first observation after load never shows a cue
     private Boolean lastEnabled = null;
-    private Boolean lastInNebula = null;
-    private Boolean lastInCorona = null;
+    private final Settled nebula = new Settled();
+    private final Settled corona = new Settled();
     private float fuelGained = 0f;
     private float suppliesGained = 0f;
 
@@ -70,32 +78,33 @@ public class Ramscoop implements EveryFrameScript {
         lastEnabled = enabled;
         if (!enabled) {
             reportGains();
-            lastInNebula = null;
-            lastInCorona = null;
+            nebula.reset();
+            corona.reset();
             return;
         }
 
-        boolean inNebula = false;
-        boolean inCorona = false;
+        boolean rawNebula = false;
+        boolean rawCorona = false;
         LocationAPI loc = fleet.getContainingLocation();
-        if (loc != null) {
+        // Hyperspace has no nebula or corona terrain; skip copying its terrain list every tick.
+        if (loc != null && !loc.isHyperspace()) {
             for (CampaignTerrainAPI t : loc.getTerrainCopy()) {
                 CampaignTerrainPlugin plugin = t.getPlugin();
-                if (!inNebula && plugin instanceof NebulaTextureProvider) {
-                    inNebula = plugin.containsEntity(fleet);
-                } else if (!inCorona && isCorona(t.getType())) {
-                    inCorona = plugin.containsEntity(fleet);
+                if (!rawNebula && plugin instanceof NebulaTextureProvider) {
+                    rawNebula = plugin.containsEntity(fleet);
+                } else if (!rawCorona && isCorona(t.getType())) {
+                    rawCorona = plugin.containsEntity(fleet);
                 }
-                if (inNebula && inCorona) {
+                if (rawNebula && rawCorona) {
                     break;
                 }
             }
         }
 
-        lastInNebula = cue(fleet, lastInNebula, inNebula, ModPlugin.notify_nebula_entry, ModPlugin.notify_nebula_exit,
-                ModPlugin.color_nebula_active, ModPlugin.color_nebula_inactive);
-        lastInCorona = cue(fleet, lastInCorona, inCorona, ModPlugin.notify_corona_entry, ModPlugin.notify_corona_exit,
-                ModPlugin.color_corona_active, ModPlugin.color_corona_inactive);
+        boolean inNebula = cue(fleet, nebula, rawNebula, "Nebula", ModPlugin.notify_nebula_entry,
+                ModPlugin.notify_nebula_exit, ModPlugin.color_nebula_active, ModPlugin.color_nebula_inactive);
+        boolean inCorona = cue(fleet, corona, rawCorona, "Corona", ModPlugin.notify_corona_entry,
+                ModPlugin.notify_corona_exit, ModPlugin.color_corona_active, ModPlugin.color_corona_inactive);
 
         if (!inNebula && !inCorona) {
             reportGains();
@@ -180,13 +189,25 @@ public class Ramscoop implements EveryFrameScript {
         return add;
     }
 
-    /** Posts what was collected since the last report to the message log, then resets the totals. */
+    /**
+     * Posts what was collected since the last report to the message log and resets what was posted.
+     * Totals under one unit are kept and added to the next report instead of posting "+0.2 fuel".
+     */
     void reportGains() {
+        if (!ModPlugin.report_gains) {
+            fuelGained = 0f;
+            suppliesGained = 0f;
+            return;
+        }
         String fuel = gain(fuelGained, "fuel");
         String supplies = gain(suppliesGained, "supplies");
-        fuelGained = 0f;
-        suppliesGained = 0f;
-        if (!ModPlugin.report_gains || (fuel == null && supplies == null)) {
+        if (fuel != null) {
+            fuelGained = 0f;
+        }
+        if (supplies != null) {
+            suppliesGained = 0f;
+        }
+        if (fuel == null && supplies == null) {
             return;
         }
         String both = fuel != null && supplies != null ? fuel + " and " + supplies : fuel != null ? fuel : supplies;
@@ -194,22 +215,83 @@ public class Ramscoop implements EveryFrameScript {
     }
 
     private static String gain(float amount, String what) {
-        return amount >= 0.05f ? "+" + Misc.getRoundedValueMaxOneAfterDecimal(amount) + " " + what : null;
+        return amount >= 1f ? "+" + Misc.getRoundedValueMaxOneAfterDecimal(amount) + " " + what : null;
     }
 
-    /** Shows an enter/exit cue when the state flips; returns the new state to remember. */
-    private static Boolean cue(CampaignFleetAPI fleet, Boolean last, boolean now, boolean showEntry,
+    /** Settles the raw in/out reading, shows an enter/exit cue when the settled state flips, and returns it. */
+    private static boolean cue(CampaignFleetAPI fleet, Settled state, boolean raw, String where, boolean showEntry,
             boolean showExit, Color entryColor, Color exitColor) {
-        if (last != null && last != now && (now ? showEntry : showExit)) {
-            showText(fleet, now ? "Ramscoop:Active" : "Ramscoop:Inactive", now ? entryColor : exitColor);
+        boolean flipped = state.update(raw);
+        boolean in = state.value;
+        if (flipped && (in ? showEntry : showExit)) {
+            showText(fleet, where + (in ? ": scooping" : ": stopped"), in ? entryColor : exitColor);
         }
-        return now;
+        return in;
+    }
+
+    /** A boolean that only changes once a new value has been seen SETTLE_TICKS ticks in a row; null until first seen. */
+    static final class Settled {
+        Boolean value;
+        private int pending;
+
+        /** Returns true when the settled value flips; the first observation is taken as is and never counts as a flip. */
+        boolean update(boolean now) {
+            if (value == null || value == now) {
+                value = now;
+                pending = 0;
+                return false;
+            }
+            if (++pending < SETTLE_TICKS) {
+                return false;
+            }
+            value = now;
+            pending = 0;
+            return true;
+        }
+
+        void reset() {
+            value = null;
+            pending = 0;
+        }
     }
 
     private static void showText(CampaignFleetAPI fleet, String text, Color color) {
         if (ModPlugin.enable_visual_feedback) {
             fleet.addFloatingText(text, color, ModPlugin.floating_text_duration);
         }
+    }
+
+    @Override
+    public void processCampaignInputPreCore(List<InputEventAPI> events) {
+        if (ModPlugin.toggle_key <= 0) {
+            return;
+        }
+        // Only on the campaign map, so typing in a menu or dialog never flips the switch.
+        CampaignUIAPI ui = Global.getSector().getCampaignUI();
+        if (ui.isShowingDialog() || ui.isShowingMenu() || ui.getCurrentCoreTab() != null) {
+            return;
+        }
+        for (InputEventAPI e : events) {
+            if (!e.isConsumed() && e.isKeyDownEvent() && !e.isRepeat() && e.getEventValue() == ModPlugin.toggle_key) {
+                e.consume();
+                ModPlugin.scoop_enabled = !ModPlugin.scoop_enabled;
+                ui.addMessage(ModPlugin.scoop_enabled ? "Ramscoop switched on" : "Ramscoop switched off",
+                        Misc.getHighlightColor());
+            }
+        }
+    }
+
+    @Override
+    public void processCampaignInputPreFleetControl(List<InputEventAPI> events) {
+    }
+
+    @Override
+    public void processCampaignInputPostCore(List<InputEventAPI> events) {
+    }
+
+    @Override
+    public int getListenerInputPriority() {
+        return 0;
     }
 
     @Override

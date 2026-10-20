@@ -21,7 +21,7 @@ Ever wished your fleet could collect fuel and supplies whilst travelling through
 - Easy in-game settings menu (press F3, or Shift+F2) - no file editing required
 - Separate controls for nebula and corona environments
 - Adjustable generation rates, caps, and limits
-- Master on/off toggle for quick disable
+- Master on/off toggle for quick disable, with an optional hotkey
 
 🛡️ **Smart & Safe**
 - Prevents overfilling your fuel tanks

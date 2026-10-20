@@ -22,6 +22,9 @@ Starsector does not hot-reload jars: fully restart the game after each build.
 - `changelog.txt` - the only changelog (plain text, `Version X.Y.Z (date)` headers, as read by TriOS and Version Checker).
 - `mod_info.json`, `Ramscoop.version` - version metadata; versions and download URLs must match.
 
+## Save safety
+The mod is a utility mod (`"utility":true`) so players can remove it from a save. Nothing from `ramscoop` may be written to the save: use `addTransientScript`/`addTransientListener`, never `addScript`, persistent data or memory keys. `RepoCheck` enforces this.
+
 ## Editing LunaSettings.csv
 - Every `fieldID` must be read in `ModPlugin.loadSettings()` and vice versa (checked by `RepoCheck`).
 - Write literal percent signs in descriptions as `%%`; LunaLib formats them with `String.format()`.

@@ -1,5 +1,19 @@
 Changelog
 
+Version 0.8.1 (2026-10-20)
+Added
+- Optional Toggle Key (General tab, unbound by default) that flips the master switch on the campaign map until the game is loaded or the settings are saved.
+
+Changed
+- Floating text names the source: "Nebula: scooping" / "Nebula: stopped", and the same for coronas.
+- Entering or leaving only counts after about half a second, so skimming a ragged nebula edge no longer flickers the text or posts several reports.
+- The message log only reports whole units; smaller amounts carry over to the next report instead of "+0.1 fuel".
+- Marked as a utility mod: it can be added to or removed from an existing save.
+- Skips the terrain scan in hyperspace, where there is no nebula or corona.
+
+Fixed
+- Saves from 0.3.0 kept a saved copy of the Ramscoop script, which doubled gains and blocked removing the mod. It is now removed on load; save once afterwards to clean the save.
+
 Version 0.8.0 (2026-10-11)
 Added
 - Message log report on leaving a nebula or corona, e.g. "Ramscoop collected +12 fuel and +30 supplies". Toggle: Notifications > Report Gains in Message Log.
