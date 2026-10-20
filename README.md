@@ -31,13 +31,14 @@ It is balanced as a safety net: if you are very low on fuel, a nebula or star co
 - Easy in-game settings menu (no file editing required)
 - Separate controls for nebula and corona environments
 - Adjustable generation rates, caps, and limits
-- Master on/off toggle for quick disable
+- Master on/off toggle for quick disable, with an optional hotkey
 
 🛡️ **Smart & Safe**
 - Prevents overfilling your fuel tanks
 - Respects your cargo capacity limits
 - Balanced default settings that won't break gameplay
 - Works seamlessly with other mods
+- Save-safe: add it to or remove it from an existing campaign at any time (utility mod)
 
 ## Installation
 1. **Download and install [LunaLib](https://fractalsoftworks.com/forum/index.php?topic=25658)** (required dependency)
@@ -57,7 +58,7 @@ The mod works with the default settings. Once installed, you will collect:
 ### Customising Your Experience
 Press **F3** (or **Shift+F2**) in-game and open **Ramscoop**:
 
-**🎮 General** - master on/off switch, plus fuel and supply switches
+**🎮 General** - master on/off switch, an optional key to flip it on the campaign map, plus fuel and supply switches
 
 **🌌 Nebula** - fuel rate and caps, supply caps, and how crew affect supply generation
 

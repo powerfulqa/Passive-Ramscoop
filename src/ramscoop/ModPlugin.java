@@ -27,6 +27,7 @@ public class ModPlugin extends BaseModPlugin implements LunaSettingsListener {
     public static boolean scoop_enabled = true;
     public static boolean enable_fuel = true;
     public static boolean enable_supplies = true;
+    public static int toggle_key = 0; // LWJGL key code, 0 = unbound
     // Nebula fuel (fractions of max fuel)
     public static boolean nebula_enable_fuel = true;
     public static float nebula_fuel_per_day = 0.04f;
@@ -77,9 +78,13 @@ public class ModPlugin extends BaseModPlugin implements LunaSettingsListener {
     @Override
     public void onGameLoad(boolean newGame) {
         loadSettings();
-        // Transient: not written to the save, so re-adding on every load cannot stack.
+        // Version 0.3.0 used addScript, which saved a Ramscoop into the sector. Drop it so it
+        // does not double gains and the save stays loadable after the mod is removed.
+        Global.getSector().removeScriptsOfClass(Ramscoop.class);
+        // Transient script and listener: not written to the save, so re-adding on every load cannot stack.
         script = new Ramscoop();
         Global.getSector().addTransientScript(script);
+        Global.getSector().getListenerManager().addListener(script, true);
         // Versions <= 0.7.3 kept the toggle in fleet memory, which leaked into saves.
         CampaignFleetAPI fleet = Global.getSector().getPlayerFleet();
         if (fleet != null) {
@@ -106,6 +111,7 @@ public class ModPlugin extends BaseModPlugin implements LunaSettingsListener {
         scoop_enabled = or(LunaSettings.getBoolean(MOD_ID, "ramscoop_toggle_default_on"), scoop_enabled);
         enable_fuel = or(LunaSettings.getBoolean(MOD_ID, "ramscoop_enable_fuel"), enable_fuel);
         enable_supplies = or(LunaSettings.getBoolean(MOD_ID, "ramscoop_enable_supplies"), enable_supplies);
+        toggle_key = or(LunaSettings.getInt(MOD_ID, "ramscoop_toggle_key"), toggle_key);
 
         nebula_enable_fuel = or(LunaSettings.getBoolean(MOD_ID, "nebula_enable_fuel"), nebula_enable_fuel);
         nebula_fuel_per_day = pct(LunaSettings.getDouble(MOD_ID, "nebula_fuel_per_day"), nebula_fuel_per_day);
@@ -153,6 +159,10 @@ public class ModPlugin extends BaseModPlugin implements LunaSettingsListener {
 
     // LunaLib getters return null (and log) for missing keys or type mismatches.
     private static boolean or(Boolean v, boolean fallback) {
+        return v != null ? v : fallback;
+    }
+
+    private static int or(Integer v, int fallback) {
         return v != null ? v : fallback;
     }
 
