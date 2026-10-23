@@ -227,24 +227,24 @@ public class Ramscoop implements EveryFrameScript, CampaignInputListener {
 
     /** Settles the raw in/out reading, shows an enter/exit cue when the settled state flips, and returns it. */
     private static boolean cue(CampaignFleetAPI fleet, Settled state, boolean raw, boolean isNebula) {
-        boolean flipped = state.update(raw);
+        if (!state.update(raw)) {
+            return state.value;
+        }
         boolean in = state.value;
-        if (!flipped) {
-            return in;
-        }
-        boolean show;
-        Color color;
         if (isNebula) {
-            show = in ? ModPlugin.notify_nebula_entry : ModPlugin.notify_nebula_exit;
-            color = in ? ModPlugin.color_nebula_active : ModPlugin.color_nebula_inactive;
+            showCue(fleet, "Nebula", in, in ? ModPlugin.notify_nebula_entry : ModPlugin.notify_nebula_exit,
+                    in ? ModPlugin.color_nebula_active : ModPlugin.color_nebula_inactive);
         } else {
-            show = in ? ModPlugin.notify_corona_entry : ModPlugin.notify_corona_exit;
-            color = in ? ModPlugin.color_corona_active : ModPlugin.color_corona_inactive;
-        }
-        if (show) {
-            showText(fleet, (isNebula ? "Nebula" : "Corona") + (in ? ": scooping" : ": stopped"), color);
+            showCue(fleet, "Corona", in, in ? ModPlugin.notify_corona_entry : ModPlugin.notify_corona_exit,
+                    in ? ModPlugin.color_corona_active : ModPlugin.color_corona_inactive);
         }
         return in;
+    }
+
+    private static void showCue(CampaignFleetAPI fleet, String where, boolean in, boolean show, Color color) {
+        if (show) {
+            showText(fleet, where + (in ? ": scooping" : ": stopped"), color);
+        }
     }
 
     /** A boolean that only changes once a new value has been seen SETTLE_TICKS ticks in a row; null until first seen. */
