@@ -160,6 +160,16 @@ public class Ramscoop implements EveryFrameScript, CampaignInputListener {
         return add;
     }
 
+    /** Supplies to add: gen, limited by free cargo space and by the soft/hard cap minus what the caps count. */
+    static float suppliesToAdd(float maxCapacity, float counted, float spaceLeft, float pctCap, float hardCap,
+            float gen) {
+        float cap = maxCapacity * pctCap;
+        if (hardCap > 0f) {
+            cap = Math.min(cap, hardCap);
+        }
+        return Math.max(0f, Math.min(gen, Math.min(cap - counted, spaceLeft)));
+    }
+
     /** Adds supplies at the configured nebula rate times rateMult; returns the amount added. */
     private static float addSupplies(CampaignFleetAPI fleet, CargoAPI cargo, float rateMult, float days) {
         float perDay;
@@ -177,11 +187,10 @@ public class Ramscoop implements EveryFrameScript, CampaignInputListener {
                         * ModPlugin.supplies_per_crew;
                 break;
         }
-        float cap = cargo.getMaxCapacity() * ModPlugin.percent_supply_limit;
-        if (ModPlugin.hard_supply_limit > 0f) {
-            cap = Math.min(cap, ModPlugin.hard_supply_limit);
-        }
-        float add = Math.min(perDay * rateMult * days, Math.min(cap - cargo.getSupplies(), cargo.getSpaceLeft()));
+        // The caps count supplies only, or everything in the hold when supply_cap_all_cargo is on.
+        float counted = ModPlugin.supply_cap_all_cargo ? cargo.getSpaceUsed() : cargo.getSupplies();
+        float add = suppliesToAdd(cargo.getMaxCapacity(), counted, cargo.getSpaceLeft(), ModPlugin.percent_supply_limit,
+                ModPlugin.hard_supply_limit, perDay * rateMult * days);
         if (add <= 0f) {
             return 0f;
         }

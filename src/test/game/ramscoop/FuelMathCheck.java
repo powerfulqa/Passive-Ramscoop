@@ -1,6 +1,6 @@
 package ramscoop;
 
-/** Run by build.sh against the game jars: checks Ramscoop.fuelToAdd caps and rounding, and the edge debounce. */
+/** Run by build.sh against the game jars: checks Ramscoop.fuelToAdd and suppliesToAdd caps, and the edge debounce. */
 public class FuelMathCheck {
     public static void main(String[] args) {
         // Small tank still generates (old Math.floor rounded 20 * 4% down to 0).
@@ -13,6 +13,15 @@ public class FuelMathCheck {
         check(Ramscoop.fuelToAdd(100f, 15f, 1f, 0.2f, 0f, 5f, 1f), 0f);
         // Above cap never removes fuel.
         check(Ramscoop.fuelToAdd(100f, 90f, 1f, 0.2f, 0f, 0f, 1f), 0f);
+        // Supplies: 1000 cargo, 80% cap, 100 supplies plus 600 other cargo (300 free).
+        // Counting supplies only, free space is the limit; counting all cargo, the cap is.
+        check(Ramscoop.suppliesToAdd(1000f, 100f, 300f, 0.8f, 0f, 500f), 300f);
+        check(Ramscoop.suppliesToAdd(1000f, 700f, 300f, 0.8f, 0f, 500f), 100f);
+        // Hard cap wins over soft cap; generation below the room is added in full.
+        check(Ramscoop.suppliesToAdd(1000f, 0f, 1000f, 1f, 50f, 500f), 50f);
+        check(Ramscoop.suppliesToAdd(1000f, 0f, 1000f, 1f, 0f, 5f), 5f);
+        // Above cap never removes supplies.
+        check(Ramscoop.suppliesToAdd(1000f, 900f, 100f, 0.8f, 0f, 500f), 0f);
         // Debounce: first reading is taken as is; a flip needs SETTLE_TICKS readings in a row.
         Ramscoop.Settled s = new Ramscoop.Settled();
         checkTrue(!s.update(true) && s.value);

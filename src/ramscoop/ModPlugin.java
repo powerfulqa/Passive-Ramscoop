@@ -37,6 +37,7 @@ public class ModPlugin extends BaseModPlugin implements LunaSettingsListener {
     // Nebula supplies
     public static float percent_supply_limit = 0.20f; // fraction of cargo capacity
     public static float hard_supply_limit = 0f;
+    public static boolean supply_cap_all_cargo = false;
     public static float supplies_per_crew = 0.1f;
     public static String crew_usage = "extra"; // extra | all | nocrew
     public static String no_crew_gen = "percent"; // percent | flat
@@ -121,6 +122,7 @@ public class ModPlugin extends BaseModPlugin implements LunaSettingsListener {
 
         percent_supply_limit = pct(LunaSettings.getDouble(MOD_ID, "ramscoop_percent_supply_limit_v2"), percent_supply_limit);
         hard_supply_limit = or(LunaSettings.getDouble(MOD_ID, "ramscoop_hard_supply_limit"), hard_supply_limit);
+        supply_cap_all_cargo = or(LunaSettings.getBoolean(MOD_ID, "ramscoop_supply_cap_all_cargo"), supply_cap_all_cargo);
         supplies_per_crew = or(LunaSettings.getDouble(MOD_ID, "ramscoop_supply_per_crew"), supplies_per_crew);
         crew_usage = or(LunaSettings.getString(MOD_ID, "nebula_crew_usage"), crew_usage);
         no_crew_gen = or(LunaSettings.getString(MOD_ID, "nebula_no_crew_gen"), no_crew_gen);
@@ -154,6 +156,7 @@ public class ModPlugin extends BaseModPlugin implements LunaSettingsListener {
                 + " coronaFuel=" + corona_enable_fuel + "@" + corona_fuel_per_day
                 + " coronaCapsReuse=" + corona_caps_reuse
                 + " coronaSupplies=" + corona_enable_supplies + "@" + corona_supply_rate
+                + " supplyCap=" + percent_supply_limit + (supply_cap_all_cargo ? " of all cargo" : " of supplies")
                 + " crewUsage=" + crew_usage + " noCrewGen=" + no_crew_gen);
     }
 

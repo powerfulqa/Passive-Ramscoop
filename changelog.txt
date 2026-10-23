@@ -1,5 +1,13 @@
 Changelog
 
+Version 0.8.2 (2026-10-23)
+Added
+- Supply Caps Count All Cargo (Nebula tab, off by default): when on, the supply caps count everything in the hold, so supplies stop once the hold is that full. Off keeps the old behaviour, where the caps count supplies only.
+
+Changed
+- Nebula tab: supply settings now run rate first, then caps (as for fuel). Crew Usage Mode leads, and the caps sit together under a new Nebula Supply Caps header.
+- Settings order: Toggle Key moved to the end of General; Report Gains leads Notifications so the floating text settings sit together; show/hide toggles come before their colours.
+
 Version 0.8.1 (2026-10-20)
 Added
 - Optional Toggle Key (General tab, unbound by default) that flips the master switch on the campaign map until the game is loaded or the settings are saved.

@@ -60,7 +60,7 @@ Press **F3** (or **Shift+F2**) in-game and open **Ramscoop**:
 
 **🎮 General** - master on/off switch, an optional key to flip it on the campaign map, plus fuel and supply switches
 
-**🌌 Nebula** - fuel rate and caps, supply caps, and how crew affect supply generation
+**🌌 Nebula** - fuel rate and caps, supply caps (supplies only, or the whole hold), and how crew affect supply generation
 
 **☀️ Corona** - fuel rate and caps (or reuse the Nebula caps), and opt-in corona supplies
 
