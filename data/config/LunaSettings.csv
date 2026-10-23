@@ -1,9 +1,9 @@
 fieldID,fieldName,fieldType,defaultValue,secondaryValue,fieldDescription,minValue,maxValue,tab
 ramscoop_toggle_header,General,Header,General,,,,,General
 ramscoop_toggle_default_on,Scoop Enabled,Boolean,true,,"[Master switch] for all Ramscoop fuel and supply generation.",,,General
-ramscoop_toggle_key,Toggle Key,Keycode,0,,"Key that flips the [master switch] on the campaign map, until the game is loaded or these settings are saved. Unbound by default.",,,General
 ramscoop_enable_fuel,Enable Fuel Generation,Boolean,true,,"Allows fuel generation in [nebulae] and [coronas]; the Nebula and Corona tabs can each turn their own fuel off.",,,General
 ramscoop_enable_supplies,Enable Supply Generation,Boolean,true,,"Allows supply generation in [nebulae], and in [coronas] if enabled on the Corona tab.",,,General
+ramscoop_toggle_key,Toggle Key,Keycode,0,,"Key that flips the [master switch] on the campaign map, until the game is loaded or these settings are saved. Unbound by default.",,,General
 # Settings keys ending in _v2/_v3 were renamed when their scale or default changed, so old saved values are not reused.
 nebula_header,Nebula Fuel,Header,Nebula Fuel,,,,,Nebula
 nebula_enable_fuel,Enable Fuel (Nebula),Boolean,true,,"Generate fuel while inside a [nebula].",,,Nebula
@@ -13,15 +13,16 @@ nebula_percent_fuel_limit,Fuel Cap (percent of max fuel),Double,20,,"[Stops] gen
 nebula_hard_fuel_limit,"Fuel Cap (units, 0 = off)",Double,0,,"Also stops once fuel on board reaches this many [units]; the [lower cap wins]. Example: [300] stops at [300 fuel] however big the tanks are.",0,100000,Nebula
 nebula_fuel_cap_margin,Fuel Cap Margin (units),Double,0,,"Stops this many units [below the cap] to leave room for salvaged fuel. Example: [50] with a cap of 100 stops at [50].",0,1000,Nebula
 nebula_supply_header,Nebula Supplies,Header,Nebula Supplies,,,,,Nebula
-ramscoop_percent_supply_limit_v2,Supply Cap (percent of cargo),Double,20,,"[Stops] generating once supplies on board reach this percentage of [cargo capacity]. Example: [20] with 1000 cargo stops at [200 supplies].",0,100,Nebula
-ramscoop_hard_supply_limit,"Supply Cap (units, 0 = off)",Double,0,,"Also stops once supplies on board reach this many [units]; the [lower cap wins]. Example: [300] stops at [300 supplies].",0,10000,Nebula
-ramscoop_supply_per_crew,Supplies Per Crew (per day),Double,0.10,,"Supplies each counted crew member makes [per day] in the [extra] and [all] crew modes. Example: [0.1] with 200 counted crew = [20 supplies/day].",0.0,100.0,Nebula
-nebula_crew_header,Crew Usage,Header,Crew Usage,,,,,Nebula
 nebula_crew_usage,Crew Usage Mode,Radio,extra,"extra, all, nocrew","Which crew count toward supplies: [extra] = crew [above the fleet minimum]; [all] = all crew; [nocrew] = ignore crew and use the [No-Crew rate] below.",,,Nebula
+ramscoop_supply_per_crew,Supplies Per Crew (per day),Double,0.10,,"Supplies each counted crew member makes [per day] in the [extra] and [all] crew modes. Example: [0.1] with 200 counted crew = [20 supplies/day].",0.0,100.0,Nebula
 nebula_nocrew_header,No-Crew Generation,Header,No-Crew Generation,,,,,Nebula
 nebula_no_crew_gen,No-Crew Rate Type,Radio,percent,"percent, flat","Rate used in [nocrew] mode: [percent] = percentage of cargo capacity per day; [flat] = fixed units per day.",,,Nebula
 nebula_no_crew_rate_percent,No-Crew Rate (percent of cargo per day),Double,10.0,,"Daily supplies in [nocrew] + [percent] mode. Example: [10] with 1000 cargo = [100 supplies/day].",0.0,100.0,Nebula
 nebula_no_crew_rate_flat,No-Crew Rate (units per day),Double,10.0,,"Daily supplies in [nocrew] + [flat] mode. Example: [10] = [10 supplies/day].",0.0,1000.0,Nebula
+nebula_supply_caps_header,Nebula Supply Caps,Header,Nebula Supply Caps,,,,,Nebula
+ramscoop_percent_supply_limit_v2,Supply Cap (percent of cargo),Double,20,,"[Stops] generating once supplies on board (or all cargo, see below) reach this percentage of [cargo capacity]. Example: [20] with 1000 cargo stops at [200 supplies].",0,100,Nebula
+ramscoop_supply_cap_all_cargo,Supply Caps Count All Cargo,Boolean,false,,"[Off]: the supply caps count [supplies only]. [On]: they count [everything in the hold], so supplies stop once the hold is that full. Example: [80] percent with 1000 cargo, 600 of it metals, stops at [200 supplies].",,,Nebula
+ramscoop_hard_supply_limit,"Supply Cap (units, 0 = off)",Double,0,,"Also stops once supplies on board (or all cargo, as set above) reach this many [units]; the [lower cap wins]. Example: [300] stops at [300 supplies].",0,10000,Nebula
 corona_header,Corona Fuel,Header,Corona Fuel,,,,,Corona
 corona_enable_fuel,Enable Fuel (Corona),Boolean,true,,"Generate fuel inside a [star corona]; where a corona overlaps a nebula this rate [replaces] the nebula rate.",,,Corona
 corona_fuel_per_day,Fuel Rate (percent of max fuel per day),Double,25,,"Fuel gained [per day] in a corona as a percentage of [max fuel]. Example: [25] with 500 max fuel = [125 fuel/day].",0,100,Corona
@@ -34,16 +35,16 @@ corona_supply_header,Corona Supplies,Header,Corona Supplies,,,,,Corona
 corona_enable_supplies,Enable Supplies (Corona),Boolean,false,,"Generate supplies in a [corona] using the [Nebula tab] supply settings and caps; where both overlap this [replaces] the nebula rate.",,,Corona
 corona_supply_rate,Supply Rate (percent of nebula rate),Double,100,,"Corona supply rate relative to the [nebula supply rate]. Example: [200] = [twice] the nebula rate.",0,1000,Corona
 notification_header,Notifications,Header,Notifications,,,,,Notifications
+ramscoop_report_gains,Report Gains in Message Log,Boolean,true,,"On [leaving] a nebula or corona, posts what was collected. Example: [Ramscoop collected +12 fuel and +30 supplies].",,,Notifications
 ramscoop_enable_visual_feedback,Show Floating Text,Boolean,true,,"[Master switch] for the floating text above your fleet.",,,Notifications
 ramscoop_floating_text_scale,Floating Text Duration (seconds),Double,0.7,,"How long floating text stays on screen. Example: [2] = [two seconds].",0.1,3.0,Notifications
-ramscoop_report_gains,Report Gains in Message Log,Boolean,true,,"On [leaving] a nebula or corona, posts what was collected. Example: [Ramscoop collected +12 fuel and +30 supplies].",,,Notifications
 notifications_nebula_header,Nebula,Header,Nebula,,,,,Notifications
 ramscoop_notify_nebula_entry,Show Nebula Entry,Boolean,true,,"Show floating text when [entering] a nebula.",,,Notifications
-ramscoop_color_nebula_active_v3,Nebula Entry Color,Color,#7FD97F,,"Text color for [nebula entry], also used when the master switch turns [on].",,,Notifications
 ramscoop_notify_nebula_exit,Show Nebula Exit,Boolean,true,,"Show floating text when [leaving] a nebula.",,,Notifications
+ramscoop_color_nebula_active_v3,Nebula Entry Color,Color,#7FD97F,,"Text color for [nebula entry], also used when the master switch turns [on].",,,Notifications
 ramscoop_color_nebula_inactive_v3,Nebula Exit Color,Color,#A0A0A0,,"Text color for [nebula exit], also used when the master switch turns [off].",,,Notifications
 notifications_corona_header,Corona,Header,Corona,,,,,Notifications
 ramscoop_notify_corona_entry,Show Corona Entry,Boolean,true,,"Show floating text when [entering] a corona.",,,Notifications
-ramscoop_color_corona_active_v3,Corona Entry Color,Color,#FFA540,,"Text color for [corona entry].",,,Notifications
 ramscoop_notify_corona_exit,Show Corona Exit,Boolean,true,,"Show floating text when [leaving] a corona.",,,Notifications
+ramscoop_color_corona_active_v3,Corona Entry Color,Color,#FFA540,,"Text color for [corona entry].",,,Notifications
 ramscoop_color_corona_inactive_v3,Corona Exit Color,Color,#A0A0A0,,"Text color for [corona exit].",,,Notifications
