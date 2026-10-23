@@ -16,6 +16,9 @@ import java.awt.Color;
  * Percent sliders in LunaSettings.csv are stored as 0..100 and converted to fractions
  * here, so Ramscoop only ever sees fractions.
  */
+// The settings fields are reloaded from LunaLib at runtime and read directly by Ramscoop, so they are
+// public, mutable and named like their keys: S1104/S1444 (public mutable fields) and S116/S3008 (field names).
+@SuppressWarnings({"java:S1104", "java:S1444", "java:S116", "java:S3008"})
 public class ModPlugin extends BaseModPlugin implements LunaSettingsListener {
     private static final Logger LOG = Global.getLogger(ModPlugin.class);
     public static final String MOD_ID = "m561_ramscoop";
