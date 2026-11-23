@@ -1,5 +1,9 @@
 Changelog
 
+Version 0.8.3 (2026-11-23)
+Changed
+- Updated for Starsector 0.98.5a-RC8 (rebuilt against the new game API). Needs LunaLib 2.1.0 or later.
+
 Version 0.8.2 (2026-10-23)
 Added
 - Supply Caps Count All Cargo (Nebula tab, off by default): when on, the supply caps count everything in the hold, so supplies stop once the hold is that full. Off keeps the old behaviour, where the caps count supplies only.
