@@ -36,7 +36,7 @@ Ever wished your fleet could collect fuel and supplies whilst travelling through
 
 ### Requirements
 - **LunaLib** (required for in-game settings menu)
-- **Starsector 0.98a-RC8**
+- **Starsector 0.98.5a-RC8**
 
 ### Perfect For Players Who Want
 - Less micromanagement of fuel and supplies

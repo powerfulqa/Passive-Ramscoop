@@ -1,7 +1,7 @@
 # Development
 
 ## Build
-Needs JDK 17+, a Starsector 0.98a install and LunaLib in its `mods/` folder.
+Needs JDK 17+, a Starsector 0.98.5a install and LunaLib in its `mods/` folder.
 
 ```sh
 ./build.sh [--install]        # Linux/macOS

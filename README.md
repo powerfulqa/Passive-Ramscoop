@@ -74,7 +74,7 @@ Press **F3** (or **Shift+F2**) in-game and open **Ramscoop**:
 - Verify both this mod and LunaLib are enabled in the launcher
 
 ## Compatibility
-- Starsector 0.98a-RC8
+- Starsector 0.98.5a-RC8
 - LunaLib 2.0.4+ (required)
 - Version Checker and TriOS supported
 - No known mod conflicts
